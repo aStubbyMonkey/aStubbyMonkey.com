@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aStubbyMonkey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background-image: url('aStubbyMonkey.YT.Banner V_11.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+        }
+
+        /* Overlay for better text readability */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
+
+        header {
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: white;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+            font-weight: bold;
+        }
+
+        .links-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            padding: 20px;
+            flex-wrap: wrap;
+        }
+
+        .link-button {
+            display: inline-block;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            text-decoration: none;
+        }
+
+        .link-button:hover {
+            transform: translateY(-10px) scale(1.05);
+            filter: drop-shadow(0 10px 20px rgba(255, 255, 255, 0.3));
+        }
+
+        .link-button img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            display: block;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        footer {
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .contact {
+            font-size: 0.9rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .contact a {
+            color: #88c0ff;
+            text-decoration: none;
+        }
+
+        .contact a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .links-container {
+                gap: 30px;
+            }
+
+            .link-button img {
+                width: 100px;
+                height: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>aStubbyMonkey</h1>
+    </header>
+
+    <main class="links-container">
+        <a href="https://discord.gg/StQGJEyHtX" class="link-button" target="_blank" rel="noopener noreferrer">
+            <img src="HoverparkComp.png" alt="GTCH Discord Server">
+        </a>
+
+        <a href="https://discord.gg/Eq94wcbHtX" class="link-button" target="_blank" rel="noopener noreferrer">
+            <img src="Discord-Logo.png" alt="aStubbyMonkey Discord Server">
+        </a>
+
+        <a href="https://www.youtube.com/@aStubbyMonkey" class="link-button" target="_blank" rel="noopener noreferrer">
+            <img src="YouTube_full-color_icon(2017).svg.webp" alt="YouTube Channel">
+        </a>
+    </main>
+
+    <footer>
+        <p class="contact">Contact Email: <a href="mailto:astubbymonkey@gmail.com">astubbymonkey@gmail.com</a></p>
+    </footer>
+</body>
+</html>
