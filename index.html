@@ -35,7 +35,9 @@
     /* NAV */
     nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 48px; height:68px; background:rgba(10,0,18,0.72); backdrop-filter:blur(20px); border-bottom:1px solid var(--border); }
     .nav-logo { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:2px; color:var(--text); display:flex; align-items:center; gap:10px; }
-    .nav-logo .gem { width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,var(--purple-hi),var(--purple-dim)); display:flex; align-items:center; justify-content:center; font-size:16px; box-shadow:0 0 18px rgba(119,34,204,0.6); }
+    .nav-logo .gem { width:32px; height:32px; border-radius:50%; overflow:visible; display:flex; align-items:center; justify-content:center; position:relative; }
+    .nav-logo .gem img.nav-avatar { width:32px; height:32px; border-radius:50%; object-fit:cover; border:1.5px solid rgba(180,100,255,0.5); box-shadow:0 0 14px rgba(119,34,204,0.5); }
+    .nav-logo .gem img.nav-hat { position:absolute; width:38px; top:-18px; left:50%; transform:translateX(-50%); pointer-events:none; z-index:10; }
     .nav-links { display:flex; gap:4px; }
     .nav-links a { padding:7px 16px; border:1px solid var(--border); border-radius:10px; font-size:13px; font-weight:700; color:var(--text-mid); text-decoration:none; transition:all .2s; letter-spacing:.3px; }
     .nav-links a:hover { background:var(--surface2); border-color:var(--border-hi); color:var(--text); }
@@ -233,6 +235,7 @@
   <div class="hero-blob blob3"></div>
 
   <div class="hero-avatar-wrap reveal">
+    <img src="Chromecowboyhat.png" alt="" style="width:130px;position:absolute;top:-72px;left:50%;transform:translateX(-48%) rotate(-4deg);z-index:5;pointer-events:none;" />
     <div class="hero-avatar">
       <img src="avatar.png" alt="aStubbyMonkey" onerror="this.style.display='none';this.parentNode.innerHTML='🐒';" />
     </div>
