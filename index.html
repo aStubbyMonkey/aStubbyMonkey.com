@@ -93,19 +93,21 @@
     #videos { }
     .vid-link { text-decoration:none; display:block; }
     /* GHOST BACKGROUND CARDS */
-    .shorts-stage { position:relative; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:32px; }
-    .ghost-cards { position:absolute; inset:0; pointer-events:none; z-index:0; }
+    .shorts-stage { position:relative; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:32px; padding:40px 0; }
+    .ghost-cards { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:visible; }
     .ghost-card {
       position:absolute;
       border-radius:var(--radius);
       overflow:hidden;
-      border:1.5px solid rgba(150,80,255,0.15);
+      border:1.5px solid rgba(150,80,255,0.2);
       background:var(--purple-dim);
-      filter:blur(3px);
-      opacity:0.18;
+      filter:blur(4px);
+      opacity:0.22;
+      top:50%;
+      transform-origin:center center;
     }
     .ghost-card img { width:100%; height:100%; object-fit:cover; display:block; }
-    .shorts-row { position:relative; z-index:1; }
+    .shorts-row { position:relative; z-index:1; margin:0; }
 
     .vid-loading { color:var(--text-dim); font-size:13px; font-weight:600; letter-spacing:1px; padding:40px; text-align:center; width:100%; }
 
@@ -645,23 +647,20 @@ async function fetchVideos() {
     if (ghostEl) {
       const ghostVids = shorts.slice(4, 10); // up to 6 ghost cards
       const ghostPositions = [
-        {left:'-7%', top:'8%',  width:'110px', rotate:'-12deg'},
-        {left:'-3%', top:'15%', width:'90px',  rotate:'-6deg'},
-        {left:'8%',  top:'-5%', width:'100px', rotate:'8deg'},
-        {right:'-7%',top:'8%',  width:'110px', rotate:'12deg'},
-        {right:'-3%',top:'15%', width:'90px',  rotate:'6deg'},
-        {right:'8%', top:'-5%', width:'100px', rotate:'-8deg'},
+        {left:'2%',   translateY:'-60%', width:'90px',  height:'160px', rotate:'-14deg', opacity:'0.2'},
+        {left:'10%',  translateY:'-30%', width:'75px',  height:'133px', rotate:'-7deg',  opacity:'0.15'},
+        {left:'18%',  translateY:'-50%', width:'65px',  height:'115px', rotate:'-4deg',  opacity:'0.12'},
+        {right:'2%',  translateY:'-60%', width:'90px',  height:'160px', rotate:'14deg',  opacity:'0.2'},
+        {right:'10%', translateY:'-30%', width:'75px',  height:'133px', rotate:'7deg',   opacity:'0.15'},
+        {right:'18%', translateY:'-50%', width:'65px',  height:'115px', rotate:'4deg',   opacity:'0.12'},
       ];
-      // If not enough unique shorts, reuse from the main 4
       const allShorts = [...shorts];
       ghostPositions.forEach((pos, i) => {
         const v = allShorts[i + 4] || allShorts[i % 4];
         if (!v) return;
-        const style = Object.entries(pos).map(([k,val]) =>
-          k === 'rotate' ? `transform:rotate(${val})` : `${k}:${val}`
-        ).join(';');
+        const side = pos.left ? `left:${pos.left}` : `right:${pos.right}`;
         ghostEl.innerHTML += `
-          <div class="ghost-card" style="${style}; height:160px;">
+          <div class="ghost-card" style="${side}; top:50%; width:${pos.width}; height:${pos.height}; transform:translateY(${pos.translateY}) rotate(${pos.rotate}); opacity:${pos.opacity};">
             <img src="${v.thumb}" alt="" />
           </div>`;
       });
