@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>aStubbyMonkey</title>
+  <meta name="description" content="Hey! I'm aStubbyMonkey — Indie VR Dev, Filmmaker, and Believer. Building Districts, making videos, and sharing what matters." />
+  <meta property="og:title" content="aStubbyMonkey" />
+  <meta property="og:description" content="Hey! I'm aStubbyMonkey — Indie VR Dev, Filmmaker, and Believer. Building Districts, making videos, and sharing what matters." />
+  <meta property="og:url" content="https://astubbymonkey.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
@@ -483,7 +487,7 @@ document.getElementById('discord-popup').addEventListener('click',function(e){
 
 <script>
 async function fetchVideos() {
-  const API_KEY = 'AIzaSyA-hd1y-BA9LCd1IewjJGzzZekx4y5FYvY';
+  const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
   const CHANNEL_ID = 'UCDlHHAvfs7GXP_l5IDYpgqw';
 
   try {
@@ -565,7 +569,7 @@ async function fetchVideos() {
 fetchVideos();
 
 async function fetchSubCount() {
-  const API_KEY = 'AIzaSyA-hd1y-BA9LCd1IewjJGzzZekx4y5FYvY';
+  const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
   const CHANNEL_ID = 'UCDlHHAvfs7GXP_l5IDYpgqw';
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
