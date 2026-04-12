@@ -501,17 +501,20 @@ async function fetchVideos() {
     const vidData = await vidRes.json();
     const items = vidData.items;
 
-    // Get video IDs to check duration (shorts vs long)
+    // Get video IDs to check duration and type (shorts vs long, skip livestreams)
     const ids = items.map(i => i.snippet.resourceId.videoId).join(',');
-    const detailRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${ids}&key=${API_KEY}`);
+    const detailRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,liveStreamingDetails&id=${ids}&key=${API_KEY}`);
     const detailData = await detailRes.json();
 
     const shorts = [];
     const longs = [];
 
     detailData.items.forEach(v => {
+      // Skip any livestreams or premieres
+      if (v.liveStreamingDetails) return;
+      if (v.snippet.liveBroadcastContent === 'live') return;
+
       const dur = v.contentDetails.duration || '';
-      // Parse ISO 8601 duration safely
       const match = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/) || [0,0,0,0];
       const hours = parseInt(match[1] || 0);
       const mins = parseInt(match[2] || 0);
