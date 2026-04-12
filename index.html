@@ -643,9 +643,9 @@ async function fetchVideos() {
     const uploadsId = chanData.items[0].contentDetails.relatedPlaylists.uploads;
 
     // Get latest 50 videos
-    const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${API_KEY}`);
+    const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${uploadsId}&key=${API_KEY}`);
     const vidData = await vidRes.json();
-    const items = vidData.items;
+    const items = vidData.items || [];
 
     // Get video IDs to check duration and type (shorts vs long, skip livestreams)
     const ids = items.map(i => i.snippet.resourceId.videoId).join(',');
