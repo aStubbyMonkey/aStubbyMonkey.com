@@ -154,6 +154,29 @@
     .game-sub { font-size:13px; color:var(--text-dim); font-weight:500; }
     .game-emoji { font-size:32px; }
 
+
+    /* GTCH */
+    #gtch { }
+    .gtch-layout { display:flex; gap:52px; align-items:center; width:100%; }
+    .gtch-left { display:flex; flex-direction:column; align-items:center; gap:20px; flex-shrink:0; }
+    .gtch-img-wrap { position:relative; width:220px; height:220px; border-radius:50%; }
+    .gtch-img { width:220px; height:220px; border-radius:50%; object-fit:cover; border:3px solid var(--border-hi); box-shadow:0 0 40px rgba(85,0,170,0.5); display:block; }
+    .gtch-img-glow { position:absolute; inset:-4px; border-radius:50%; background:transparent; box-shadow:0 0 30px rgba(153,68,238,0.4); pointer-events:none; }
+    .gtch-discord-btn { display:flex; align-items:center; gap:10px; background:linear-gradient(135deg,#5865f2,#3b4bd6); border:none; border-radius:14px; padding:12px 24px; font-size:14px; font-weight:800; color:white; text-decoration:none; transition:all .25s; font-family:'Nunito',sans-serif; box-shadow:0 4px 20px rgba(88,101,242,0.4); }
+    .gtch-discord-btn:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(88,101,242,0.6); }
+    .gtch-right { flex:1; display:flex; flex-direction:column; gap:20px; }
+    .gtch-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(32px,5vw,56px); letter-spacing:3px; background:linear-gradient(135deg,#fff,var(--text-mid)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .gtch-desc { font-size:15px; color:var(--text-mid); line-height:1.8; font-weight:500; }
+    .gtch-vid-wrap { position:relative; border-radius:var(--radius); overflow:hidden; border:2px solid var(--border); cursor:none; display:block; text-decoration:none; transition:all .3s; }
+    .gtch-vid-wrap:hover { border-color:var(--border-hi); box-shadow:0 16px 50px rgba(85,0,170,0.5); transform:translateY(-3px); }
+    .gtch-vid-thumb { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; transition:filter .3s; }
+    .gtch-vid-wrap:hover .gtch-vid-thumb { filter:brightness(0.45); }
+    .gtch-vid-overlay { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; opacity:0; transition:opacity .3s; }
+    .gtch-vid-wrap:hover .gtch-vid-overlay { opacity:1; }
+    .gtch-play { width:56px; height:56px; border-radius:50%; background:rgba(136,0,255,0.55); border:2px solid rgba(180,80,255,0.8); display:flex; align-items:center; justify-content:center; font-size:20px; color:white; box-shadow:0 0 20px rgba(136,0,255,0.6); }
+    .gtch-vid-overlay span { font-size:13px; font-weight:700; color:white; text-shadow:0 1px 8px rgba(0,0,0,0.8); }
+    @media(max-width:900px){ .gtch-layout{flex-direction:column;} }
+
     /* DISTRICTS — full viewport, no name leak */
     #districts { padding:0; }
     .construction-zone { position:relative; width:100%; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; overflow:hidden; background:radial-gradient(ellipse at center,rgba(85,0,170,0.1) 0%,transparent 70%); }
@@ -230,6 +253,7 @@
     <a href="#videos">Videos</a>
     <a href="#games-fav">Fav Games</a>
     <a href="#districts">My Game</a>
+    <a href="#gtch">GTCH</a>
     <a href="#gospel">The Gospel</a>
   </div>
   <div class="nav-social">
@@ -333,6 +357,48 @@
       <p class="construction-sub">Something is being built here. Check back when the tape comes down.</p>
       <div class="coming-soon-badge"><div class="spinner"></div>In Active Development</div>
     </div>
+  </div>
+</section>
+
+
+<!-- ══ GTCH SECTION ══════════════════════════════════════════════ -->
+<section id="gtch" class="page-section">
+  <div class="section-label reveal"><h2>GTCH — Gorilla Tag Competitive Hoverpark</h2><div class="line"></div></div>
+
+  <div class="gtch-layout reveal">
+
+    <!-- Left: image + discord -->
+    <div class="gtch-left">
+      <div class="gtch-img-wrap">
+        <img src="HoverparkComp.png" alt="GTCH" class="gtch-img" />
+        <div class="gtch-img-glow"></div>
+      </div>
+      <a href="https://discord.gg/StQGJEyHEC" target="_blank" class="gtch-discord-btn">
+        <img src="Discord-Logo.png" alt="Discord" style="width:20px;height:20px;object-fit:contain;" />
+        Join the GTCH Discord
+      </a>
+    </div>
+
+    <!-- Right: description + video -->
+    <div class="gtch-right">
+      <h2 class="gtch-title">What is GTCH?</h2>
+      <p class="gtch-desc">
+        Gorilla Tag Competitive Hoverpark is a competitive server, where we host Events, Tournaments, and have a bunch of Fun. We take Hoverboards to the next level here, pushing Gorilla Tag to its limits, and the skill ceiling is still rising after a year of it being released. This server was founded by me, and I genuinely have a passion for it.
+      </p>
+      <a href="https://www.youtube.com/watch?v=H18oSPS1zvA" target="_blank" class="gtch-vid-wrap">
+        <img
+          src="https://img.youtube.com/vi/H18oSPS1zvA/maxresdefault.jpg"
+          alt="GTCH Video"
+          class="gtch-vid-thumb"
+          onerror="this.src='https://img.youtube.com/vi/H18oSPS1zvA/hqdefault.jpg'"
+        />
+        <div class="gtch-vid-overlay">
+          <div class="gtch-play">▶</div>
+          <span>Watch on YouTube</span>
+        </div>
+      </a>
+    </div>
+
   </div>
 </section>
 
