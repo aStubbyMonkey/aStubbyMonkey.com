@@ -124,7 +124,7 @@
     }
     .shorts-row .vid-link { flex:1; max-width:175px; min-width:0; }
 
-    /* videos + livestream row */
+    /* videos row */
     .videos-row {
       display:grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -716,8 +716,8 @@ async function fetchVideos() {
     }
 
     // Render videos into individual slots
-    const slots = [document.getElementById('vid-slot-1'), document.getElementById('vid-slot-2')];
-    longs.slice(0, 2).forEach((v, i) => {
+    const slots = [document.getElementById('vid-slot-1'), document.getElementById('vid-slot-2'), document.getElementById('vid-slot-3')];
+    longs.slice(0, 3).forEach((v, i) => {
       if (!slots[i]) return;
       slots[i].innerHTML = `
         <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" class="vid-link">
