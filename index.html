@@ -167,7 +167,7 @@
     .gtch-right { flex:1; display:flex; flex-direction:column; gap:20px; }
     .gtch-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(32px,5vw,56px); letter-spacing:3px; background:linear-gradient(135deg,#fff,var(--text-mid)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
     .gtch-desc { font-size:15px; color:var(--text-mid); line-height:1.8; font-weight:500; }
-    .gtch-vid-wrap { position:relative; border-radius:var(--radius); overflow:hidden; border:2px solid var(--border); cursor:none; display:block; text-decoration:none; transition:all .3s; max-width:50%; }
+    .gtch-vid-wrap { position:relative; border-radius:var(--radius); overflow:hidden; border:2px solid var(--border); cursor:none; display:block; text-decoration:none; transition:all .3s; flex:1; }
     .gtch-vid-wrap:hover { border-color:var(--border-hi); box-shadow:0 16px 50px rgba(85,0,170,0.5); transform:translateY(-3px); }
     .gtch-vid-thumb { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; transition:filter .3s; }
     .gtch-vid-wrap:hover .gtch-vid-thumb { filter:brightness(0.45); }
@@ -385,18 +385,32 @@
       <p class="gtch-desc">
         Gorilla Tag Competitive Hoverpark is a competitive server, where we host Events, Tournaments, and have a bunch of Fun. We take Hoverboards to the next level here, pushing Gorilla Tag to its limits, and the skill ceiling is still rising after a year of it being released. This server was founded by me, and I genuinely have a passion for it.
       </p>
-      <a href="https://www.youtube.com/watch?v=H18oSPS1zvA" target="_blank" class="gtch-vid-wrap">
-        <img
-          src="https://img.youtube.com/vi/H18oSPS1zvA/maxresdefault.jpg"
-          alt="GTCH Video"
-          class="gtch-vid-thumb"
-          onerror="this.src='https://img.youtube.com/vi/H18oSPS1zvA/hqdefault.jpg'"
-        />
-        <div class="gtch-vid-overlay">
-          <div class="gtch-play">▶</div>
-          <span>Watch on YouTube</span>
-        </div>
-      </a>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <a href="https://www.youtube.com/watch?v=H18oSPS1zvA" target="_blank" class="gtch-vid-wrap" style="max-width:48%;">
+          <img
+            src="https://img.youtube.com/vi/H18oSPS1zvA/maxresdefault.jpg"
+            alt="GTCH Video"
+            class="gtch-vid-thumb"
+            onerror="this.src='https://img.youtube.com/vi/H18oSPS1zvA/hqdefault.jpg'"
+          />
+          <div class="gtch-vid-overlay">
+            <div class="gtch-play">▶</div>
+            <span>Watch on YouTube</span>
+          </div>
+        </a>
+        <a href="https://www.youtube.com/watch?v=UzEC3HxOcfA&t=510s" target="_blank" class="gtch-vid-wrap" style="max-width:48%;">
+          <img
+            src="https://img.youtube.com/vi/UzEC3HxOcfA/maxresdefault.jpg"
+            alt="GTCH Season 1 — 321 Runners Send-Off"
+            class="gtch-vid-thumb"
+            onerror="this.src='https://img.youtube.com/vi/UzEC3HxOcfA/hqdefault.jpg'"
+          />
+          <div class="gtch-vid-overlay">
+            <div class="gtch-play">▶</div>
+            <span>Season 1 — 321 Runners Send-Off</span>
+          </div>
+        </a>
+      </div>
     </div>
 
   </div>
