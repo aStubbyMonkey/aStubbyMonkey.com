@@ -92,96 +92,30 @@
     /* VIDEOS */
     #videos { }
     .vid-link { text-decoration:none; display:block; }
-    /* GHOST BACKGROUND CARDS */
-    .shorts-stage { position:relative; width:100%; display:flex; align-items:center; justify-content:center; margin-bottom:32px; padding:40px 0; }
-    .ghost-cards { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:visible; }
-    .ghost-card {
-      position:absolute;
-      border-radius:var(--radius);
-      overflow:hidden;
-      border:1.5px solid rgba(150,80,255,0.2);
-      background:var(--purple-dim);
-      filter:blur(4px);
-      opacity:0.22;
-      top:50%;
-      transform-origin:center center;
-    }
-    .ghost-card img { width:100%; height:100%; object-fit:cover; display:block; }
-    .shorts-row { position:relative; z-index:1; margin:0; }
-
     .vid-loading { color:var(--text-dim); font-size:13px; font-weight:600; letter-spacing:1px; padding:40px; text-align:center; width:100%; }
 
-    /* 8 shorts row */
+    /* 4 shorts row */
     .shorts-row {
       display:flex;
       flex-direction:row;
-      gap:12px;
+      gap:20px;
       justify-content:center;
       align-items:flex-end;
       width:100%;
-      flex-wrap:nowrap;
-      margin-bottom:48px;
+      margin-bottom:32px;
     }
-    .shorts-row .vid-link { flex:1; max-width:175px; min-width:0; }
+    .shorts-row .vid-link { width:calc(25% - 16px); max-width:200px; }
 
-    /* videos row */
+    /* 2 videos row */
     .videos-row {
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap:20px;
-      width:100%;
-    }
-    .videos-row .vid-link { width:100%; max-width:100%; }
-
-    /* LIVESTREAM CARD */
-    .livestream-card {
-      width:100%;
-      border-radius:var(--radius);
-      border:2px solid var(--border);
-      background:var(--surface);
-      overflow:hidden;
       display:flex;
-      flex-direction:column;
-      min-height:200px;
-      transition:all .3s;
-      text-decoration:none;
-    }
-    .livestream-card:hover { border-color:var(--border-hi); box-shadow:0 16px 50px rgba(85,0,170,0.4); transform:translateY(-3px); }
-    .livestream-thumb { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; position:relative; }
-    .livestream-thumb-wrap { position:relative; }
-    .live-badge {
-      position:absolute; top:10px; left:10px;
-      background:#ff0000; color:white;
-      font-size:11px; font-weight:800;
-      padding:3px 10px; border-radius:6px;
-      display:flex; align-items:center; gap:5px;
-      letter-spacing:1px; text-transform:uppercase;
-      box-shadow:0 0 12px rgba(255,0,0,0.5);
-      animation:livepulse 1.5s ease-in-out infinite;
-    }
-    .upcoming-badge {
-      position:absolute; top:10px; left:10px;
-      background:rgba(255,165,0,0.9); color:#000;
-      font-size:11px; font-weight:800;
-      padding:3px 10px; border-radius:6px;
-      letter-spacing:1px; text-transform:uppercase;
-    }
-    @keyframes livepulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
-    .live-dot { width:7px; height:7px; border-radius:50%; background:white; }
-    .livestream-info { padding:14px 16px; flex:1; display:flex; flex-direction:column; gap:6px; }
-    .livestream-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.4; }
-    .livestream-sub { font-size:11px; color:var(--text-dim); font-weight:600; }
-    .no-stream-card {
+      flex-direction:row;
+      gap:28px;
+      justify-content:center;
+      align-items:flex-start;
       width:100%;
-      border-radius:var(--radius); border:1.5px dashed rgba(150,80,255,0.25);
-      background:var(--surface); min-height:200px;
-      display:flex; flex-direction:column;
-      align-items:center; justify-content:center;
-      gap:12px; padding:24px; text-align:center;
     }
-    .no-stream-icon { font-size:36px; opacity:0.4; }
-    .no-stream-text { font-size:13px; font-weight:700; color:var(--text-dim); }
-    .no-stream-sub { font-size:11px; color:var(--text-dim); opacity:0.6; }
+    .videos-row .vid-link { width:calc(50% - 14px); max-width:560px; }
 
     .vid-card { position:relative; border-radius:var(--radius); overflow:hidden; cursor:none; border:2px solid var(--border); transition:transform .35s cubic-bezier(.34,1.56,.64,1),border-color .3s,box-shadow .3s; background:var(--purple-dim); }
     .vid-card:hover { transform:scale(1.04) !important; border-color:var(--border-hi); box-shadow:0 20px 60px rgba(85,0,170,0.55); z-index:10; }
@@ -643,9 +577,9 @@ async function fetchVideos() {
     const uploadsId = chanData.items[0].contentDetails.relatedPlaylists.uploads;
 
     // Get latest 50 videos
-    const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${uploadsId}&key=${API_KEY}`);
+    const vidRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=50&playlistId=${uploadsId}&key=${API_KEY}`);
     const vidData = await vidRes.json();
-    const items = vidData.items || [];
+    const items = vidData.items;
 
     // Get video IDs to check duration and type (shorts vs long, skip livestreams)
     const ids = items.map(i => i.snippet.resourceId.videoId).join(',');
@@ -680,7 +614,7 @@ async function fetchVideos() {
     // Render shorts row
     const shortsRow = document.getElementById('shorts-row');
     shortsRow.innerHTML = '';
-    shorts.slice(0, 8).forEach(v => {
+    shorts.slice(0, 4).forEach(v => {
       shortsRow.innerHTML += `
         <a href="https://www.youtube.com/shorts/${v.id}" target="_blank" class="vid-link">
           <div class="vid-card short">
@@ -691,35 +625,11 @@ async function fetchVideos() {
         </a>`;
     });
 
-    // Render ghost background cards from remaining shorts
-    const ghostEl = document.getElementById('ghost-cards');
-    if (ghostEl) {
-      const ghostVids = shorts.slice(4, 10); // up to 6 ghost cards
-      const ghostPositions = [
-        {left:'2%',   translateY:'-60%', width:'90px',  height:'160px', rotate:'-14deg', opacity:'0.2'},
-        {left:'10%',  translateY:'-30%', width:'75px',  height:'133px', rotate:'-7deg',  opacity:'0.15'},
-        {left:'18%',  translateY:'-50%', width:'65px',  height:'115px', rotate:'-4deg',  opacity:'0.12'},
-        {right:'2%',  translateY:'-60%', width:'90px',  height:'160px', rotate:'14deg',  opacity:'0.2'},
-        {right:'10%', translateY:'-30%', width:'75px',  height:'133px', rotate:'7deg',   opacity:'0.15'},
-        {right:'18%', translateY:'-50%', width:'65px',  height:'115px', rotate:'4deg',   opacity:'0.12'},
-      ];
-      const allShorts = [...shorts];
-      ghostPositions.forEach((pos, i) => {
-        const v = allShorts[i + 4] || allShorts[i % 4];
-        if (!v) return;
-        const side = pos.left ? `left:${pos.left}` : `right:${pos.right}`;
-        ghostEl.innerHTML += `
-          <div class="ghost-card" style="${side}; top:50%; width:${pos.width}; height:${pos.height}; transform:translateY(${pos.translateY}) rotate(${pos.rotate}); opacity:${pos.opacity};">
-            <img src="${v.thumb}" alt="" />
-          </div>`;
-      });
-    }
-
-    // Render videos into individual slots
-    const slots = [document.getElementById('vid-slot-1'), document.getElementById('vid-slot-2'), document.getElementById('vid-slot-3')];
-    longs.slice(0, 3).forEach((v, i) => {
-      if (!slots[i]) return;
-      slots[i].innerHTML = `
+    // Render videos row
+    const videosRow = document.getElementById('videos-row');
+    videosRow.innerHTML = '';
+    longs.slice(0, 2).forEach(v => {
+      videosRow.innerHTML += `
         <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" class="vid-link">
           <div class="vid-card">
             <img class="vid-thumb" src="${v.thumb}" alt="${v.title}" />
