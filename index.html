@@ -510,9 +510,9 @@ async function fetchVideos() {
     const longs = [];
 
     detailData.items.forEach(v => {
-      const dur = v.contentDetails.duration;
-      // Parse ISO 8601 duration
-      const match = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      const dur = v.contentDetails.duration || '';
+      // Parse ISO 8601 duration safely
+      const match = dur.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/) || [0,0,0,0];
       const hours = parseInt(match[1] || 0);
       const mins = parseInt(match[2] || 0);
       const secs = parseInt(match[3] || 0);
