@@ -173,8 +173,11 @@
     .dot-dnd{background:#f23f43;}
     .dot-offline{background:#80848e;}
     .discord-status-text { font-size:13px; color:var(--text-dim); font-weight:600; }
+    .discord-custom-status { font-size:13px; color:var(--text-mid); font-weight:600; margin-left:auto; align-self:center; }
     .discord-activities {
       display:grid; grid-template-columns:1fr 1fr; gap:12px;
+      overflow:hidden;
+      width:100%;
     }
     .discord-activity {
       background:rgba(43,45,49,0.9);
@@ -185,21 +188,23 @@
       font-size:10px; font-weight:700;
       text-transform:uppercase; letter-spacing:1px; color:#b5bac1;
     }
-    .discord-activity-inner { display:flex; gap:10px; align-items:center; }
+    .discord-activity-inner { display:flex; gap:10px; align-items:center; min-width:0; overflow:hidden; }
     .discord-activity-art {
       width:48px; height:48px; border-radius:8px;
       flex-shrink:0; display:flex; align-items:center; justify-content:center;
       font-size:22px; overflow:hidden; background:var(--purple-dim);
     }
     .discord-activity-art img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
-    .discord-activity-details { flex:1; min-width:0; }
+    .discord-activity-details { flex:1; min-width:0; overflow:hidden; }
     .discord-activity-name {
       font-size:13px; font-weight:700; color:#f2f3f5;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:100%;
     }
     .discord-activity-sub {
       font-size:11px; color:#b5bac1; margin-top:2px;
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width:100%;
     }
     .spotify-bar { height:3px; background:#3d3f43; border-radius:2px; margin-top:6px; }
     .spotify-fill { height:100%; background:#1db954; border-radius:2px; transition:width 1s; }
@@ -399,6 +404,7 @@
       </div>
       <div class="discord-status-text" id="discord-status-text">Connecting...</div>
     </div>
+    <div class="discord-custom-status" id="discord-custom-status"></div>
     <div class="discord-activities" id="discord-activities">
       <div class="discord-no-activity">Loading...</div>
     </div>
@@ -790,6 +796,17 @@ async function fetchDiscordStatus() {
     const statusText = document.getElementById('discord-status-text');
     dot.className = 'discord-dot ' + (STATUS_COLORS[d.discord_status] || 'dot-offline');
     statusText.textContent = STATUS_LABELS[d.discord_status] || '⚫ Offline';
+
+    // Custom status
+    const customStatusEl = document.getElementById('discord-custom-status');
+    const customActivity = d.activities && d.activities.find(a => a.type === 4);
+    if (customActivity && customStatusEl) {
+      const emoji = customActivity.emoji ? (customActivity.emoji.name || '') : '';
+      const state = customActivity.state || '';
+      customStatusEl.textContent = (emoji + ' ' + state).trim();
+    } else if (customStatusEl) {
+      customStatusEl.textContent = '';
+    }
 
     // Build activities
     const activitiesEl = document.getElementById('discord-activities');
