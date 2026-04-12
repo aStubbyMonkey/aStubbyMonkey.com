@@ -138,6 +138,76 @@
 
     .loading-card .vid-placeholder { display:flex; animation:shimmer 1.5s ease-in-out infinite; }
     @keyframes shimmer { 0%,100%{opacity:0.4;} 50%{opacity:0.8;} }
+
+    /* DISCORD STATUS */
+    #status { }
+    .discord-card {
+      background:rgba(30,31,34,0.85);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:24px;
+      max-width:620px;
+      margin:0 auto;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+    .discord-top { display:flex; align-items:center; gap:16px; }
+    .discord-avatar-wrap { position:relative; flex-shrink:0; }
+    .discord-avatar {
+      width:72px; height:72px; border-radius:50%;
+      background:var(--purple);
+      display:flex; align-items:center; justify-content:center;
+      font-size:28px; overflow:hidden;
+      border:3px solid rgba(180,100,255,0.3);
+    }
+    .discord-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .discord-dot {
+      position:absolute; bottom:2px; right:2px;
+      width:18px; height:18px; border-radius:50%;
+      border:3px solid #1e1f22;
+    }
+    .dot-online{background:#23a55a;}
+    .dot-idle{background:#f0b232;}
+    .dot-dnd{background:#f23f43;}
+    .dot-offline{background:#80848e;}
+    .discord-status-text { font-size:13px; color:var(--text-dim); font-weight:600; }
+    .discord-activities {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px;
+    }
+    .discord-activity {
+      background:rgba(43,45,49,0.9);
+      border-radius:10px; padding:14px;
+      display:flex; flex-direction:column; gap:8px;
+    }
+    .discord-activity-label {
+      font-size:10px; font-weight:700;
+      text-transform:uppercase; letter-spacing:1px; color:#b5bac1;
+    }
+    .discord-activity-inner { display:flex; gap:10px; align-items:center; }
+    .discord-activity-art {
+      width:48px; height:48px; border-radius:8px;
+      flex-shrink:0; display:flex; align-items:center; justify-content:center;
+      font-size:22px; overflow:hidden; background:var(--purple-dim);
+    }
+    .discord-activity-art img { width:100%; height:100%; object-fit:cover; border-radius:8px; }
+    .discord-activity-details { flex:1; min-width:0; }
+    .discord-activity-name {
+      font-size:13px; font-weight:700; color:#f2f3f5;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .discord-activity-sub {
+      font-size:11px; color:#b5bac1; margin-top:2px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .spotify-bar { height:3px; background:#3d3f43; border-radius:2px; margin-top:6px; }
+    .spotify-fill { height:100%; background:#1db954; border-radius:2px; transition:width 1s; }
+    .discord-no-activity {
+      color:#4e5058; font-size:12px; font-style:italic;
+      text-align:center; padding:16px 0;
+    }
+
     /* FAV GAMES */
     #games-fav { }
     .games-list { display:flex; flex-direction:column; gap:16px; max-width:800px; margin:0 auto; width:100%; }
@@ -251,6 +321,7 @@
   <div class="nav-logo"><div class="gem">🐒</div>aStubbyMonkey</div>
   <div class="nav-links">
     <a href="#videos">Videos</a>
+    <a href="#status">Status</a>
     <a href="#games-fav">Fav Games</a>
     <a href="#districts">My Game</a>
     <a href="#gtch">GTCH</a>
@@ -311,6 +382,26 @@
   <div class="videos-row" id="videos-row">
     <div class="vid-link"><div class="vid-card loading-card"><div class="vid-placeholder land"><span>Loading...</span></div></div></div>
     <div class="vid-link"><div class="vid-card loading-card"><div class="vid-placeholder land"><span>Loading...</span></div></div></div>
+  </div>
+</section>
+
+
+<!-- ══ DISCORD STATUS ═══════════════════════════════════════════ -->
+<section id="status" class="page-section">
+  <div class="section-label reveal"><h2>What I'm Up To</h2><div class="line"></div></div>
+  <div class="discord-card reveal" id="discord-card">
+    <div class="discord-top">
+      <div class="discord-avatar-wrap">
+        <div class="discord-avatar">
+          <img src="avatar.png" alt="aStubbyMonkey" onerror="this.style.display='none'" />
+        </div>
+        <div class="discord-dot dot-offline" id="discord-dot"></div>
+      </div>
+      <div class="discord-status-text" id="discord-status-text">Connecting...</div>
+    </div>
+    <div class="discord-activities" id="discord-activities">
+      <div class="discord-no-activity">Loading...</div>
+    </div>
   </div>
 </section>
 
@@ -670,5 +761,104 @@ async function fetchSubCount() {
 }
 fetchSubCount();
 </script>
+
+<script>
+const DISCORD_USER_ID = '914625759698628669';
+
+const STATUS_COLORS = {
+  online: 'dot-online',
+  idle: 'dot-idle',
+  dnd: 'dot-dnd',
+  offline: 'dot-offline'
+};
+const STATUS_LABELS = {
+  online: '🟢 Online',
+  idle: '🟡 Idle',
+  dnd: '🔴 Do Not Disturb',
+  offline: '⚫ Offline'
+};
+
+async function fetchDiscordStatus() {
+  try {
+    const res = await fetch(`https://api.lanyard.rest/v1/users/${DISCORD_USER_ID}`);
+    const data = await res.json();
+    if (!data.success) return;
+    const d = data.data;
+
+    // Update status dot
+    const dot = document.getElementById('discord-dot');
+    const statusText = document.getElementById('discord-status-text');
+    dot.className = 'discord-dot ' + (STATUS_COLORS[d.discord_status] || 'dot-offline');
+    statusText.textContent = STATUS_LABELS[d.discord_status] || '⚫ Offline';
+
+    // Build activities
+    const activitiesEl = document.getElementById('discord-activities');
+    let spotifyHTML = '';
+    let gameHTML = '';
+
+    // Spotify
+    if (d.spotify) {
+      const sp = d.spotify;
+      const elapsed = Date.now() - sp.timestamps.start;
+      const total = sp.timestamps.end - sp.timestamps.start;
+      const pct = Math.min(100, Math.round((elapsed / total) * 100));
+      spotifyHTML = `
+        <div class="discord-activity">
+          <div class="discord-activity-label">🎵 Listening to Spotify</div>
+          <div class="discord-activity-inner">
+            <div class="discord-activity-art">
+              <img src="${sp.album_art_url}" onerror="this.style.display='none'" />
+            </div>
+            <div class="discord-activity-details">
+              <div class="discord-activity-name">${sp.song}</div>
+              <div class="discord-activity-sub">${sp.artist}</div>
+              <div class="spotify-bar"><div class="spotify-fill" style="width:${pct}%"></div></div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      spotifyHTML = `<div class="discord-activity"><div class="discord-activity-label">🎵 Spotify</div><div class="discord-no-activity">Not listening to anything</div></div>`;
+    }
+
+    // Game
+    const game = d.activities && d.activities.find(a => a.type === 0);
+    if (game) {
+      const elapsed = game.timestamps && game.timestamps.start
+        ? Math.floor((Date.now() - game.timestamps.start) / 60000)
+        : null;
+      const elapsedStr = elapsed !== null
+        ? (elapsed >= 60 ? `${Math.floor(elapsed/60)}h ${elapsed%60}m elapsed` : `${elapsed}m elapsed`)
+        : '';
+      const artUrl = game.assets && game.assets.large_image
+        ? `https://cdn.discordapp.com/app-assets/${game.application_id}/${game.assets.large_image}.png`
+        : '';
+      gameHTML = `
+        <div class="discord-activity">
+          <div class="discord-activity-label">🎮 Playing a Game</div>
+          <div class="discord-activity-inner">
+            <div class="discord-activity-art">
+              ${artUrl ? `<img src="${artUrl}" onerror="this.textContent='🎮';this.style.fontSize='22px';" />` : '🎮'}
+            </div>
+            <div class="discord-activity-details">
+              <div class="discord-activity-name">${game.name}</div>
+              <div class="discord-activity-sub">${elapsedStr}</div>
+            </div>
+          </div>
+        </div>`;
+    } else {
+      gameHTML = `<div class="discord-activity"><div class="discord-activity-label">🎮 Games</div><div class="discord-no-activity">Not playing anything</div></div>`;
+    }
+
+    activitiesEl.innerHTML = spotifyHTML + gameHTML;
+
+  } catch(e) {
+    console.error('Lanyard error:', e);
+  }
+}
+
+fetchDiscordStatus();
+setInterval(fetchDiscordStatus, 30000);
+</script>
+
 </body>
 </html>
