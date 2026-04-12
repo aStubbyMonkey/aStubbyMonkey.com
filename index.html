@@ -115,29 +115,27 @@
     .shorts-row {
       display:flex;
       flex-direction:row;
-      gap:14px;
+      gap:12px;
       justify-content:center;
       align-items:flex-end;
       width:100%;
       flex-wrap:nowrap;
+      margin-bottom:48px;
     }
-    .shorts-row .vid-link { width:calc(12.5% - 12px); max-width:160px; min-width:100px; }
+    .shorts-row .vid-link { flex:1; max-width:175px; min-width:0; }
 
     /* videos + livestream row */
     .videos-row {
-      display:flex;
-      flex-direction:row;
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap:20px;
-      justify-content:center;
-      align-items:flex-start;
       width:100%;
     }
-    .videos-row .vid-link { width:calc(33% - 14px); max-width:420px; }
+    .videos-row .vid-link { width:100%; max-width:100%; }
 
     /* LIVESTREAM CARD */
     .livestream-card {
-      width:calc(33% - 14px);
-      max-width:420px;
+      width:100%;
       border-radius:var(--radius);
       border:2px solid var(--border);
       background:var(--surface);
@@ -174,7 +172,7 @@
     .livestream-title { font-size:13px; font-weight:700; color:var(--text); line-height:1.4; }
     .livestream-sub { font-size:11px; color:var(--text-dim); font-weight:600; }
     .no-stream-card {
-      width:calc(33% - 14px); max-width:420px;
+      width:100%;
       border-radius:var(--radius); border:1.5px dashed rgba(150,80,255,0.25);
       background:var(--surface); min-height:200px;
       display:flex; flex-direction:column;
@@ -717,11 +715,11 @@ async function fetchVideos() {
       });
     }
 
-    // Render videos row (2 videos)
-    const videosRow = document.getElementById('videos-row');
-    videosRow.innerHTML = '';
-    longs.slice(0, 2).forEach(v => {
-      videosRow.innerHTML += `
+    // Render videos into individual slots
+    const slots = [document.getElementById('vid-slot-1'), document.getElementById('vid-slot-2')];
+    longs.slice(0, 2).forEach((v, i) => {
+      if (!slots[i]) return;
+      slots[i].innerHTML = `
         <a href="https://www.youtube.com/watch?v=${v.id}" target="_blank" class="vid-link">
           <div class="vid-card">
             <img class="vid-thumb" src="${v.thumb}" alt="${v.title}" />
