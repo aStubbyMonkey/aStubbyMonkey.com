@@ -707,10 +707,10 @@ document.getElementById('discord-popup').addEventListener('click',function(e){
 </script>
 
 <script>
-async function fetchVideos() {
-  const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
-  const CHANNEL_ID = 'UCDlHHAvfs7GXP_l5IDYpgqw';
+const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
+const CHANNEL_ID = 'UCDlHHAvfs7GXP_l5IDYpgqw';
 
+async function fetchVideos() {
   try {
     // Get uploads playlist ID
     const chanRes = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${CHANNEL_ID}&key=${API_KEY}`);
