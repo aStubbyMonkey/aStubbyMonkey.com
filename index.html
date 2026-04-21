@@ -80,7 +80,7 @@
     .btn-primary:hover { transform:translateY(-3px); box-shadow:0 10px 40px rgba(119,34,204,0.65); }
     .btn-outline { background:transparent; border:1.5px solid var(--border-hi); border-radius:14px; padding:14px 32px; font-size:15px; font-weight:800; color:var(--text-mid); cursor:none; font-family:'Nunito',sans-serif; transition:all .25s; }
     .btn-outline:hover { background:var(--surface); color:var(--text); transform:translateY(-3px); }
-    .hero-subcount { display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:28px; position:relative; z-index:1; }
+
     .subcount-num { font-family:'Bebas Neue',sans-serif; font-size:48px; letter-spacing:2px; background:linear-gradient(135deg,#fff,var(--purple-glow)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
     .subcount-label { font-size:11px; font-weight:700; color:var(--text-dim); letter-spacing:3px; text-transform:uppercase; }
     .hero-scroll-hint { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:8px; font-size:11px; font-weight:700; color:var(--text-dim); letter-spacing:2px; text-transform:uppercase; animation:floatHint 2.5s ease-in-out infinite; }
@@ -407,10 +407,7 @@
     <button class="btn-primary" onclick="document.getElementById('videos').scrollIntoView({behavior:'smooth'})">Watch My Videos</button>
     <button class="btn-outline" onclick="showDiscordPopup()">Join Discord</button>
   </div>
-  <div class="hero-subcount reveal reveal-delay-5">
-    <span class="subcount-num" id="sub-count">—</span>
-    <span class="subcount-label">YouTube Subscribers</span>
-  </div>
+
   <div class="hero-scroll-hint"><span>Scroll</span><div class="arrow"></div></div>
 </section>
 
@@ -796,10 +793,18 @@ async function fetchVideos() {
 fetchVideos();
 
 async function fetchSubCount() {
-  const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
-  const CHANNEL_ID = 'UCDlHHAvfs7GXP_l5IDYpgqw';
-  try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
+    try {
+      const r = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
+      const d = await r.json();
+      const stats = d.items[0].statistics;
+      const subs = parseInt(stats.subscriberCount).toLocaleString();
+      const views = parseInt(stats.viewCount).toLocaleString();
+      const statSubs = document.getElementById('stat-subs');
+      const statViews = document.getElementById('stat-views');
+      if (statSubs) statSubs.textContent = subs;
+      if (statViews) statViews.textContent = views;
+    } catch(e) { console.error('Stats fetch error:', e); }
+  }&key=${API_KEY}`);
     const data = await res.json();
     const count = parseInt(data.items[0].statistics.subscriberCount);
     const el = document.getElementById('sub-count');
