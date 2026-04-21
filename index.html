@@ -142,6 +142,46 @@
     .loading-card .vid-placeholder { display:flex; animation:shimmer 1.5s ease-in-out infinite; }
     @keyframes shimmer { 0%,100%{opacity:0.4;} 50%{opacity:0.8;} }
 
+
+    /* CHANNEL STATS BAR */
+    .channel-stats {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      width:100%;
+      margin-bottom:48px;
+      padding:24px 40px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+    }
+    .channel-stat {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+    }
+    .channel-stat-number {
+      font-family:'Bebas Neue',sans-serif;
+      font-size:clamp(36px,5vw,64px);
+      letter-spacing:2px;
+      color:var(--text);
+      line-height:1;
+    }
+    .channel-stat-number span { color:var(--purple-glow); }
+    .channel-stat-label {
+      font-size:11px;
+      font-weight:700;
+      letter-spacing:3px;
+      color:var(--text-dim);
+      text-transform:uppercase;
+    }
+    .channel-stat-divider {
+      width:1px;
+      height:60px;
+      background:var(--border);
+    }
+
     /* DISCORD STATUS */
     #status { }
     .discord-card {
@@ -329,6 +369,7 @@
 <nav>
   <div class="nav-logo">aStubbyMonkey.com</div>
   <div class="nav-links">
+    <a href="#hero">Home</a>
     <a href="#videos">Videos</a>
     <a href="#status">Status</a>
     <a href="#games-fav">Fav Games</a>
@@ -377,6 +418,19 @@
 <section id="videos" class="page-section">
   <div class="section-label reveal">
     <h2>Latest Videos</h2><div class="line"></div>
+  </div>
+
+  <!-- CHANNEL STATS -->
+  <div class="channel-stats reveal">
+    <div class="channel-stat">
+      <div class="channel-stat-number" id="stat-subs">—</div>
+      <div class="channel-stat-label">Subscribers</div>
+    </div>
+    <div class="channel-stat-divider"></div>
+    <div class="channel-stat">
+      <div class="channel-stat-number" id="stat-views">—</div>
+      <div class="channel-stat-label">Total Views</div>
+    </div>
   </div>
 
   <!-- ROW 1: 4 Shorts — dynamically loaded -->
