@@ -804,19 +804,7 @@ async function fetchSubCount() {
       if (statSubs) statSubs.textContent = subs;
       if (statViews) statViews.textContent = views;
     } catch(e) { console.error('Stats fetch error:', e); }
-  }&key=${API_KEY}`);
-    const data = await res.json();
-    const count = parseInt(data.items[0].statistics.subscriberCount);
-    const el = document.getElementById('sub-count');
-    if (count >= 1000) {
-      el.textContent = (count / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-    } else {
-      el.textContent = count.toLocaleString();
-    }
-  } catch(e) {
-    document.getElementById('sub-count').textContent = '—';
   }
-}
 fetchSubCount();
 </script>
 
