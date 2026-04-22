@@ -508,22 +508,22 @@
     <!-- Manual status cards -->
     <div class="status-cards" id="status-cards">
       <div class="status-card">
-        <div class="status-card-label">Currently</div>
+        <div class="status-card-label" id="label-currently">Currently</div>
         <div class="status-card-value" id="sc-currently">—</div>
         <div class="status-card-sub" id="sc-currently-sub"></div>
       </div>
       <div class="status-card">
-        <div class="status-card-label">Mood</div>
+        <div class="status-card-label" id="label-mood">Mood</div>
         <div class="status-card-value" id="sc-mood">—</div>
         <div class="status-card-sub" id="sc-mood-sub"></div>
       </div>
       <div class="status-card">
-        <div class="status-card-label">Next Video</div>
+        <div class="status-card-label" id="label-video">Next Video</div>
         <div class="status-card-value" id="sc-video">—</div>
         <div class="status-card-sub" id="sc-video-sub"></div>
       </div>
       <div class="status-card">
-        <div class="status-card-label">GTCH Status</div>
+        <div class="status-card-label" id="label-gtch">GTCH Status</div>
         <div class="status-card-value" id="sc-gtch">—</div>
         <div class="status-card-sub" id="sc-gtch-sub"></div>
       </div>
@@ -538,35 +538,43 @@
     </div>
 
     <!-- Admin toggle -->
-    <div class="admin-toggle" onclick="toggleAdmin()">⚙️ Update Status (Admin)</div>
+    <div class="admin-toggle" id="admin-toggle" style="display:none;" onclick="toggleAdmin()">⚙️ Update Status (Admin)</div>
 
     <!-- Admin panel -->
     <div class="admin-panel" id="admin-panel">
       <div class="admin-pw" id="admin-pw-row">
+        <input class="admin-input" type="email" id="admin-email" placeholder="Email..." />
         <input class="admin-input" type="password" id="admin-pw" placeholder="Password..." />
-        <button class="admin-btn" onclick="checkPw()">Unlock</button>
+        <button class="admin-btn" onclick="checkPw()">Login</button>
       </div>
       <div id="admin-content" style="display:none;">
-        <h4>Update Cards</h4>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h4 style="margin:0;">Update Cards</h4>
+          <button class="admin-btn secondary" id="admin-logout" onclick="adminLogout()" style="display:none;">Logout</button>
+        </div>
         <div class="admin-grid admin-section">
           <div class="admin-field">
-            <div class="admin-field-label">Currently</div>
-            <input class="admin-input" id="in-currently" placeholder="e.g. Working on Districts" />
+            <div class="admin-field-label">Card 1 Label</div>
+            <input class="admin-input" id="in-label-currently" placeholder="e.g. Currently" />
+            <input class="admin-input" style="margin-top:4px;" id="in-currently" placeholder="Value..." />
             <input class="admin-input" style="margin-top:4px;" id="in-currently-sub" placeholder="Subtitle (optional)" />
           </div>
           <div class="admin-field">
-            <div class="admin-field-label">Mood</div>
-            <input class="admin-input" id="in-mood" placeholder="e.g. Focused" />
+            <div class="admin-field-label">Card 2 Label</div>
+            <input class="admin-input" id="in-label-mood" placeholder="e.g. Mood" />
+            <input class="admin-input" style="margin-top:4px;" id="in-mood" placeholder="Value..." />
             <input class="admin-input" style="margin-top:4px;" id="in-mood-sub" placeholder="Subtitle (optional)" />
           </div>
           <div class="admin-field">
-            <div class="admin-field-label">Next Video</div>
-            <input class="admin-input" id="in-video" placeholder="e.g. Recording soon" />
+            <div class="admin-field-label">Card 3 Label</div>
+            <input class="admin-input" id="in-label-video" placeholder="e.g. Next Video" />
+            <input class="admin-input" style="margin-top:4px;" id="in-video" placeholder="Value..." />
             <input class="admin-input" style="margin-top:4px;" id="in-video-sub" placeholder="Subtitle (optional)" />
           </div>
           <div class="admin-field">
-            <div class="admin-field-label">GTCH Status</div>
-            <input class="admin-input" id="in-gtch" placeholder="e.g. Event this week" />
+            <div class="admin-field-label">Card 4 Label</div>
+            <input class="admin-input" id="in-label-gtch" placeholder="e.g. GTCH Status" />
+            <input class="admin-input" style="margin-top:4px;" id="in-gtch" placeholder="Value..." />
             <input class="admin-input" style="margin-top:4px;" id="in-gtch-sub" placeholder="Subtitle (optional)" />
           </div>
         </div>
@@ -735,11 +743,26 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.28a</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.28d</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
 <script>
+
+  // ADMIN KEYBIND - type "admin"
+  (function() {
+    let typed = '';
+    document.addEventListener('keydown', function(e) {
+      typed += e.key.toLowerCase();
+      if (typed.length > 5) typed = typed.slice(-5);
+      if (typed === 'admin') {
+        const panel = document.getElementById('admin-panel');
+        const toggle = document.getElementById('admin-toggle');
+        panel.classList.toggle('visible');
+      }
+    });
+  })();
+
   // CURSOR
   const dot = document.getElementById('cursor-dot');
   const ring = document.getElementById('cursor-ring');
@@ -1037,82 +1060,51 @@ setInterval(fetchDiscordStatus, 30000);
 </script>
 
 
-<script>
-const ADMIN_PW = 'stubby2025';
 
-function toggleAdmin() {
-  const panel = document.getElementById('admin-panel');
-  panel.classList.toggle('visible');
-}
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
 
-function checkPw() {
-  const pw = document.getElementById('admin-pw').value;
-  if (pw === ADMIN_PW) {
-    document.getElementById('admin-pw-row').style.display = 'none';
-    document.getElementById('admin-content').style.display = 'block';
-    loadAdmin();
-  } else {
-    document.getElementById('admin-pw').style.borderColor = '#f23f43';
-  }
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyBe1Ex5z_tDW4JuLZaHs-65_kMM0jfFjX8",
+  authDomain: "astubbymonkey-status.firebaseapp.com",
+  projectId: "astubbymonkey-status",
+  storageBucket: "astubbymonkey-status.firebasestorage.app",
+  messagingSenderId: "410093699659",
+  appId: "1:410093699659:web:bc3a00c3f70b3f8b0c43ce",
+  databaseURL: "https://astubbymonkey-status-default-rtdb.firebaseio.com"
+};
 
-function loadAdmin() {
-  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
-  if (data.currently) document.getElementById('in-currently').value = data.currently;
-  if (data.currentlySub) document.getElementById('in-currently-sub').value = data.currentlySub;
-  if (data.mood) document.getElementById('in-mood').value = data.mood;
-  if (data.moodSub) document.getElementById('in-mood-sub').value = data.moodSub;
-  if (data.video) document.getElementById('in-video').value = data.video;
-  if (data.videoSub) document.getElementById('in-video-sub').value = data.videoSub;
-  if (data.gtch) document.getElementById('in-gtch').value = data.gtch;
-  if (data.gtchSub) document.getElementById('in-gtch-sub').value = data.gtchSub;
-}
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-function saveCards() {
-  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
-  data.currently = document.getElementById('in-currently').value;
-  data.currentlySub = document.getElementById('in-currently-sub').value;
-  data.mood = document.getElementById('in-mood').value;
-  data.moodSub = document.getElementById('in-mood-sub').value;
-  data.video = document.getElementById('in-video').value;
-  data.videoSub = document.getElementById('in-video-sub').value;
-  data.gtch = document.getElementById('in-gtch').value;
-  data.gtchSub = document.getElementById('in-gtch-sub').value;
-  localStorage.setItem('stubby-status', JSON.stringify(data));
-  renderCards(data);
-}
+// ── LIVE LISTENERS ──────────────────────────────────────────
+onValue(ref(db, 'status/cards'), (snap) => {
+  const data = snap.val() || {};
+  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  setEl('sc-currently', data.currently);
+  setEl('sc-currently-sub', data.currentlySub);
+  setEl('sc-mood', data.mood);
+  setEl('sc-mood-sub', data.moodSub);
+  setEl('sc-video', data.video);
+  setEl('sc-video-sub', data.videoSub);
+  setEl('sc-gtch', data.gtch);
+  setEl('sc-gtch-sub', data.gtchSub);
+  // Also update card labels if customized
+  const setLabel = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+  setLabel('label-currently', data.labelCurrently);
+  setLabel('label-mood', data.labelMood);
+  setLabel('label-video', data.labelVideo);
+  setLabel('label-gtch', data.labelGtch);
+});
 
-function renderCards(data) {
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  set('sc-currently', data.currently);
-  set('sc-currently-sub', data.currentlySub);
-  set('sc-mood', data.mood);
-  set('sc-mood-sub', data.moodSub);
-  set('sc-video', data.video);
-  set('sc-video-sub', data.videoSub);
-  set('sc-gtch', data.gtch);
-  set('sc-gtch-sub', data.gtchSub);
-}
-
-function addPost() {
-  const input = document.getElementById('in-post');
-  const text = input.value.trim();
-  if (!text) return;
-  const posts = JSON.parse(localStorage.getItem('stubby-posts') || '[]');
-  posts.unshift({ text, time: Date.now() });
-  localStorage.setItem('stubby-posts', JSON.stringify(posts));
-  input.value = '';
-  renderFeed(posts);
-}
-
-function clearFeed() {
-  localStorage.setItem('stubby-posts', '[]');
-  renderFeed([]);
-}
-
-function renderFeed(posts) {
+onValue(ref(db, 'status/posts'), (snap) => {
+  const data = snap.val();
   const feed = document.getElementById('status-feed');
-  if (!posts.length) { feed.innerHTML = '<div class="status-empty">No updates yet.</div>'; return; }
+  if (!data) { feed.innerHTML = '<div class="status-empty">No updates yet.</div>'; return; }
+  const posts = Object.values(data).sort((a, b) => b.time - a.time);
   feed.innerHTML = posts.map((p, i) => `
     <div class="status-post">
       <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
@@ -1121,7 +1113,90 @@ function renderFeed(posts) {
         <div class="status-post-time">${timeAgo(p.time)}</div>
       </div>
     </div>`).join('');
+});
+
+// ── AUTH STATE ──────────────────────────────────────────────
+onAuthStateChanged(auth, (user) => {
+  const pwRow = document.getElementById('admin-pw-row');
+  const content = document.getElementById('admin-content');
+  const logoutBtn = document.getElementById('admin-logout');
+  if (user) {
+    if (pwRow) pwRow.style.display = 'none';
+    if (content) { content.style.display = 'block'; loadAdminInputs(); }
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+  } else {
+    if (pwRow) pwRow.style.display = 'flex';
+    if (content) content.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
+});
+
+// ── ADMIN FUNCTIONS ──────────────────────────────────────────
+window.toggleAdmin = function() {
+  document.getElementById('admin-panel').classList.toggle('visible');
+};
+
+window.checkPw = function() {
+  const email = document.getElementById('admin-email').value;
+  const pw = document.getElementById('admin-pw').value;
+  signInWithEmailAndPassword(auth, email, pw)
+    .catch(() => {
+      document.getElementById('admin-pw').style.borderColor = '#f23f43';
+      document.getElementById('admin-email').style.borderColor = '#f23f43';
+    });
+};
+
+window.adminLogout = function() {
+  signOut(auth);
+};
+
+function loadAdminInputs() {
+  onValue(ref(db, 'status/cards'), (snap) => {
+    const d = snap.val() || {};
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('in-currently', d.currently);
+    setVal('in-currently-sub', d.currentlySub);
+    setVal('in-label-currently', d.labelCurrently || 'Currently');
+    setVal('in-mood', d.mood);
+    setVal('in-mood-sub', d.moodSub);
+    setVal('in-label-mood', d.labelMood || 'Mood');
+    setVal('in-video', d.video);
+    setVal('in-video-sub', d.videoSub);
+    setVal('in-label-video', d.labelVideo || 'Next Video');
+    setVal('in-gtch', d.gtch);
+    setVal('in-gtch-sub', d.gtchSub);
+    setVal('in-label-gtch', d.labelGtch || 'GTCH Status');
+  }, { onlyOnce: true });
 }
+
+window.saveCards = function() {
+  set(ref(db, 'status/cards'), {
+    labelCurrently: document.getElementById('in-label-currently').value || 'Currently',
+    currently: document.getElementById('in-currently').value,
+    currentlySub: document.getElementById('in-currently-sub').value,
+    labelMood: document.getElementById('in-label-mood').value || 'Mood',
+    mood: document.getElementById('in-mood').value,
+    moodSub: document.getElementById('in-mood-sub').value,
+    labelVideo: document.getElementById('in-label-video').value || 'Next Video',
+    video: document.getElementById('in-video').value,
+    videoSub: document.getElementById('in-video-sub').value,
+    labelGtch: document.getElementById('in-label-gtch').value || 'GTCH Status',
+    gtch: document.getElementById('in-gtch').value,
+    gtchSub: document.getElementById('in-gtch-sub').value,
+  }).then(() => alert('Cards saved!'));
+};
+
+window.addPost = function() {
+  const input = document.getElementById('in-post');
+  const text = input.value.trim();
+  if (!text) return;
+  push(ref(db, 'status/posts'), { text, time: Date.now() });
+  input.value = '';
+};
+
+window.clearFeed = function() {
+  if (confirm('Clear all posts?')) set(ref(db, 'status/posts'), null);
+};
 
 function timeAgo(ts) {
   const diff = Math.floor((Date.now() - ts) / 1000);
@@ -1130,14 +1205,6 @@ function timeAgo(ts) {
   if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
   return Math.floor(diff/86400) + 'd ago';
 }
-
-// Load on page start
-(function init() {
-  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
-  renderCards(data);
-  const posts = JSON.parse(localStorage.getItem('stubby-posts') || '[]');
-  renderFeed(posts);
-})();
 </script>
 </body>
 </html>
