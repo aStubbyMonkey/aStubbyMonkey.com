@@ -198,6 +198,9 @@
     .status-post-text { font-size:13px; color:var(--text); line-height:1.5; }
     .status-post-time { font-size:11px; color:var(--text-dim); margin-top:4px; }
     .status-empty { font-size:13px; color:var(--text-dim); font-style:italic; text-align:center; padding:20px 0; }
+    .post-delete { display:none; margin-left:auto; background:none; border:none; color:var(--text-dim); font-size:14px; cursor:pointer; padding:0 4px; flex-shrink:0; }
+    .post-delete:hover { color:#f23f43; }
+    .admin-open .post-delete { display:block; }
 
     /* ADMIN PANEL */
     .admin-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:none; }
@@ -581,8 +584,8 @@
         <button class="admin-btn" onclick="saveCards()" style="margin-bottom:20px;">Save Cards</button>
 
         <h4>Post an Update</h4>
-        <div class="admin-row">
-          <input class="admin-input" id="in-post" placeholder="What's going on right now..." />
+        <div class="admin-row" style="align-items:flex-start;">
+          <textarea class="admin-input" id="in-post" placeholder="What's going on right now... (Shift+Enter for new line)" rows="3" style="resize:vertical;"></textarea>
           <button class="admin-btn" onclick="addPost()">Post</button>
         </div>
         <button class="admin-btn secondary" onclick="clearFeed()" style="margin-top:8px;">Clear All Posts</button>
@@ -743,7 +746,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.28d</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29a</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -753,12 +756,19 @@
   (function() {
     let typed = '';
     document.addEventListener('keydown', function(e) {
+      // Shift+Enter in post textarea
+      if (e.key === 'Enter' && e.shiftKey && document.activeElement.id === 'in-post') return;
+      if (e.key === 'Enter' && document.activeElement.id === 'in-post') {
+        e.preventDefault();
+        window.addPost && window.addPost();
+        return;
+      }
       typed += e.key.toLowerCase();
       if (typed.length > 5) typed = typed.slice(-5);
       if (typed === 'admin') {
         const panel = document.getElementById('admin-panel');
-        const toggle = document.getElementById('admin-toggle');
         panel.classList.toggle('visible');
+        document.getElementById('status-feed').classList.toggle('admin-open', panel.classList.contains('visible'));
       }
     });
   })();
@@ -1104,14 +1114,15 @@ onValue(ref(db, 'status/posts'), (snap) => {
   const data = snap.val();
   const feed = document.getElementById('status-feed');
   if (!data) { feed.innerHTML = '<div class="status-empty">No updates yet.</div>'; return; }
-  const posts = Object.values(data).sort((a, b) => b.time - a.time);
-  feed.innerHTML = posts.map((p, i) => `
+  const entries = Object.entries(data).sort((a, b) => b[1].time - a[1].time);
+  feed.innerHTML = entries.map(([key, p], i) => `
     <div class="status-post">
       <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
-      <div>
-        <div class="status-post-text">${p.text}</div>
+      <div style="flex:1;">
+        <div class="status-post-text">${p.text.replace(/\n/g, '<br>')}</div>
         <div class="status-post-time">${timeAgo(p.time)}</div>
       </div>
+      <button class="post-delete" onclick="deletePost('${key}')" title="Delete">✕</button>
     </div>`).join('');
 });
 
@@ -1133,7 +1144,9 @@ onAuthStateChanged(auth, (user) => {
 
 // ── ADMIN FUNCTIONS ──────────────────────────────────────────
 window.toggleAdmin = function() {
-  document.getElementById('admin-panel').classList.toggle('visible');
+  const panel = document.getElementById('admin-panel');
+  panel.classList.toggle('visible');
+  document.getElementById('status-feed').classList.toggle('admin-open', panel.classList.contains('visible'));
 };
 
 window.checkPw = function() {
@@ -1196,6 +1209,10 @@ window.addPost = function() {
 
 window.clearFeed = function() {
   if (confirm('Clear all posts?')) set(ref(db, 'status/posts'), null);
+};
+
+window.deletePost = function(key) {
+  set(ref(db, 'status/posts/' + key), null);
 };
 
 function timeAgo(ts) {
