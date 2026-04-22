@@ -182,6 +182,43 @@
       background:var(--border);
     }
 
+
+    /* STATUS BOARD */
+    .status-board { display:flex; flex-direction:column; gap:24px; max-width:800px; margin:0 auto; width:100%; }
+    .status-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .status-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+    .status-card-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); margin-bottom:8px; }
+    .status-card-value { font-size:15px; font-weight:700; color:var(--text); line-height:1.4; }
+    .status-card-sub { font-size:11px; color:var(--text-dim); margin-top:4px; }
+    .status-feed-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--text-dim); margin-bottom:12px; }
+    .status-feed { display:flex; flex-direction:column; gap:10px; }
+    .status-post { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; display:flex; gap:12px; align-items:flex-start; }
+    .status-post-dot { width:8px; height:8px; border-radius:50%; background:var(--purple); flex-shrink:0; margin-top:6px; }
+    .status-post-dot.old { background:var(--text-dim); }
+    .status-post-text { font-size:13px; color:var(--text); line-height:1.5; }
+    .status-post-time { font-size:11px; color:var(--text-dim); margin-top:4px; }
+    .status-empty { font-size:13px; color:var(--text-dim); font-style:italic; text-align:center; padding:20px 0; }
+
+    /* ADMIN PANEL */
+    .admin-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:none; }
+    .admin-panel.visible { display:block; }
+    .admin-panel h4 { font-size:13px; font-weight:800; color:var(--text); margin-bottom:16px; }
+    .admin-section { margin-bottom:16px; }
+    .admin-section-label { font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+    .admin-row { display:flex; gap:8px; margin-bottom:8px; }
+    .admin-input { flex:1; background:var(--ink); border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-size:13px; color:var(--text); font-family:'Nunito',sans-serif; }
+    .admin-input:focus { outline:none; border-color:var(--purple); }
+    .admin-btn { background:var(--purple); border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700; color:white; cursor:pointer; font-family:'Nunito',sans-serif; white-space:nowrap; }
+    .admin-btn:hover { background:var(--purple-hi); }
+    .admin-btn.secondary { background:transparent; border:1px solid var(--border); color:var(--text-dim); }
+    .admin-btn.secondary:hover { border-color:var(--purple); color:var(--text); }
+    .admin-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .admin-field { display:flex; flex-direction:column; gap:4px; }
+    .admin-field-label { font-size:11px; color:var(--text-dim); }
+    .admin-toggle { font-size:11px; color:var(--text-dim); cursor:pointer; margin-top:8px; text-align:right; }
+    .admin-toggle:hover { color:var(--purple-glow); }
+    .admin-pw { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+
     /* DISCORD STATUS */
     #status { }
     .discord-card {
@@ -449,20 +486,101 @@
 <!-- ══ DISCORD STATUS ═══════════════════════════════════════════ -->
 <section id="status" class="page-section">
   <div class="section-label reveal"><h2>What I'm Up To</h2><div class="line"></div></div>
-  <div class="discord-card reveal" id="discord-card">
-    <div class="discord-top">
-      <div class="discord-avatar-wrap">
-        <div class="discord-avatar">
-          <img src="avatar.png" alt="aStubbyMonkey" onerror="this.style.display='none'" />
+  <div class="status-board reveal">
+
+    <!-- Discord live status (kept) -->
+    <div class="discord-card" id="discord-card">
+      <div class="discord-top">
+        <div class="discord-avatar-wrap">
+          <div class="discord-avatar">
+            <img src="avatar.png" alt="aStubbyMonkey" onerror="this.style.display='none'" />
+          </div>
+          <div class="discord-dot dot-offline" id="discord-dot"></div>
         </div>
-        <div class="discord-dot dot-offline" id="discord-dot"></div>
+        <div class="discord-status-text" id="discord-status-text">Connecting...</div>
+        <div class="discord-custom-status" id="discord-custom-status"></div>
       </div>
-      <div class="discord-status-text" id="discord-status-text">Connecting...</div>
-      <div class="discord-custom-status" id="discord-custom-status"></div>
+      <div class="discord-activities" id="discord-activities">
+        <div class="discord-no-activity">Loading...</div>
+      </div>
     </div>
-    <div class="discord-activities" id="discord-activities">
-      <div class="discord-no-activity">Loading...</div>
+
+    <!-- Manual status cards -->
+    <div class="status-cards" id="status-cards">
+      <div class="status-card">
+        <div class="status-card-label">Currently</div>
+        <div class="status-card-value" id="sc-currently">—</div>
+        <div class="status-card-sub" id="sc-currently-sub"></div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">Mood</div>
+        <div class="status-card-value" id="sc-mood">—</div>
+        <div class="status-card-sub" id="sc-mood-sub"></div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">Next Video</div>
+        <div class="status-card-value" id="sc-video">—</div>
+        <div class="status-card-sub" id="sc-video-sub"></div>
+      </div>
+      <div class="status-card">
+        <div class="status-card-label">GTCH Status</div>
+        <div class="status-card-value" id="sc-gtch">—</div>
+        <div class="status-card-sub" id="sc-gtch-sub"></div>
+      </div>
     </div>
+
+    <!-- Update feed -->
+    <div>
+      <div class="status-feed-title">Recent Updates</div>
+      <div class="status-feed" id="status-feed">
+        <div class="status-empty">No updates yet.</div>
+      </div>
+    </div>
+
+    <!-- Admin toggle -->
+    <div class="admin-toggle" onclick="toggleAdmin()">⚙️ Update Status (Admin)</div>
+
+    <!-- Admin panel -->
+    <div class="admin-panel" id="admin-panel">
+      <div class="admin-pw" id="admin-pw-row">
+        <input class="admin-input" type="password" id="admin-pw" placeholder="Password..." />
+        <button class="admin-btn" onclick="checkPw()">Unlock</button>
+      </div>
+      <div id="admin-content" style="display:none;">
+        <h4>Update Cards</h4>
+        <div class="admin-grid admin-section">
+          <div class="admin-field">
+            <div class="admin-field-label">Currently</div>
+            <input class="admin-input" id="in-currently" placeholder="e.g. Working on Districts" />
+            <input class="admin-input" style="margin-top:4px;" id="in-currently-sub" placeholder="Subtitle (optional)" />
+          </div>
+          <div class="admin-field">
+            <div class="admin-field-label">Mood</div>
+            <input class="admin-input" id="in-mood" placeholder="e.g. Focused" />
+            <input class="admin-input" style="margin-top:4px;" id="in-mood-sub" placeholder="Subtitle (optional)" />
+          </div>
+          <div class="admin-field">
+            <div class="admin-field-label">Next Video</div>
+            <input class="admin-input" id="in-video" placeholder="e.g. Recording soon" />
+            <input class="admin-input" style="margin-top:4px;" id="in-video-sub" placeholder="Subtitle (optional)" />
+          </div>
+          <div class="admin-field">
+            <div class="admin-field-label">GTCH Status</div>
+            <input class="admin-input" id="in-gtch" placeholder="e.g. Event this week" />
+            <input class="admin-input" style="margin-top:4px;" id="in-gtch-sub" placeholder="Subtitle (optional)" />
+          </div>
+        </div>
+        <button class="admin-btn" onclick="saveCards()" style="margin-bottom:20px;">Save Cards</button>
+
+        <h4>Post an Update</h4>
+        <div class="admin-row">
+          <input class="admin-input" id="in-post" placeholder="What's going on right now..." />
+          <button class="admin-btn" onclick="addPost()">Post</button>
+        </div>
+        <button class="admin-btn secondary" onclick="clearFeed()" style="margin-top:8px;">Clear All Posts</button>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -617,7 +735,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.27c</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.28a</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -918,5 +1036,108 @@ fetchDiscordStatus();
 setInterval(fetchDiscordStatus, 30000);
 </script>
 
+
+<script>
+const ADMIN_PW = 'stubby2025';
+
+function toggleAdmin() {
+  const panel = document.getElementById('admin-panel');
+  panel.classList.toggle('visible');
+}
+
+function checkPw() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PW) {
+    document.getElementById('admin-pw-row').style.display = 'none';
+    document.getElementById('admin-content').style.display = 'block';
+    loadAdmin();
+  } else {
+    document.getElementById('admin-pw').style.borderColor = '#f23f43';
+  }
+}
+
+function loadAdmin() {
+  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
+  if (data.currently) document.getElementById('in-currently').value = data.currently;
+  if (data.currentlySub) document.getElementById('in-currently-sub').value = data.currentlySub;
+  if (data.mood) document.getElementById('in-mood').value = data.mood;
+  if (data.moodSub) document.getElementById('in-mood-sub').value = data.moodSub;
+  if (data.video) document.getElementById('in-video').value = data.video;
+  if (data.videoSub) document.getElementById('in-video-sub').value = data.videoSub;
+  if (data.gtch) document.getElementById('in-gtch').value = data.gtch;
+  if (data.gtchSub) document.getElementById('in-gtch-sub').value = data.gtchSub;
+}
+
+function saveCards() {
+  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
+  data.currently = document.getElementById('in-currently').value;
+  data.currentlySub = document.getElementById('in-currently-sub').value;
+  data.mood = document.getElementById('in-mood').value;
+  data.moodSub = document.getElementById('in-mood-sub').value;
+  data.video = document.getElementById('in-video').value;
+  data.videoSub = document.getElementById('in-video-sub').value;
+  data.gtch = document.getElementById('in-gtch').value;
+  data.gtchSub = document.getElementById('in-gtch-sub').value;
+  localStorage.setItem('stubby-status', JSON.stringify(data));
+  renderCards(data);
+}
+
+function renderCards(data) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  set('sc-currently', data.currently);
+  set('sc-currently-sub', data.currentlySub);
+  set('sc-mood', data.mood);
+  set('sc-mood-sub', data.moodSub);
+  set('sc-video', data.video);
+  set('sc-video-sub', data.videoSub);
+  set('sc-gtch', data.gtch);
+  set('sc-gtch-sub', data.gtchSub);
+}
+
+function addPost() {
+  const input = document.getElementById('in-post');
+  const text = input.value.trim();
+  if (!text) return;
+  const posts = JSON.parse(localStorage.getItem('stubby-posts') || '[]');
+  posts.unshift({ text, time: Date.now() });
+  localStorage.setItem('stubby-posts', JSON.stringify(posts));
+  input.value = '';
+  renderFeed(posts);
+}
+
+function clearFeed() {
+  localStorage.setItem('stubby-posts', '[]');
+  renderFeed([]);
+}
+
+function renderFeed(posts) {
+  const feed = document.getElementById('status-feed');
+  if (!posts.length) { feed.innerHTML = '<div class="status-empty">No updates yet.</div>'; return; }
+  feed.innerHTML = posts.map((p, i) => `
+    <div class="status-post">
+      <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
+      <div>
+        <div class="status-post-text">${p.text}</div>
+        <div class="status-post-time">${timeAgo(p.time)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function timeAgo(ts) {
+  const diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'Just now';
+  if (diff < 3600) return Math.floor(diff/60) + ' min ago';
+  if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  return Math.floor(diff/86400) + 'd ago';
+}
+
+// Load on page start
+(function init() {
+  const data = JSON.parse(localStorage.getItem('stubby-status') || '{}');
+  renderCards(data);
+  const posts = JSON.parse(localStorage.getItem('stubby-posts') || '[]');
+  renderFeed(posts);
+})();
+</script>
 </body>
 </html>
