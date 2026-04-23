@@ -203,7 +203,7 @@
     .admin-open .post-delete { display:block; }
 
     /* ADMIN PANEL */
-    .admin-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:none; }
+    .admin-panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:block; }
     .admin-panel.visible { display:block; }
     .admin-panel h4 { font-size:13px; font-weight:800; color:var(--text); margin-bottom:16px; }
     .admin-section { margin-bottom:16px; }
@@ -221,6 +221,20 @@
     .admin-toggle { font-size:11px; color:var(--text-dim); cursor:pointer; margin-top:8px; text-align:right; }
     .admin-toggle:hover { color:var(--purple-glow); }
     .admin-pw { display:flex; gap:8px; align-items:center; margin-bottom:16px; }
+
+
+    /* SMOOTH TRANSITIONS */
+    .admin-panel { transition: opacity 0.3s ease, transform 0.3s ease; opacity:0; transform:translateY(-8px); pointer-events:none; }
+    .admin-panel.visible { opacity:1; transform:translateY(0); pointer-events:all; }
+    .status-card-value { transition: all 0.4s ease; }
+    .status-card-label { transition: all 0.4s ease; }
+    .status-card-sub { transition: all 0.4s ease; }
+    .status-post { animation: postFadeIn 0.35s ease forwards; }
+    .post-delete { transition: color 0.2s ease, opacity 0.2s ease; }
+    @keyframes postFadeIn {
+      from { opacity:0; transform:translateX(-8px); }
+      to { opacity:1; transform:translateX(0); }
+    }
 
     /* DISCORD STATUS */
     #status { }
@@ -746,7 +760,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29a</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29b</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
