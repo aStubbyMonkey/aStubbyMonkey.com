@@ -226,14 +226,31 @@
     /* SMOOTH TRANSITIONS */
     .admin-panel { transition: opacity 0.3s ease, transform 0.3s ease; opacity:0; transform:translateY(-8px); pointer-events:none; }
     .admin-panel.visible { opacity:1; transform:translateY(0); pointer-events:all; }
-    .status-card-value { transition: all 0.4s ease; }
-    .status-card-label { transition: all 0.4s ease; }
-    .status-card-sub { transition: all 0.4s ease; }
-    .status-post { animation: postFadeIn 0.35s ease forwards; }
-    .post-delete { transition: color 0.2s ease, opacity 0.2s ease; }
-    @keyframes postFadeIn {
-      from { opacity:0; transform:translateX(-8px); }
-      to { opacity:1; transform:translateX(0); }
+    .post-delete { transition: color 0.2s ease; }
+
+    /* POST SLIDE IN FROM TOP */
+    .status-post {
+      overflow:hidden;
+      max-height:200px;
+      opacity:1;
+      transform:translateY(0);
+      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.4s ease,
+                  transform 0.4s ease,
+                  margin 0.4s ease;
+    }
+    .status-post.post-entering {
+      max-height:0;
+      opacity:0;
+      transform:translateY(-16px);
+      margin-bottom:0;
+    }
+
+    /* CARD SWAP ANIMATION */
+    .status-card { transition: transform 0.25s ease, opacity 0.25s ease; }
+    .status-card.card-updating {
+      transform: scale(0.92);
+      opacity: 0;
     }
 
     /* DISCORD STATUS */
@@ -760,7 +777,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29b</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29c</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -1124,20 +1141,60 @@ onValue(ref(db, 'status/cards'), (snap) => {
   setLabel('label-gtch', data.labelGtch);
 });
 
+let _lastPostKeys = [];
 onValue(ref(db, 'status/posts'), (snap) => {
   const data = snap.val();
   const feed = document.getElementById('status-feed');
-  if (!data) { feed.innerHTML = '<div class="status-empty">No updates yet.</div>'; return; }
+  if (!data) {
+    _lastPostKeys = [];
+    feed.innerHTML = '<div class="status-empty">No updates yet.</div>';
+    return;
+  }
   const entries = Object.entries(data).sort((a, b) => b[1].time - a[1].time);
-  feed.innerHTML = entries.map(([key, p], i) => `
-    <div class="status-post">
-      <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
-      <div style="flex:1;">
-        <div class="status-post-text">${p.text.replace(/\n/g, '<br>')}</div>
-        <div class="status-post-time">${timeAgo(p.time)}</div>
-      </div>
-      <button class="post-delete" onclick="deletePost('${key}')" title="Delete">✕</button>
-    </div>`).join('');
+  const newKeys = entries.map(([k]) => k);
+  const addedKeys = newKeys.filter(k => !_lastPostKeys.includes(k));
+  _lastPostKeys = newKeys;
+
+  // Build all posts
+  entries.forEach(([key, p], i) => {
+    const existing = feed.querySelector(`[data-key="${key}"]`);
+    if (!existing) {
+      // New post — insert at top with slide animation
+      const el = document.createElement('div');
+      el.className = 'status-post post-entering';
+      el.dataset.key = key;
+      el.innerHTML = `
+        <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
+        <div style="flex:1;">
+          <div class="status-post-text">${p.text.replace(/\n/g, '<br>')}</div>
+          <div class="status-post-time">${timeAgo(p.time)}</div>
+        </div>
+        <button class="post-delete" onclick="deletePost('${key}')" title="Delete">✕</button>`;
+      feed.insertBefore(el, feed.firstChild);
+      // Trigger animation
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        el.classList.remove('post-entering');
+      }));
+    } else {
+      // Update time
+      const timeEl = existing.querySelector('.status-post-time');
+      if (timeEl) timeEl.textContent = timeAgo(p.time);
+    }
+  });
+
+  // Remove deleted posts
+  feed.querySelectorAll('.status-post[data-key]').forEach(el => {
+    if (!newKeys.includes(el.dataset.key)) {
+      el.style.maxHeight = '0';
+      el.style.opacity = '0';
+      el.style.marginBottom = '0';
+      setTimeout(() => el.remove(), 500);
+    }
+  });
+
+  if (feed.children.length === 0) {
+    feed.innerHTML = '<div class="status-empty">No updates yet.</div>';
+  }
 });
 
 // ── AUTH STATE ──────────────────────────────────────────────
@@ -1197,20 +1254,29 @@ function loadAdminInputs() {
 }
 
 window.saveCards = function() {
-  set(ref(db, 'status/cards'), {
-    labelCurrently: document.getElementById('in-label-currently').value || 'Currently',
-    currently: document.getElementById('in-currently').value,
-    currentlySub: document.getElementById('in-currently-sub').value,
-    labelMood: document.getElementById('in-label-mood').value || 'Mood',
-    mood: document.getElementById('in-mood').value,
-    moodSub: document.getElementById('in-mood-sub').value,
-    labelVideo: document.getElementById('in-label-video').value || 'Next Video',
-    video: document.getElementById('in-video').value,
-    videoSub: document.getElementById('in-video-sub').value,
-    labelGtch: document.getElementById('in-label-gtch').value || 'GTCH Status',
-    gtch: document.getElementById('in-gtch').value,
-    gtchSub: document.getElementById('in-gtch-sub').value,
-  }).then(() => alert('Cards saved!'));
+  // Animate cards out
+  document.querySelectorAll('.status-card').forEach(c => c.classList.add('card-updating'));
+  setTimeout(() => {
+    set(ref(db, 'status/cards'), {
+      labelCurrently: document.getElementById('in-label-currently').value || 'Currently',
+      currently: document.getElementById('in-currently').value,
+      currentlySub: document.getElementById('in-currently-sub').value,
+      labelMood: document.getElementById('in-label-mood').value || 'Mood',
+      mood: document.getElementById('in-mood').value,
+      moodSub: document.getElementById('in-mood-sub').value,
+      labelVideo: document.getElementById('in-label-video').value || 'Next Video',
+      video: document.getElementById('in-video').value,
+      videoSub: document.getElementById('in-video-sub').value,
+      labelGtch: document.getElementById('in-label-gtch').value || 'GTCH Status',
+      gtch: document.getElementById('in-gtch').value,
+      gtchSub: document.getElementById('in-gtch-sub').value,
+    }).then(() => {
+      // Animate cards back in
+      setTimeout(() => {
+        document.querySelectorAll('.status-card').forEach(c => c.classList.remove('card-updating'));
+      }, 100);
+    });
+  }, 250);
 };
 
 window.addPost = function() {
