@@ -231,18 +231,18 @@
     /* POST SLIDE IN FROM TOP */
     .status-post {
       overflow:hidden;
-      max-height:200px;
+      max-height:300px;
       opacity:1;
       transform:translateY(0);
-      transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1),
-                  opacity 0.4s ease,
-                  transform 0.4s ease,
-                  margin 0.4s ease;
+      transition: max-height 0.7s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.6s ease,
+                  transform 0.6s ease,
+                  margin 0.6s ease;
     }
     .status-post.post-entering {
       max-height:0;
       opacity:0;
-      transform:translateY(-16px);
+      transform:translateY(-20px);
       margin-bottom:0;
     }
 
@@ -777,7 +777,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29c</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29d</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -1122,23 +1122,43 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 // ── LIVE LISTENERS ──────────────────────────────────────────
+let _cardsInitialized = false;
 onValue(ref(db, 'status/cards'), (snap) => {
   const data = snap.val() || {};
-  const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  setEl('sc-currently', data.currently);
-  setEl('sc-currently-sub', data.currentlySub);
-  setEl('sc-mood', data.mood);
-  setEl('sc-mood-sub', data.moodSub);
-  setEl('sc-video', data.video);
-  setEl('sc-video-sub', data.videoSub);
-  setEl('sc-gtch', data.gtch);
-  setEl('sc-gtch-sub', data.gtchSub);
-  // Also update card labels if customized
-  const setLabel = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
-  setLabel('label-currently', data.labelCurrently);
-  setLabel('label-mood', data.labelMood);
-  setLabel('label-video', data.labelVideo);
-  setLabel('label-gtch', data.labelGtch);
+
+  const doUpdate = () => {
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+    setEl('sc-currently', data.currently);
+    setEl('sc-currently-sub', data.currentlySub);
+    setEl('sc-mood', data.mood);
+    setEl('sc-mood-sub', data.moodSub);
+    setEl('sc-video', data.video);
+    setEl('sc-video-sub', data.videoSub);
+    setEl('sc-gtch', data.gtch);
+    setEl('sc-gtch-sub', data.gtchSub);
+    const setLabel = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
+    setLabel('label-currently', data.labelCurrently);
+    setLabel('label-mood', data.labelMood);
+    setLabel('label-video', data.labelVideo);
+    setLabel('label-gtch', data.labelGtch);
+  };
+
+  if (!_cardsInitialized) {
+    // First load — just set values, no animation
+    doUpdate();
+    _cardsInitialized = true;
+    return;
+  }
+
+  // Live update — animate for all viewers
+  const cards = document.querySelectorAll('.status-card');
+  cards.forEach(c => c.classList.add('card-updating'));
+  setTimeout(() => {
+    doUpdate();
+    setTimeout(() => {
+      cards.forEach(c => c.classList.remove('card-updating'));
+    }, 50);
+  }, 250);
 });
 
 let _lastPostKeys = [];
