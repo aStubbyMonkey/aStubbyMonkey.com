@@ -777,7 +777,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29e</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29f</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -980,12 +980,17 @@ async function fetchSubCount() {
       const r = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
       const d = await r.json();
       const stats = d.items[0].statistics;
-      const subs = parseInt(stats.subscriberCount).toLocaleString();
-      const views = parseInt(stats.viewCount).toLocaleString();
+      const subCount = parseInt(stats.subscriberCount);
+      const viewCount = parseInt(stats.viewCount);
+      const formatCount = (n) => {
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M+';
+        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K+';
+        return n.toLocaleString();
+      };
       const statSubs = document.getElementById('stat-subs');
       const statViews = document.getElementById('stat-views');
-      if (statSubs) statSubs.textContent = subs;
-      if (statViews) statViews.textContent = views;
+      if (statSubs) statSubs.textContent = formatCount(subCount);
+      if (statViews) statViews.textContent = formatCount(viewCount);
     } catch(e) { console.error('Stats fetch error:', e); }
   }
 fetchSubCount();
