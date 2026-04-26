@@ -777,7 +777,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29f</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29h</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -982,15 +982,15 @@ async function fetchSubCount() {
       const stats = d.items[0].statistics;
       const subCount = parseInt(stats.subscriberCount);
       const viewCount = parseInt(stats.viewCount);
-      const formatCount = (n) => {
-        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M+';
-        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K+';
+      const formatSubs = (n) => {
+        if (n >= 1000000) return (n / 1000000).toFixed(2) + 'M';
+        if (n >= 1000) return (n / 1000).toFixed(2) + 'K';
         return n.toLocaleString();
       };
       const statSubs = document.getElementById('stat-subs');
       const statViews = document.getElementById('stat-views');
-      if (statSubs) statSubs.textContent = formatCount(subCount);
-      if (statViews) statViews.textContent = formatCount(viewCount);
+      if (statSubs) statSubs.textContent = formatSubs(subCount);
+      if (statViews) statViews.textContent = viewCount.toLocaleString();
     } catch(e) { console.error('Stats fetch error:', e); }
   }
 fetchSubCount();
