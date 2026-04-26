@@ -777,7 +777,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29d</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29e</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -1172,31 +1172,42 @@ onValue(ref(db, 'status/posts'), (snap) => {
   }
   const entries = Object.entries(data).sort((a, b) => b[1].time - a[1].time);
   const newKeys = entries.map(([k]) => k);
-  const addedKeys = newKeys.filter(k => !_lastPostKeys.includes(k));
+  const isFirstLoad = _lastPostKeys.length === 0;
   _lastPostKeys = newKeys;
 
-  // Build all posts
+  if (isFirstLoad) {
+    // Initial load — render all in correct order, no animation
+    feed.innerHTML = entries.map(([key, p], i) => `
+      <div class="status-post" data-key="${key}">
+        <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
+        <div style="flex:1;">
+          <div class="status-post-text">${p.text.replace(/\n/g, '<br>')}</div>
+          <div class="status-post-time">${timeAgo(p.time)}</div>
+        </div>
+        <button class="post-delete" onclick="deletePost('${key}')" title="Delete">✕</button>
+      </div>`).join('');
+    return;
+  }
+
+  // Live update — animate new posts in at top
   entries.forEach(([key, p], i) => {
     const existing = feed.querySelector(`[data-key="${key}"]`);
     if (!existing) {
-      // New post — insert at top with slide animation
       const el = document.createElement('div');
       el.className = 'status-post post-entering';
       el.dataset.key = key;
       el.innerHTML = `
-        <div class="status-post-dot ${i > 0 ? 'old' : ''}"></div>
+        <div class="status-post-dot"></div>
         <div style="flex:1;">
           <div class="status-post-text">${p.text.replace(/\n/g, '<br>')}</div>
           <div class="status-post-time">${timeAgo(p.time)}</div>
         </div>
         <button class="post-delete" onclick="deletePost('${key}')" title="Delete">✕</button>`;
       feed.insertBefore(el, feed.firstChild);
-      // Trigger animation
       requestAnimationFrame(() => requestAnimationFrame(() => {
         el.classList.remove('post-entering');
       }));
     } else {
-      // Update time
       const timeEl = existing.querySelector('.status-post-time');
       if (timeEl) timeEl.textContent = timeAgo(p.time);
     }
