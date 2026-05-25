@@ -428,6 +428,22 @@
       .vid-left{grid-row:2;} .vid-center{grid-row:1;} .vid-right{grid-row:3;}
       footer{flex-direction:column;text-align:center;}
     }
+
+    /* ── EASTER EGGS ──────────────────────────────────────────── */
+    .confetti-piece { position:fixed; pointer-events:none; z-index:9995; animation:confettiFall 2s linear forwards; }
+    @keyframes confettiFall { 0%{opacity:1;transform:translateY(0) rotate(0deg);} 100%{opacity:0;transform:translateY(110vh) rotate(720deg);} }
+    @keyframes avatarParty { 0%,100%{transform:rotate(0deg);} 50%{transform:rotate(180deg);} }
+    .hero-avatar.party { animation:avatarParty 0.5s ease-in-out 3; }
+    #type-overlay { display:none; position:fixed; inset:0; z-index:9992; background:rgba(0,0,0,0.92); backdrop-filter:blur(5px); flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:40px; }
+    #type-overlay.open { display:flex; animation:eoFadeIn 0.5s ease; }
+    @keyframes eoFadeIn { from{opacity:0;} to{opacity:1;} }
+    .eo-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(52px,12vw,110px); letter-spacing:6px; background:linear-gradient(135deg,#fff 0%,#ddb8ff 40%,#9944ee 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:20px; animation:eoPulse 2s ease-in-out infinite; }
+    @keyframes eoPulse { 0%,100%{filter:drop-shadow(0 0 20px rgba(153,68,238,0.5));} 50%{filter:drop-shadow(0 0 60px rgba(153,68,238,1));} }
+    .eo-sub { font-size:clamp(16px,3vw,20px); color:#c4a8e8; font-weight:600; line-height:1.7; max-width:500px; margin:0 auto 24px; }
+    .eo-verse { font-size:clamp(15px,2.2vw,19px); color:#ffcc44; font-style:italic; font-weight:700; line-height:1.7; max-width:560px; margin:0 auto 10px; }
+    .eo-ref { font-size:14px; font-weight:700; color:#aa8822; letter-spacing:1px; margin-bottom:32px; }
+    .eo-close { background:linear-gradient(135deg,var(--purple-hi),var(--purple)); border:none; border-radius:14px; padding:12px 36px; font-size:15px; font-weight:800; color:white; cursor:none; font-family:'Nunito',sans-serif; box-shadow:0 4px 28px rgba(85,0,170,0.5); transition:all .25s; }
+    .eo-close:hover { transform:translateY(-3px); box-shadow:0 10px 40px rgba(119,34,204,0.65); }
   </style>
 </head>
 <body>
@@ -777,7 +793,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.29h</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.30</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -888,6 +904,15 @@ document.getElementById('discord-popup').addEventListener('click',function(e){
   if(e.target===this)this.style.display='none';
 });
 </script>
+
+<!-- ══ TYPE EASTER EGG OVERLAY ══════════════════════════════════ -->
+<div id="type-overlay">
+  <div class="eo-title">YOU FOUND IT</div>
+  <div class="eo-sub">You've found this easter egg, but have you found God?</div>
+  <div class="eo-verse">"I love those who love me, and those who seek me diligently find me."</div>
+  <div class="eo-ref">— Proverbs 8:17</div>
+  <button class="eo-close" onclick="document.getElementById('type-overlay').classList.remove('open');document.body.style.overflow='';">Close</button>
+</div>
 
 <script>
 const API_KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
@@ -1338,6 +1363,99 @@ function timeAgo(ts) {
   if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
   return Math.floor(diff/86400) + 'd ago';
 }
+</script>
+
+<!-- ══ EASTER EGGS ════════════════════════════════════════════════ -->
+<script>
+// ── EE 1: Avatar 10× tap in 10s → confetti + spin + sound ───────
+(function(){
+  const av = document.querySelector('.hero-avatar');
+  if (!av) return;
+  let taps = [];
+
+  av.addEventListener('click', () => {
+    const now = Date.now();
+    taps.push(now);
+    taps = taps.filter(t => now - t < 10000);
+    if (taps.length >= 10) { taps = []; party(); }
+  });
+
+  function party() {
+    av.classList.add('party');
+    av.addEventListener('animationend', () => av.classList.remove('party'), { once: true });
+    confetti();
+    beep();
+  }
+
+  function confetti() {
+    const colors = ['#ff0066','#ffcc44','#9944ee','#00ccff','#ff6600','#00ff88','#ff44aa','#fff'];
+    for (let i = 0; i < 150; i++) {
+      setTimeout(() => {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        const sz = (Math.random() * 10 + 6).toFixed(1);
+        p.style.cssText = `left:${(Math.random()*100).toFixed(1)}vw;top:-20px;width:${sz}px;height:${sz}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${(Math.random()*2+1.5).toFixed(2)}s;`;
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 4000);
+      }, i * 12);
+    }
+  }
+
+  function beep() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [[523,0],[659,.1],[784,.2],[1047,.3],[1319,.4]].forEach(([f,t]) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type = 'triangle'; o.frequency.value = f;
+        const s = ctx.currentTime + t;
+        g.gain.setValueAtTime(0, s);
+        g.gain.linearRampToValueAtTime(0.25, s + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, s + 0.35);
+        o.start(s); o.stop(s + 0.4);
+      });
+    } catch(e) {}
+  }
+})();
+
+// ── EE 2: "Join Discord" 3× → troll popup (count keeps climbing) ─
+(function(){
+  let n = 0;
+  const btn = document.querySelector('.hero-btns .btn-outline');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    n++;
+    if (n < 3) return;
+    const box = document.querySelector('#discord-popup > div');
+    if (!box) return;
+    box.innerHTML = `
+      <div style="font-size:48px;margin-bottom:16px;">💀</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:#f23f43;margin-bottom:12px;">It's Not Ready! 💀</div>
+      <p style="font-size:14px;color:#f23f43;line-height:1.7;margin-bottom:28px;">You've clicked this ${n} times.<br/>It's still not ready. 💀</p>
+      <button onclick="document.getElementById('discord-popup').style.display='none';" style="background:linear-gradient(135deg,#f23f43,#aa1122);border:none;border-radius:12px;padding:12px 28px;font-size:14px;font-weight:800;color:white;cursor:pointer;font-family:'Nunito',sans-serif;">Fine. 💀</button>`;
+  });
+})();
+
+// ── EE 3: Type "astubbymonkey" → overlay ────────────────────────
+(function(){
+  const SECRET = 'astubbymonkey';
+  let buf = '';
+  const overlay = document.getElementById('type-overlay');
+  if (!overlay) return;
+
+  const close = () => { overlay.classList.remove('open'); document.body.style.overflow = ''; };
+  const open  = () => { overlay.classList.add('open');    document.body.style.overflow = 'hidden'; };
+
+  document.addEventListener('keydown', e => {
+    if (['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (overlay.classList.contains('open')) { close(); return; }
+    buf += e.key.toLowerCase().replace(/[^a-z]/g, '');
+    if (buf.length > SECRET.length) buf = buf.slice(-SECRET.length);
+    if (buf === SECRET) { buf = ''; open(); }
+  });
+
+  overlay.addEventListener('click', close);
+})();
 </script>
 </body>
 </html>
