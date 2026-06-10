@@ -1472,12 +1472,19 @@ function timeAgo(ts) {
   document.documentElement.style.overflowY = 'hidden';
 
   document.fonts.ready.then(() => {
-    const drop    = document.getElementById('intro-drop');
-    const heroAv  = document.querySelector('.hero-avatar');
-    const overlay = document.getElementById('intro-overlay');
+    const drop     = document.getElementById('intro-drop');
+    const heroWrap = document.querySelector('.hero-avatar-wrap');
+    const heroAv   = document.querySelector('.hero-avatar');
+    const overlay  = document.getElementById('intro-overlay');
     if (!drop || !heroAv || !overlay) return;
 
-    // Anchor drop to the exact hero avatar position
+    // Remove reveal class so translateY(40px) doesn't skew the measurement
+    if (heroWrap) {
+      heroWrap.classList.remove('reveal', 'in');
+      heroWrap.style.transition = 'none';
+      heroWrap.style.opacity    = '1';
+    }
+
     const rect = heroAv.getBoundingClientRect();
     drop.style.width           = rect.width  + 'px';
     drop.style.height          = rect.height + 'px';
@@ -1495,31 +1502,30 @@ function timeAgo(ts) {
     requestAnimationFrame(() => {
       drop.style.opacity = '1';
       requestAnimationFrame(() => {
-        // Phase 1: drop from top to center, ease out
+        // Phase 1: drop from top to center, ease out — 0.48s
         drop.style.transition = 'transform 0.48s cubic-bezier(0.22, 1, 0.36, 1)';
         drop.style.transform  = `translate(${toCenterX}px, ${toCenterY}px) scale(${bigScale})`;
 
-        drop.addEventListener('transitionend', () => {
-          setTimeout(() => {
-            // Phase 2: glide to hero slot and scale down, ease in-out
-            drop.style.transition = 'transform 0.58s cubic-bezier(0.65, 0, 0.35, 1)';
-            drop.style.transform  = 'translate(0, 0) scale(1)';
+        // Phase 2: glide to hero slot + scale down — starts after Phase 1 (480ms) + pause (300ms)
+        setTimeout(() => {
+          drop.style.transition = 'transform 0.58s cubic-bezier(0.65, 0, 0.35, 1)';
+          drop.style.transform  = 'translate(0, 0) scale(1)';
+        }, 780);
 
-            drop.addEventListener('transitionend', () => {
-              // Fade out overlay and drop together
-              overlay.style.transition = 'opacity 0.4s ease-in-out';
-              overlay.style.opacity    = '0';
-              drop.style.transition    = 'opacity 0.4s ease-in-out';
-              drop.style.opacity       = '0';
+        // Fade overlay + drop after Phase 2 completes (780 + 580ms)
+        setTimeout(() => {
+          overlay.style.transition = 'opacity 0.4s ease-in-out';
+          overlay.style.opacity    = '0';
+          drop.style.transition    = 'opacity 0.4s ease-in-out';
+          drop.style.opacity       = '0';
+        }, 1380);
 
-              setTimeout(() => {
-                drop.style.display    = 'none';
-                overlay.style.display = 'none';
-                document.documentElement.style.overflowY = '';
-              }, 450);
-            }, { once: true });
-          }, 300);
-        }, { once: true });
+        // Cleanup
+        setTimeout(() => {
+          drop.style.display    = 'none';
+          overlay.style.display = 'none';
+          document.documentElement.style.overflowY = '';
+        }, 1830);
       });
     });
   });
