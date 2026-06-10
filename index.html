@@ -25,7 +25,8 @@
       --border:rgba(150,80,255,0.18); --border-hi:rgba(180,100,255,0.45);
       --radius:18px; --radius-lg:28px;
     }
-    html { scroll-behavior:smooth; overflow-x:hidden; }
+    html { scroll-behavior:smooth; overflow-x:hidden; scrollbar-width:none; -ms-overflow-style:none; }
+    html::-webkit-scrollbar { display:none; }
     body { font-family:'Nunito',sans-serif; background:var(--ink); color:var(--text); overflow-x:hidden; cursor:none; }
 
     /* CURSOR */
@@ -803,7 +804,7 @@
 <footer>
   <div class="footer-logo">aStubbyMonkey</div>
   <div class="footer-copy">Built with 💜 · astubbymonkey.com · <a href="mailto:contactastubbymonkey@gmail.com" style="color:var(--text-dim);text-decoration:none;">contactastubbymonkey@gmail.com</a></div>
-  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.30b</div>
+  <div class="footer-copy" style="opacity:0.4; font-size:11px;">v0.2.31a</div>
 </footer>
 
 <!-- ══ JAVASCRIPT ══════════════════════════════════════════════════ -->
@@ -1470,6 +1471,7 @@ function timeAgo(ts) {
 // ── INTRO ANIMATION ──────────────────────────────────────────
 (function() {
   document.documentElement.style.overflowY = 'hidden';
+  document.body.style.overflowY = 'hidden';
 
   document.fonts.ready.then(() => {
     const drop     = document.getElementById('intro-drop');
@@ -1525,6 +1527,7 @@ function timeAgo(ts) {
           drop.style.display    = 'none';
           overlay.style.display = 'none';
           document.documentElement.style.overflowY = '';
+          document.body.style.overflowY = '';
         }, 1830);
       });
     });
