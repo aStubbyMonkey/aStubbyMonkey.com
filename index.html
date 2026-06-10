@@ -444,9 +444,14 @@
     .eo-ref { font-size:14px; font-weight:700; color:#aa8822; letter-spacing:1px; margin-bottom:32px; }
     .eo-close { background:linear-gradient(135deg,var(--purple-hi),var(--purple)); border:none; border-radius:14px; padding:12px 36px; font-size:15px; font-weight:800; color:white; cursor:none; font-family:'Nunito',sans-serif; box-shadow:0 4px 28px rgba(85,0,170,0.5); transition:all .25s; }
     .eo-close:hover { transform:translateY(-3px); box-shadow:0 10px 40px rgba(119,34,204,0.65); }
+
+    /* ── INTRO ANIMATION ── */
+    #intro-overlay { position:fixed; inset:0; z-index:9996; background:var(--ink); pointer-events:none; }
   </style>
 </head>
 <body>
+
+<div id="intro-overlay"></div>
 
 <div id="cursor-dot"></div>
 <div id="cursor-ring"></div>
@@ -1455,6 +1460,67 @@ function timeAgo(ts) {
   });
 
   overlay.addEventListener('click', close);
+})();
+
+// ── INTRO ANIMATION ──────────────────────────────────────────
+(function() {
+  document.documentElement.style.overflowY = 'hidden';
+
+  document.fonts.ready.then(() => {
+    const wrap    = document.querySelector('.hero-avatar-wrap');
+    const overlay = document.getElementById('intro-overlay');
+    if (!wrap || !overlay) return;
+
+    // Pull the element out of the reveal system and lift it above the overlay
+    wrap.classList.remove('reveal', 'in');
+    wrap.style.transition  = 'none';
+    wrap.style.opacity     = '1';
+    wrap.style.zIndex      = '9997';
+    wrap.style.position    = 'relative';
+    wrap.style.willChange  = 'transform';
+
+    const rect = wrap.getBoundingClientRect();
+
+    const toCenterX = window.innerWidth  / 2 - (rect.left + rect.width  / 2);
+    const toCenterY = window.innerHeight / 2 - (rect.top  + rect.height / 2);
+    const toTopY    = -(rect.top + rect.height / 2) - 80;
+    const bigScale  = Math.min(window.innerWidth, window.innerHeight) * 0.6 / rect.width;
+
+    wrap.style.transformOrigin = 'center center';
+    wrap.style.transform = `translate(${toCenterX}px, ${toTopY}px) scale(${bigScale})`;
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Phase 1: drop from top to center, ease out
+        wrap.style.transition = 'transform 0.48s cubic-bezier(0.22, 1, 0.36, 1)';
+        wrap.style.transform  = `translate(${toCenterX}px, ${toCenterY}px) scale(${bigScale})`;
+
+        wrap.addEventListener('transitionend', () => {
+          setTimeout(() => {
+            // Phase 2: glide to natural position and scale down, ease in-out
+            wrap.style.transition = 'transform 0.58s cubic-bezier(0.65, 0, 0.35, 1)';
+            wrap.style.transform  = 'translate(0, 0) scale(1)';
+
+            wrap.addEventListener('transitionend', () => {
+              // Fade out the overlay — real avatar is already in its correct spot
+              overlay.style.transition = 'opacity 0.4s ease-in-out';
+              overlay.style.opacity    = '0';
+
+              setTimeout(() => {
+                overlay.style.display      = 'none';
+                wrap.style.transition      = '';
+                wrap.style.transform       = '';
+                wrap.style.transformOrigin = '';
+                wrap.style.zIndex          = '';
+                wrap.style.willChange      = '';
+                document.documentElement.style.overflowY = '';
+              }, 450);
+            }, { once: true });
+          }, 300);
+        }, { once: true });
+      });
+    });
+  });
 })();
 </script>
 </body>
