@@ -447,11 +447,16 @@
 
     /* ── INTRO ANIMATION ── */
     #intro-overlay { position:fixed; inset:0; z-index:9996; background:var(--ink); pointer-events:none; }
+    #intro-drop { position:fixed; opacity:0; z-index:9997; border-radius:50%; overflow:hidden; border:3px solid rgba(180,100,255,0.4); box-shadow:0 0 50px rgba(85,0,170,0.6),0 0 100px rgba(85,0,170,0.2); will-change:transform; }
+    #intro-drop img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
   </style>
 </head>
 <body>
 
 <div id="intro-overlay"></div>
+<div id="intro-drop">
+  <img src="avatar.png" alt="aStubbyMonkey" onerror="this.style.display='none';this.parentNode.innerHTML='🐒'" />
+</div>
 
 <div id="cursor-dot"></div>
 <div id="cursor-ring"></div>
@@ -1467,67 +1472,49 @@ function timeAgo(ts) {
   document.documentElement.style.overflowY = 'hidden';
 
   document.fonts.ready.then(() => {
-    const wrap    = document.querySelector('.hero-avatar-wrap');
+    const drop    = document.getElementById('intro-drop');
+    const heroAv  = document.querySelector('.hero-avatar');
     const overlay = document.getElementById('intro-overlay');
-    if (!wrap || !overlay) return;
+    if (!drop || !heroAv || !overlay) return;
 
-    // Remove reveal so IntersectionObserver doesn't interfere
-    wrap.classList.remove('reveal', 'in');
-    wrap.style.transition = 'none';
-
-    // Measure natural position before touching anything
-    const rect = wrap.getBoundingClientRect();
-
-    // Switch to position:fixed so it escapes #hero's stacking context (z-index:2)
-    // and can stack above the overlay (z-index:9996)
-    wrap.style.position   = 'fixed';
-    wrap.style.top        = rect.top    + 'px';
-    wrap.style.left       = rect.left   + 'px';
-    wrap.style.width      = rect.width  + 'px';
-    wrap.style.height     = rect.height + 'px';
-    wrap.style.margin     = '0';
-    wrap.style.opacity    = '1';
-    wrap.style.zIndex     = '9997';
-    wrap.style.willChange = 'transform';
+    // Anchor drop to the exact hero avatar position
+    const rect = heroAv.getBoundingClientRect();
+    drop.style.width           = rect.width  + 'px';
+    drop.style.height          = rect.height + 'px';
+    drop.style.top             = rect.top    + 'px';
+    drop.style.left            = rect.left   + 'px';
+    drop.style.transformOrigin = 'center center';
 
     const toCenterX = window.innerWidth  / 2 - (rect.left + rect.width  / 2);
     const toCenterY = window.innerHeight / 2 - (rect.top  + rect.height / 2);
     const toTopY    = -(rect.top + rect.height / 2) - 80;
     const bigScale  = Math.min(window.innerWidth, window.innerHeight) * 0.6 / rect.width;
 
-    wrap.style.transformOrigin = 'center center';
-    wrap.style.transform = `translate(${toCenterX}px, ${toTopY}px) scale(${bigScale})`;
+    drop.style.transform = `translate(${toCenterX}px, ${toTopY}px) scale(${bigScale})`;
 
     requestAnimationFrame(() => {
+      drop.style.opacity = '1';
       requestAnimationFrame(() => {
         // Phase 1: drop from top to center, ease out
-        wrap.style.transition = 'transform 0.48s cubic-bezier(0.22, 1, 0.36, 1)';
-        wrap.style.transform  = `translate(${toCenterX}px, ${toCenterY}px) scale(${bigScale})`;
+        drop.style.transition = 'transform 0.48s cubic-bezier(0.22, 1, 0.36, 1)';
+        drop.style.transform  = `translate(${toCenterX}px, ${toCenterY}px) scale(${bigScale})`;
 
-        wrap.addEventListener('transitionend', () => {
+        drop.addEventListener('transitionend', () => {
           setTimeout(() => {
-            // Phase 2: glide to natural position and scale down, ease in-out
-            wrap.style.transition = 'transform 0.58s cubic-bezier(0.65, 0, 0.35, 1)';
-            wrap.style.transform  = 'translate(0, 0) scale(1)';
+            // Phase 2: glide to hero slot and scale down, ease in-out
+            drop.style.transition = 'transform 0.58s cubic-bezier(0.65, 0, 0.35, 1)';
+            drop.style.transform  = 'translate(0, 0) scale(1)';
 
-            wrap.addEventListener('transitionend', () => {
-              // Fade out the overlay — real avatar is already in its correct spot
+            drop.addEventListener('transitionend', () => {
+              // Fade out overlay and drop together
               overlay.style.transition = 'opacity 0.4s ease-in-out';
               overlay.style.opacity    = '0';
+              drop.style.transition    = 'opacity 0.4s ease-in-out';
+              drop.style.opacity       = '0';
 
               setTimeout(() => {
-                overlay.style.display      = 'none';
-                wrap.style.transition      = '';
-                wrap.style.transform       = '';
-                wrap.style.transformOrigin = '';
-                wrap.style.position        = '';
-                wrap.style.top             = '';
-                wrap.style.left            = '';
-                wrap.style.width           = '';
-                wrap.style.height          = '';
-                wrap.style.margin          = '';
-                wrap.style.zIndex          = '';
-                wrap.style.willChange      = '';
+                drop.style.display    = 'none';
+                overlay.style.display = 'none';
                 document.documentElement.style.overflowY = '';
               }, 450);
             }, { once: true });
