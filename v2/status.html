@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status — aStubbyMonkey</title>
+<meta name="description" content="What I'm playing, what I'm listening to, and what I'm working on right now. Updates live." />
+<link rel="canonical" href="https://astubbymonkey.com/v2/status.html" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Status — aStubbyMonkey" />
+<meta property="og:description" content="What I'm playing, what I'm listening to, and what I'm working on right now." />
+<meta property="og:image" content="https://astubbymonkey.com/avatar.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/v2/assets/site.css" />
+
+<style>
+  .board { display: flex; flex-direction: column; gap: 26px; max-width: 860px; margin-inline: auto; }
+
+  /* ── Discord presence ─────────────────────────────────────── */
+  .dc {
+    background: rgba(30,31,34,.92);
+    border: 4px solid var(--paper);
+    border-radius: var(--r);
+    padding: 22px;
+    box-shadow: var(--shadow-lift);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dc__top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .dc__avwrap { position: relative; flex-shrink: 0; }
+  .dc__av {
+    width: 72px; height: 72px; border-radius: 50%;
+    object-fit: cover; background: var(--grape);
+    border: 3px solid rgba(255,255,255,.22);
+  }
+  .dc__dot {
+    position: absolute; bottom: 1px; right: 1px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 4px solid #1e1f22; background: #80848e;
+  }
+  .dot-online  { background: #23a55a; }
+  .dot-idle    { background: #f0b232; }
+  .dot-dnd     { background: #f23f43; }
+  .dot-offline { background: #80848e; }
+
+  .dc__state { font-size: var(--t-b); font-weight: 800; color: #dbdee1; }
+  .dc__custom { font-size: var(--t-sm); color: #b5bac1; font-weight: 700; margin-left: auto; }
+
+  .dc__acts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 620px) { .dc__acts { grid-template-columns: 1fr; } }
+
+  .act { background: rgba(43,45,49,.95); border-radius: 12px; padding: 14px; min-width: 0; }
+  .act__label { font-size: var(--t-xs); font-weight: 800; color: #b5bac1; margin-bottom: 9px; }
+  .act__row { display: flex; gap: 11px; align-items: center; min-width: 0; }
+  .act__art {
+    width: 50px; height: 50px; border-radius: 9px; flex-shrink: 0;
+    background: var(--grape-deep); object-fit: cover;
+    display: grid; place-items: center; font-size: 22px;
+  }
+  .act__meta { min-width: 0; flex: 1; }
+  .act__name { font-size: var(--t-sm); font-weight: 800; color: #f2f3f5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .act__sub  { font-size: var(--t-xs); color: #b5bac1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+  .act__none { color: #6d7079; font-size: var(--t-sm); font-style: italic; padding: 12px 0; text-align: center; }
+  .bar { height: 4px; background: #3d3f43; border-radius: 3px; margin-top: 7px; overflow: hidden; }
+  .bar__fill { height: 100%; background: #1db954; border-radius: 3px; transition: width 1s linear; }
+
+  /* ── The four cards ───────────────────────────────────────── */
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 620px) { .cards { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--paper);
+    color: var(--ink);
+    border: 4px solid var(--ink);
+    border-radius: var(--r);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-hard);
+    transition: transform .22s ease, opacity .22s ease;
+  }
+  .card.is-swapping { transform: scale(.93); opacity: 0; }
+  .card__label { font-size: var(--t-xs); font-weight: 900; color: var(--grape); margin-bottom: 5px; }
+  .card__value { font-size: var(--t-b); font-weight: 800; line-height: 1.4; }
+  .card__sub   { font-size: var(--t-sm); color: #6A5A78; font-weight: 600; margin-top: 3px; }
+
+  /* ── Feed ─────────────────────────────────────────────────── */
+  .feed-h {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: 30px; color: var(--paper);
+    text-shadow: 0 3px 0 var(--grape-deep);
+    margin-bottom: 12px;
+  }
+  .feed { display: flex; flex-direction: column; gap: 10px; }
+
+  .post {
+    background: rgba(14,0,22,.55);
+    border: 2px solid rgba(255,255,255,.16);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+    overflow: hidden;
+    max-height: 320px;
+    transition: max-height .6s cubic-bezier(.4,0,.2,1), opacity .5s ease, transform .5s ease, margin .5s ease, padding .5s ease;
+  }
+  .post.is-entering { max-height: 0; opacity: 0; transform: translateY(-16px); padding-block: 0; }
+  .post__dot { width: 9px; height: 9px; border-radius: 50%; background: var(--banana); flex-shrink: 0; margin-top: 7px; }
+  .post__dot.old { background: var(--text-dim); }
+  .post__text { font-size: var(--t-b); line-height: 1.55; color: var(--text); font-weight: 600; }
+  .post__time { font-size: var(--t-xs); color: var(--text-dim); font-weight: 700; margin-top: 4px; }
+  .post__x {
+    display: none; margin-left: auto; background: none; border: none;
+    color: var(--text-dim); font-size: 17px; cursor: pointer; padding: 0 4px; flex-shrink: 0;
+  }
+  .post__x:hover { color: #f23f43; }
+  .feed.admin-on .post__x { display: block; }
+  .feed-empty { font-size: var(--t-b); color: var(--text-dim); font-style: italic; text-align: center; padding: 22px 0; }
+
+  /* ── Admin ────────────────────────────────────────────────── */
+  .admin {
+    background: rgba(14,0,22,.72);
+    border: 3px dashed rgba(255,201,60,.4);
+    border-radius: var(--r);
+    padding: 22px;
+    opacity: 0; max-height: 0; overflow: hidden;
+    pointer-events: none;
+    transition: opacity .28s ease, max-height .4s ease, padding .3s ease, margin .3s ease;
+    padding-block: 0; margin: 0;
+  }
+  .admin.is-open { opacity: 1; max-height: 1400px; pointer-events: auto; padding-block: 22px; }
+  .admin h3 { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 25px; color: var(--banana); font-weight: 400; margin-bottom: 14px; }
+  .admin__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  @media (max-width: 620px) { .admin__grid { grid-template-columns: 1fr; } }
+  .admin__field { display: flex; flex-direction: column; gap: 4px; }
+  .in {
+    background: rgba(0,0,0,.45);
+    border: 2px solid rgba(255,255,255,.18);
+    border-radius: 8px; padding: 9px 12px;
+    font-size: var(--t-sm); color: var(--text);
+    font-family: 'Nunito', sans-serif; font-weight: 600;
+    width: 100%;
+  }
+  .in:focus { outline: none; border-color: var(--banana); }
+  .in--bad { border-color: #f23f43; }
+  .abtn {
+    background: var(--banana); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 9px;
+    padding: 9px 16px; font-size: var(--t-sm); font-weight: 900;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+  }
+  .abtn--ghost { background: transparent; color: var(--text-mid); border-color: rgba(255,255,255,.25); }
+  .admin__row { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+  .hint { font-size: var(--t-xs); color: var(--text-dim); font-weight: 700; text-align: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="field field--night" aria-hidden="true"></div>
+
+<nav class="nav">
+  <a class="nav__home" href="/v2/index.html">
+    <img class="nav__mark" src="/avatar.png" alt="" width="38" height="38" />
+    <span class="nav__name">aStubbyMonkey</span>
+  </a>
+  <div class="nav__links">
+    <a class="nav__link" href="/v2/index.html">Home</a>
+    <a class="nav__link" href="/v2/videos.html">Videos</a>
+    <a class="nav__link" href="/v2/status.html">Status</a>
+    <a class="nav__link" href="/v2/gtch.html">GTCH</a>
+    <a class="nav__link" href="/v2/gospel.html">The Gospel</a>
+  </div>
+  <div class="nav__social">
+    <a class="nav__icon" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+    </a>
+    <a class="nav__icon" href="https://discord.gg/StQGJEyHEC" target="_blank" rel="noopener" aria-label="GTCH Discord">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.3.5a18.3 18.3 0 0 1 4.3 1.3 15.6 15.6 0 0 0-15 0A18.3 18.3 0 0 1 8.9 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9 .1 13.5.4 17.9A19.9 19.9 0 0 0 6.4 21l.6-.8a13 13 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 13 0l.5.4a13 13 0 0 1-2 1l.6.8a19.9 19.9 0 0 0 6-3.1c.4-5.1-.6-9.5-3.3-13.5ZM8.1 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>
+    </a>
+  </div>
+</nav>
+
+<main class="above">
+
+  <header class="wrap phead" style="text-align:center;">
+    <span class="phead__kicker">Live right now</span>
+    <h1 class="phead__title title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);">Status</h1>
+    <p class="lede" style="margin-inline:auto;">Discord presence updates on its own. The cards and the notes below are things I write by hand when something changes.</p>
+  </header>
+
+  <div class="wrap section" style="padding-top:0;">
+    <div class="board">
+
+      <!-- Discord -->
+      <section class="dc" aria-label="Discord presence">
+        <div class="dc__top">
+          <div class="dc__avwrap">
+            <img class="dc__av" src="/avatar.png" alt="" width="72" height="72" />
+            <span class="dc__dot dot-offline" id="dc-dot"></span>
+          </div>
+          <div class="dc__state" id="dc-state">Connecting…</div>
+          <div class="dc__custom" id="dc-custom"></div>
+        </div>
+        <div class="dc__acts" id="dc-acts">
+          <div class="act"><div class="act__none">Loading…</div></div>
+        </div>
+      </section>
+
+      <!-- Hand-written cards -->
+      <section class="cards" aria-label="Current status">
+        <div class="card">
+          <div class="card__label" id="label-currently">Currently</div>
+          <div class="card__value" id="sc-currently">—</div>
+          <div class="card__sub" id="sc-currently-sub"></div>
+        </div>
+        <div class="card">
+          <div class="card__label" id="label-mood">Mood</div>
+          <div class="card__value" id="sc-mood">—</div>
+          <div class="card__sub" id="sc-mood-sub"></div>
+        </div>
+        <div class="card">
+          <div class="card__label" id="label-video">Next video</div>
+          <div class="card__value" id="sc-video">—</div>
+          <div class="card__sub" id="sc-video-sub"></div>
+        </div>
+        <div class="card">
+          <div class="card__label" id="label-gtch">GTCH status</div>
+          <div class="card__value" id="sc-gtch">—</div>
+          <div class="card__sub" id="sc-gtch-sub"></div>
+        </div>
+      </section>
+
+      <!-- Feed -->
+      <section aria-labelledby="feed-h">
+        <h2 class="feed-h" id="feed-h">Recent notes</h2>
+        <div class="feed" id="feed">
+          <div class="feed-empty">Nothing posted yet.</div>
+        </div>
+      </section>
+
+      <!-- Admin (hidden until unlocked) -->
+      <section class="admin" id="admin" aria-label="Admin">
+        <div id="admin-login">
+          <h3>Sign in</h3>
+          <div class="admin__row">
+            <input class="in" style="flex:1;min-width:180px;" type="email" id="ad-email" placeholder="Email" autocomplete="username" />
+            <input class="in" style="flex:1;min-width:150px;" type="password" id="ad-pass" placeholder="Password" autocomplete="current-password" />
+            <button class="abtn" id="ad-login">Sign in</button>
+          </div>
+          <p class="hint" id="ad-error" hidden>That didn't work. Check the email and password.</p>
+        </div>
+
+        <div id="admin-panel" hidden>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+            <h3 style="margin:0;">Update the cards</h3>
+            <button class="abtn abtn--ghost" id="ad-logout">Sign out</button>
+          </div>
+
+          <div class="admin__grid" style="margin-top:14px;">
+            <div class="admin__field">
+              <input class="in" id="in-label-currently" placeholder="Card 1 label" />
+              <input class="in" id="in-currently" placeholder="Value" />
+              <input class="in" id="in-currently-sub" placeholder="Subtitle (optional)" />
+            </div>
+            <div class="admin__field">
+              <input class="in" id="in-label-mood" placeholder="Card 2 label" />
+              <input class="in" id="in-mood" placeholder="Value" />
+              <input class="in" id="in-mood-sub" placeholder="Subtitle (optional)" />
+            </div>
+            <div class="admin__field">
+              <input class="in" id="in-label-video" placeholder="Card 3 label" />
+              <input class="in" id="in-video" placeholder="Value" />
+              <input class="in" id="in-video-sub" placeholder="Subtitle (optional)" />
+            </div>
+            <div class="admin__field">
+              <input class="in" id="in-label-gtch" placeholder="Card 4 label" />
+              <input class="in" id="in-gtch" placeholder="Value" />
+              <input class="in" id="in-gtch-sub" placeholder="Subtitle (optional)" />
+            </div>
+          </div>
+          <button class="abtn" id="ad-save">Save cards</button>
+
+          <h3 style="margin-top:24px;">Post a note</h3>
+          <div class="admin__row">
+            <textarea class="in" id="in-post" rows="3" style="flex:1;min-width:220px;resize:vertical;" placeholder="What's going on right now… (Enter posts, Shift+Enter for a new line)"></textarea>
+            <button class="abtn" id="ad-post">Post</button>
+          </div>
+          <button class="abtn abtn--ghost" id="ad-clear" style="margin-top:10px;">Delete all notes</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <div class="foot__name">aStubbyMonkey</div>
+    <div class="foot__meta">
+      Built with 💜 —
+      <a href="mailto:contactastubbymonkey@gmail.com">contactastubbymonkey@gmail.com</a>
+    </div>
+    <div class="foot__v">v0.3.0</div>
+  </div>
+</footer>
+
+<script src="/v2/assets/site.js"></script>
+
+<script>
+/* ═══ DISCORD PRESENCE (Lanyard) ════════════════════════════════ */
+(function () {
+  var USER = '914625759698628669';
+  var DOTS = { online: 'dot-online', idle: 'dot-idle', dnd: 'dot-dnd', offline: 'dot-offline' };
+  var WORDS = { online: 'Online', idle: 'Idle', dnd: 'Do not disturb', offline: 'Offline' };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function blank(label, msg) {
+    return '<div class="act"><div class="act__label">' + label + '</div><div class="act__none">' + msg + '</div></div>';
+  }
+
+  function pull() {
+    fetch('https://api.lanyard.rest/v1/users/' + USER)
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res.success) throw new Error('lanyard said no');
+        var d = res.data;
+
+        document.getElementById('dc-dot').className = 'dc__dot ' + (DOTS[d.discord_status] || 'dot-offline');
+        document.getElementById('dc-state').textContent = WORDS[d.discord_status] || 'Offline';
+
+        var custom = (d.activities || []).find(function (a) { return a.type === 4; });
+        document.getElementById('dc-custom').textContent = custom
+          ? ((custom.emoji && custom.emoji.name ? custom.emoji.name + ' ' : '') + (custom.state || '')).trim()
+          : '';
+
+        var html = '';
+
+        if (d.spotify) {
+          var sp = d.spotify;
+          var pct = 0;
+          if (sp.timestamps && sp.timestamps.end > sp.timestamps.start) {
+            pct = Math.max(0, Math.min(100,
+              ((Date.now() - sp.timestamps.start) / (sp.timestamps.end - sp.timestamps.start)) * 100));
+          }
+          html += '<div class="act"><div class="act__label">Listening to Spotify</div><div class="act__row">' +
+                    '<img class="act__art" src="' + esc(sp.album_art_url) + '" alt="" />' +
+                    '<div class="act__meta">' +
+                      '<div class="act__name">' + esc(sp.song) + '</div>' +
+                      '<div class="act__sub">' + esc(sp.artist) + '</div>' +
+                      '<div class="bar"><div class="bar__fill" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+                    '</div></div></div>';
+        } else {
+          html += blank('Spotify', 'Not listening to anything');
+        }
+
+        var game = (d.activities || []).find(function (a) { return a.type === 0; });
+        if (game) {
+          var since = '';
+          if (game.timestamps && game.timestamps.start) {
+            var mins = Math.floor((Date.now() - game.timestamps.start) / 60000);
+            since = mins >= 60 ? Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm in' : mins + 'm in';
+          }
+          var art = game.assets && game.assets.large_image && game.application_id
+            ? 'https://cdn.discordapp.com/app-assets/' + game.application_id + '/' + game.assets.large_image + '.png'
+            : '';
+          html += '<div class="act"><div class="act__label">Playing</div><div class="act__row">' +
+                    (art ? '<img class="act__art" src="' + esc(art) + '" alt="" onerror="this.remove()" />'
+                         : '<div class="act__art">🎮</div>') +
+                    '<div class="act__meta">' +
+                      '<div class="act__name">' + esc(game.name) + '</div>' +
+                      '<div class="act__sub">' + esc(since) + '</div>' +
+                    '</div></div></div>';
+        } else {
+          html += blank('Games', 'Not playing anything');
+        }
+
+        document.getElementById('dc-acts').innerHTML = html;
+      })
+      .catch(function () {
+        document.getElementById('dc-state').textContent = 'Presence unavailable';
+        document.getElementById('dc-acts').innerHTML =
+          blank('Discord', "Can't reach Discord presence right now");
+      });
+  }
+
+  pull();
+  setInterval(pull, 30000);
+})();
+
+/* ═══ ADMIN UNLOCK — type "admin" ═══════════════════════════════ */
+(function () {
+  var buf = '';
+  document.addEventListener('keydown', function (e) {
+    var tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (!/^[a-z]$/i.test(e.key)) return;
+    buf = (buf + e.key.toLowerCase()).slice(-5);
+    if (buf === 'admin') {
+      buf = '';
+      var panel = document.getElementById('admin');
+      var open = panel.classList.toggle('is-open');
+      document.getElementById('feed').classList.toggle('admin-on', open);
+      if (open) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+})();
+</script>
+
+<script type="module">
+/* ═══ FIREBASE — cards + notes ══════════════════════════════════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBe1Ex5z_tDW4JuLZaHs-65_kMM0jfFjX8",
+  authDomain: "astubbymonkey-status.firebaseapp.com",
+  projectId: "astubbymonkey-status",
+  storageBucket: "astubbymonkey-status.firebasestorage.app",
+  messagingSenderId: "410093699659",
+  appId: "1:410093699659:web:bc3a00c3f70b3f8b0c43ce",
+  databaseURL: "https://astubbymonkey-status-default-rtdb.firebaseio.com"
+});
+
+const db = getDatabase(app);
+const auth = getAuth(app);
+const $ = (id) => document.getElementById(id);
+
+const FIELDS = [
+  ['currently', 'Currently'],
+  ['mood',      'Mood'],
+  ['video',     'Next video'],
+  ['gtch',      'GTCH status']
+];
+
+/* ── cards ─────────────────────────────────────────────────── */
+let cardsReady = false;
+
+onValue(ref(db, 'status/cards'), (snap) => {
+  const d = snap.val() || {};
+
+  const apply = () => {
+    for (const [key, fallback] of FIELDS) {
+      const cap = key.charAt(0).toUpperCase() + key.slice(1);
+      const label = $('label-' + key);
+      if (label) label.textContent = d['label' + cap] || fallback;
+      const value = $('sc-' + key);
+      if (value) value.textContent = d[key] || '—';
+      const sub = $('sc-' + key + '-sub');
+      if (sub) sub.textContent = d[key + 'Sub'] || '';
+    }
+  };
+
+  if (!cardsReady) { apply(); cardsReady = true; return; }
+
+  // a live edit: swap the cards out and back so viewers notice
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(c => c.classList.add('is-swapping'));
+  setTimeout(() => {
+    apply();
+    requestAnimationFrame(() => cards.forEach(c => c.classList.remove('is-swapping')));
+  }, 230);
+});
+
+/* ── notes feed ────────────────────────────────────────────── */
+function ago(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'Just now';
+  if (s < 3600) return Math.floor(s / 60) + ' min ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function postMarkup(key, p, stale) {
+  return '<span class="post__dot' + (stale ? ' old' : '') + '"></span>' +
+         '<div style="flex:1;min-width:0;">' +
+           '<div class="post__text">' + escapeHtml(p.text).replace(/\n/g, '<br>') + '</div>' +
+           '<div class="post__time">' + ago(p.time) + '</div>' +
+         '</div>' +
+         '<button class="post__x" data-key="' + key + '" aria-label="Delete note">✕</button>';
+}
+
+let seen = [];
+
+onValue(ref(db, 'status/posts'), (snap) => {
+  const data = snap.val();
+  const feed = $('feed');
+
+  if (!data) {
+    seen = [];
+    feed.innerHTML = '<div class="feed-empty">Nothing posted yet.</div>';
+    return;
+  }
+
+  const rows = Object.entries(data).sort((a, b) => b[1].time - a[1].time);
+  const keys = rows.map(([k]) => k);
+  const first = seen.length === 0;
+  seen = keys;
+
+  if (first) {
+    feed.innerHTML = rows
+      .map(([k, p], i) => '<article class="post" data-key="' + k + '">' + postMarkup(k, p, i > 0) + '</article>')
+      .join('');
+    return;
+  }
+
+  // new notes slide in at the top; edited ones just refresh their timestamp
+  rows.forEach(([k, p]) => {
+    const existing = feed.querySelector('[data-key="' + k + '"]');
+    if (existing) {
+      const t = existing.querySelector('.post__time');
+      if (t) t.textContent = ago(p.time);
+      return;
+    }
+    const el = document.createElement('article');
+    el.className = 'post is-entering';
+    el.dataset.key = k;
+    el.innerHTML = postMarkup(k, p, false);
+    feed.insertBefore(el, feed.firstChild);
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('is-entering')));
+  });
+
+  // and deleted ones collapse away
+  feed.querySelectorAll('.post[data-key]').forEach((el) => {
+    if (!keys.includes(el.dataset.key)) {
+      el.classList.add('is-entering');
+      setTimeout(() => {
+        el.remove();
+        if (!feed.querySelector('.post')) feed.innerHTML = '<div class="feed-empty">Nothing posted yet.</div>';
+      }, 520);
+    }
+  });
+});
+
+// one delegated handler covers every delete button, now and later
+$('feed').addEventListener('click', (e) => {
+  const btn = e.target.closest('.post__x');
+  if (btn) set(ref(db, 'status/posts/' + btn.dataset.key), null);
+});
+
+/* ── auth ──────────────────────────────────────────────────── */
+onAuthStateChanged(auth, (user) => {
+  $('admin-login').hidden = !!user;
+  $('admin-panel').hidden = !user;
+  if (user) loadInputs();
+});
+
+$('ad-login').addEventListener('click', () => {
+  const email = $('ad-email').value.trim();
+  const pass = $('ad-pass').value;
+  signInWithEmailAndPassword(auth, email, pass).catch(() => {
+    $('ad-error').hidden = false;
+    $('ad-email').classList.add('in--bad');
+    $('ad-pass').classList.add('in--bad');
+  });
+});
+
+$('ad-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('ad-login').click(); });
+$('ad-logout').addEventListener('click', () => signOut(auth));
+
+function loadInputs() {
+  onValue(ref(db, 'status/cards'), (snap) => {
+    const d = snap.val() || {};
+    for (const [key, fallback] of FIELDS) {
+      const cap = key.charAt(0).toUpperCase() + key.slice(1);
+      $('in-label-' + key).value = d['label' + cap] || fallback;
+      $('in-' + key).value = d[key] || '';
+      $('in-' + key + '-sub').value = d[key + 'Sub'] || '';
+    }
+  }, { onlyOnce: true });
+}
+
+$('ad-save').addEventListener('click', () => {
+  const payload = {};
+  for (const [key, fallback] of FIELDS) {
+    const cap = key.charAt(0).toUpperCase() + key.slice(1);
+    payload['label' + cap] = $('in-label-' + key).value || fallback;
+    payload[key] = $('in-' + key).value;
+    payload[key + 'Sub'] = $('in-' + key + '-sub').value;
+  }
+  set(ref(db, 'status/cards'), payload);
+});
+
+function addPost() {
+  const box = $('in-post');
+  const text = box.value.trim();
+  if (!text) return;
+  push(ref(db, 'status/posts'), { text, time: Date.now() });
+  box.value = '';
+}
+
+$('ad-post').addEventListener('click', addPost);
+$('in-post').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addPost(); }
+});
+
+$('ad-clear').addEventListener('click', () => {
+  if (confirm('Delete every note? This cannot be undone.')) set(ref(db, 'status/posts'), null);
+});
+</script>
+
+</body>
+</html>

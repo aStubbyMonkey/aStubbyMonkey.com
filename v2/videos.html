@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Videos — aStubbyMonkey</title>
+<meta name="description" content="Every short and every upload from the aStubbyMonkey channel, pulled live, plus subscriber and view counts." />
+<link rel="canonical" href="https://astubbymonkey.com/v2/videos.html" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Videos — aStubbyMonkey" />
+<meta property="og:description" content="Every short and every upload from the aStubbyMonkey channel, pulled live." />
+<meta property="og:image" content="https://astubbymonkey.com/avatar.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://i.ytimg.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/v2/assets/site.css" />
+
+<style>
+  .vid-h {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(30px, 4.4vw, 48px);
+    color: var(--paper);
+    text-shadow: 0 4px 0 var(--grape-deep);
+    margin-bottom: 4px;
+  }
+  .vid-note { font-size: var(--t-sm); font-weight: 700; color: var(--text-mid); margin-bottom: 22px; }
+
+  .empty {
+    border: 4px dashed rgba(255,255,255,.3);
+    border-radius: var(--r);
+    padding: 40px 28px;
+    text-align: center;
+  }
+  .empty h3 { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 32px; color: var(--paper); margin-bottom: 8px; }
+  .empty p { color: var(--text-mid); font-weight: 600; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div class="field" aria-hidden="true"></div>
+
+<nav class="nav">
+  <a class="nav__home" href="/v2/index.html">
+    <img class="nav__mark" src="/avatar.png" alt="" width="38" height="38" />
+    <span class="nav__name">aStubbyMonkey</span>
+  </a>
+  <div class="nav__links">
+    <a class="nav__link" href="/v2/index.html">Home</a>
+    <a class="nav__link" href="/v2/videos.html">Videos</a>
+    <a class="nav__link" href="/v2/status.html">Status</a>
+    <a class="nav__link" href="/v2/gtch.html">GTCH</a>
+    <a class="nav__link" href="/v2/gospel.html">The Gospel</a>
+  </div>
+  <div class="nav__social">
+    <a class="nav__icon" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+    </a>
+    <a class="nav__icon" href="https://discord.gg/StQGJEyHEC" target="_blank" rel="noopener" aria-label="GTCH Discord">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.3.5a18.3 18.3 0 0 1 4.3 1.3 15.6 15.6 0 0 0-15 0A18.3 18.3 0 0 1 8.9 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9 .1 13.5.4 17.9A19.9 19.9 0 0 0 6.4 21l.6-.8a13 13 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 13 0l.5.4a13 13 0 0 1-2 1l.6.8a19.9 19.9 0 0 0 6-3.1c.4-5.1-.6-9.5-3.3-13.5ZM8.1 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>
+    </a>
+  </div>
+</nav>
+
+<main class="above">
+
+  <header class="wrap phead">
+    <span class="phead__kicker">Updates itself</span>
+    <h1 class="phead__title title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);">Videos</h1>
+    <p class="lede">Pulled straight from the channel every time this page loads. Livestreams and VODs are filtered out, so this is just the edited stuff.</p>
+  </header>
+
+  <section class="wrap" aria-label="Channel numbers">
+    <div class="slabs">
+      <div class="slab">
+        <div class="slab__num" id="stat-subs">—</div>
+        <div class="slab__label">Subscribers</div>
+      </div>
+      <div class="slab">
+        <div class="slab__num" id="stat-views">—</div>
+        <div class="slab__label">Total views</div>
+      </div>
+      <div class="slab">
+        <div class="slab__num" id="stat-count">—</div>
+        <div class="slab__label">Videos posted</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" aria-labelledby="shorts-h">
+    <h2 class="vid-h" id="shorts-h">Shorts</h2>
+    <p class="vid-note">Three minutes or less.</p>
+    <div class="grid-shorts" id="shorts">
+      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+    </div>
+  </section>
+
+  <section class="wrap section" style="padding-top:0;" aria-labelledby="longs-h">
+    <h2 class="vid-h" id="longs-h">Full videos</h2>
+    <p class="vid-note">The ones that took a while.</p>
+    <div class="grid-videos" id="longs">
+      <div class="tile tile--load"><div class="tile__img"></div></div>
+      <div class="tile tile--load"><div class="tile__img"></div></div>
+    </div>
+  </section>
+
+  <section class="wrap section" style="padding-top:0;">
+    <div style="text-align:center;">
+      <a class="btn" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+        Subscribe on YouTube
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <div class="foot__name">aStubbyMonkey</div>
+    <div class="foot__meta">
+      Built with 💜 —
+      <a href="mailto:contactastubbymonkey@gmail.com">contactastubbymonkey@gmail.com</a>
+    </div>
+    <div class="foot__v">v0.3.0</div>
+  </div>
+</footer>
+
+<script src="/v2/assets/site.js"></script>
+
+<script>
+/* ═══ YouTube ═══════════════════════════════════════════════════
+   Quota budget per cold load: playlistItems (1) + videos (1)
+   + channels (1) = 3 units. The uploads playlist id is the channel
+   id with UC swapped for UU, which saves a lookup call. Results are
+   cached for 30 minutes so a reload costs nothing.
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  var KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
+  var CHANNEL = 'UCDlHHAvfs7GXP_l5IDYpgqw';
+  var UPLOADS = 'UU' + CHANNEL.slice(2);
+  var CACHE = 'sm-videos-v1';
+  var TTL = 30 * 60 * 1000;
+
+  var PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function compact(n) {
+    n = Number(n) || 0;
+    if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+    return String(n);
+  }
+
+  function isoSeconds(iso) {
+    var m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '');
+    if (!m) return 0;
+    return (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0);
+  }
+
+  function tile(v, short) {
+    var href = short
+      ? 'https://www.youtube.com/shorts/' + v.id
+      : 'https://www.youtube.com/watch?v=' + v.id;
+    return '<a class="tile' + (short ? ' tile--short' : '') + '" href="' + href +
+             '" target="_blank" rel="noopener">' +
+             '<img class="tile__img" src="' + esc(v.thumb) + '" alt="" loading="lazy" decoding="async" />' +
+             '<div class="tile__veil"><span class="tile__play">' + PLAY + '</span></div>' +
+             '<div class="tile__cap">' + esc(v.title) + '</div>' +
+           '</a>';
+  }
+
+  function fail(id, msg) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.className = '';
+    el.innerHTML =
+      '<div class="empty"><h3>Couldn\'t load these</h3><p>' + esc(msg) +
+      '</p><a class="btn" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener">Open the channel instead</a></div>';
+  }
+
+  function render(data) {
+    var shorts = data.shorts, longs = data.longs;
+
+    if (shorts.length) {
+      document.getElementById('shorts').innerHTML = shorts.slice(0, 8).map(function (v) { return tile(v, true); }).join('');
+    } else {
+      fail('shorts', 'No shorts came back from YouTube this time.');
+    }
+
+    if (longs.length) {
+      document.getElementById('longs').innerHTML = longs.slice(0, 6).map(function (v) { return tile(v, false); }).join('');
+    } else {
+      fail('longs', 'No full videos came back from YouTube this time.');
+    }
+
+    if (data.stats) {
+      document.getElementById('stat-subs').textContent = compact(data.stats.subscriberCount);
+      document.getElementById('stat-views').textContent = compact(data.stats.viewCount);
+      document.getElementById('stat-count').textContent = compact(data.stats.videoCount);
+    }
+  }
+
+  // serve from cache when it's fresh
+  try {
+    var hit = JSON.parse(localStorage.getItem(CACHE) || 'null');
+    if (hit && Date.now() - hit.t < TTL) { render(hit.d); return; }
+  } catch (e) { /* fall through and fetch */ }
+
+  var api = 'https://www.googleapis.com/youtube/v3/';
+
+  Promise.all([
+    fetch(api + 'playlistItems?part=contentDetails&maxResults=50&playlistId=' + UPLOADS + '&key=' + KEY).then(function (r) { return r.json(); }),
+    fetch(api + 'channels?part=statistics&id=' + CHANNEL + '&key=' + KEY).then(function (r) { return r.json(); })
+  ])
+  .then(function (res) {
+    var list = res[0], chan = res[1];
+    if (list.error) throw new Error(list.error.message || 'playlist error');
+
+    var ids = (list.items || []).map(function (i) { return i.contentDetails.videoId; }).filter(Boolean);
+    if (!ids.length) throw new Error('the uploads playlist came back empty');
+
+    var stats = chan && chan.items && chan.items[0] ? chan.items[0].statistics : null;
+
+    return fetch(api + 'videos?part=contentDetails,snippet,liveStreamingDetails&id=' + ids.join(',') + '&key=' + KEY)
+      .then(function (r) { return r.json(); })
+      .then(function (detail) {
+        if (detail.error) throw new Error(detail.error.message || 'video detail error');
+
+        var shorts = [], longs = [];
+        (detail.items || []).forEach(function (v) {
+          if (v.liveStreamingDetails) return;                       // no VODs
+          if (v.snippet.liveBroadcastContent === 'live') return;     // no live now
+          var t = v.snippet.thumbnails || {};
+          var pick = t.maxres || t.standard || t.high || t.medium || t.default;
+          if (!pick) return;
+          var item = { id: v.id, title: v.snippet.title, thumb: pick.url };
+          (isoSeconds(v.contentDetails.duration) <= 180 ? shorts : longs).push(item);
+        });
+
+        var data = { shorts: shorts, longs: longs, stats: stats };
+        try { localStorage.setItem(CACHE, JSON.stringify({ d: data, t: Date.now() })); } catch (e) {}
+        render(data);
+      });
+  })
+  .catch(function (err) {
+    var msg = /referer|referrer|API_KEY|forbidden/i.test(err.message || '')
+      ? 'The API key only answers requests from astubbymonkey.com.'
+      : 'YouTube did not answer. It may be a quota limit — try again later.';
+    fail('shorts', msg);
+    fail('longs', msg);
+  });
+})();
+</script>
+
+</body>
+</html>
