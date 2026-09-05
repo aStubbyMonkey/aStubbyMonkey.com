@@ -103,8 +103,8 @@ a { color: inherit; }
   /* site.js reads these to paint the wave bands: --wave-hi lights the
      crests at the top, --wave-lo is what everything sinks into. Override
      them on a variant to re-theme the background without touching the JS. */
-  --wave-hi: #C07AEE;
-  --wave-lo: #1A0330;
+  --wave-hi: #C42BFF;
+  --wave-lo: #26003F;
 }
 
 .field__fx {
@@ -121,10 +121,11 @@ a { color: inherit; }
   background-image:
     radial-gradient(ellipse at 50% -5%, rgba(59,224,122,.20), transparent 58%),
     linear-gradient(168deg, #333A41 0%, #262B31 46%, #15181B 100%);
-  /* deliberately dark: GTCH's green accent text sits on these crests, and a
-     lighter green ground drops it to 2.5:1. Measured 5.2:1 at this value. */
-  --wave-hi: #4A745D;
-  --wave-lo: #0C0F11;
+  /* Saturated, but deliberately not light: GTCH's green accent text sits on
+     these crests, and a brighter green ground drops it under 4.5:1. The
+     vividness here comes from chroma, not lightness. */
+  --wave-hi: #176E43;
+  --wave-lo: #04140C;
 }
 /* doubled class so this outranks .field::before, which is declared later */
 .field.field--gtch::before {
@@ -155,8 +156,8 @@ a { color: inherit; }
 /* darker ground for reading-heavy pages */
 .field--night {
   background-color: var(--night);
-  --wave-hi: #7E4FB0;
-  --wave-lo: #0A0111;
+  --wave-hi: #9B2BE8;
+  --wave-lo: #15002A;
 }
 .field--night::after {
   content: '';

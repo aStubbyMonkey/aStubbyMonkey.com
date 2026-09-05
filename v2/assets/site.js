@@ -127,8 +127,13 @@
         // light where the crest is, falling away to dark below it
         var band = mix(hi, lo, L.mix);
         var deep = mix(hi, lo, Math.min(1, L.mix + 0.42));
+        // a light tint of the band's own hue right at the crest, so the wave
+        // catches the light before falling away — kept small, since lifting
+        // the crest is what eats the contrast the text on top depends on
+        var lift = mix(band, [255, 255, 255], 0.15);
         var g = ctx.createLinearGradient(0, top - H * 0.06, 0, top + H * 0.55);
-        g.addColorStop(0, rgba(band, 0.95));
+        g.addColorStop(0, rgba(lift, 0.95));
+        g.addColorStop(0.30, rgba(band, 0.95));
         g.addColorStop(1, rgba(deep, 0.95));
         ctx.fillStyle = g;
         ctx.fill();
@@ -139,8 +144,10 @@
           var y2 = crest(L, x2, t) * H + shift;
           if (x2 < 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
         }
-        ctx.strokeStyle = rgba(mix(band, [255, 255, 255], 0.55), 0.16);
-        ctx.lineWidth = 1.6;
+        // a light tint of the band's own colour, not a wash toward white —
+        // pushing this far toward white bleaches the hue out of every crest
+        ctx.strokeStyle = rgba(mix(band, [255, 255, 255], 0.30), 0.22);
+        ctx.lineWidth = 1.8;
         ctx.stroke();
       }
     }
