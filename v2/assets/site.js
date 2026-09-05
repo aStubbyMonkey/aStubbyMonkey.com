@@ -36,172 +36,21 @@
      Small faces drifting very slowly, easing away from the cursor.
      Deliberately low-contrast and small — this is texture, not art.
      ═════════════════════════════════════════════════════════ */
+  /* ═══ WAVE FIELD ═══════════════════════════════════════════
+     The background. No sprites, no images — a stack of smooth
+     wave bands, each filled with its own vertical gradient, so
+     the page reads light at the top and sinks into dark at the
+     bottom. Layers overlap and drift slowly against each other,
+     which is what gives the silk look: the crests catch a sheen
+     while everything under them falls away.
+
+     Colours come from --wave-hi / --wave-lo on the .field, so a
+     page themes its own water without touching this code.
+     ═════════════════════════════════════════════════════════ */
   function wireField() {
     var field = document.querySelector('.field');
     if (!field) return;
 
-    // data-field="carve" swaps the drifting sprites for a board trail
-    if (field.getAttribute('data-field') === 'carve') { wireCarve(field); return; }
-
-    var canvas = document.createElement('canvas');
-    canvas.className = 'field__fx';
-    canvas.setAttribute('aria-hidden', 'true');
-    field.appendChild(canvas);
-
-    var ctx = canvas.getContext('2d');
-    var night = field.classList.contains('field--night');
-
-    // Dark body, light eyes and mouth. Composited at low alpha the body
-    // darkens the ground and the features lighten it, so the face still
-    // reads as a face instead of collapsing into a blob. Colors come from
-    // CSS custom properties, so a field variant can re-theme them.
-    var css = getComputedStyle(field);
-    var bodyColor = (css.getPropertyValue('--face-body') || '#000000').trim();
-    var eyeColor  = (css.getPropertyValue('--face-eye')  || '#FFFFFF').trim();
-
-    // To swap in custom art, put data-sprite="/your-image.png" on the .field
-    // element. Pass a comma-separated list to mix several — each drifting
-    // piece picks one at random, so a set of differently coloured boards
-    // scatters instead of repeating. Aspect ratio is read per file, so they
-    // need not be the same shape. Art is treated as pixel art (see pixel
-    // below); add data-sprite-smooth for smooth, non-pixel images.
-    var customSprite = field.getAttribute('data-sprite');
-    var pixel = !!customSprite && !field.hasAttribute('data-sprite-smooth');
-
-    var sources = customSprite
-      ? customSprite.split(',').map(function (t) { return t.trim(); }).filter(Boolean)
-      : [monkeyUri(bodyColor, eyeColor)];
-
-    // one entry per source; a file that fails to load simply never draws
-    var sprites = sources.map(function (src) {
-      var rec = { img: new Image(), ready: false, ratio: 0.8 };   // glyph is 100x80
-      rec.img.onload = function () {
-        rec.ready = true;
-        if (rec.img.naturalWidth) rec.ratio = rec.img.naturalHeight / rec.img.naturalWidth;
-        if (reduced) draw();
-      };
-      rec.img.onerror = function () { rec.ready = false; };
-      rec.img.src = src;
-      return rec;
-    });
-
-    var faces = [];
-    var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var mx = -9999, my = -9999;
-
-    function seed() {
-      // density scales with area so phones don't get a crowd
-      var count = Math.round(Math.min(46, Math.max(14, (W * H) / 46000)));
-      faces = [];
-      for (var i = 0; i < count; i++) {
-        // 24–48px: big enough for the eyes to resolve, small enough to stay texture
-        var s = 24 + Math.random() * 24;
-        faces.push({
-          x: Math.random() * W,
-          y: Math.random() * H,
-          s: s,
-          si: (Math.random() * sprites.length) | 0,
-          rot: pixel ? 0 : (Math.random() - 0.5) * 0.9,
-          spin: pixel ? 0 : (Math.random() - 0.5) * 0.0022,
-          vx: (Math.random() - 0.5) * 0.16,
-          vy: -0.05 - Math.random() * 0.14,        // a slow, general drift upward
-          a: (night ? 0.07 : 0.13) + Math.random() * 0.06,
-          ox: 0, oy: 0                             // cursor offset, eased
-        });
-      }
-    }
-
-    function size() {
-      W = field.clientWidth;
-      H = field.clientHeight;
-      canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingEnabled = !pixel;
-      seed();
-      // Resizing the canvas wipes it. The animation loop repaints anyway, but
-      // the reduced-motion path paints only once, so it has to repaint here or
-      // the field goes permanently blank after the first resize.
-      if (reduced) draw();
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-
-      for (var i = 0; i < faces.length; i++) {
-        var f = faces[i];
-        var rec = sprites[f.si];
-        if (!rec || !rec.ready) continue;          // still loading, or a bad path
-
-        if (!reduced) {
-          f.x += f.vx;
-          f.y += f.vy;
-          f.rot += f.spin;
-
-          // gentle shove away from the cursor, then ease back
-          var dx = f.x + f.ox - mx, dy = f.y + f.oy - my;
-          var d2 = dx * dx + dy * dy;
-          if (d2 < 26000 && d2 > 0.01) {
-            var d = Math.sqrt(d2);
-            var push = (1 - d / 161) * 26;
-            f.ox += ((dx / d) * push - f.ox) * 0.10;
-            f.oy += ((dy / d) * push - f.oy) * 0.10;
-          } else {
-            f.ox += (0 - f.ox) * 0.06;
-            f.oy += (0 - f.oy) * 0.06;
-          }
-
-          // wrap around the edges
-          var m = f.s * 1.6;
-          if (f.y < -m) { f.y = H + m; f.x = Math.random() * W; }
-          if (f.x < -m) f.x = W + m;
-          if (f.x > W + m) f.x = -m;
-        }
-
-        var w = f.s, h = f.s * rec.ratio;
-        ctx.save();
-        ctx.globalAlpha = f.a;
-        if (pixel) {
-          // whole-pixel size and position, so the art stays crisp instead of
-          // shimmering as it drifts across sub-pixel offsets
-          w = Math.round(w); h = Math.round(h);
-          ctx.drawImage(rec.img,
-            Math.round(f.x + f.ox - w / 2), Math.round(f.y + f.oy - h / 2), w, h);
-        } else {
-          ctx.translate(f.x + f.ox, f.y + f.oy);
-          ctx.rotate(f.rot);
-          ctx.drawImage(rec.img, -w / 2, -h / 2, w, h);
-        }
-        ctx.restore();
-      }
-    }
-
-    function loop() { draw(); requestAnimationFrame(loop); }
-
-    size();
-    window.addEventListener('resize', size);
-
-    if (reduced) {
-      draw();                     // each sprite also repaints as it finishes loading
-      return;
-    }
-
-    window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
-    window.addEventListener('mouseout', function () { mx = my = -9999; });
-    loop();
-  }
-
-
-  /* ═══ CARVE FIELD ══════════════════════════════════════════
-     A hoverboard trail for the GTCH page. The pointer carves a
-     glowing line that thins and fades behind it.
-
-     Nothing here needs art. It also has to work with no pointer
-     at all — an idle desktop, or any touch screen — so after a
-     moment of stillness an autopilot rider takes the board and
-     carves its own path until a real pointer interrupts.
-     ═════════════════════════════════════════════════════════ */
-  function wireCarve(field) {
     var canvas = document.createElement('canvas');
     canvas.className = 'field__fx';
     canvas.setAttribute('aria-hidden', 'true');
@@ -209,31 +58,34 @@
 
     var ctx = canvas.getContext('2d');
     var css = getComputedStyle(field);
-    var glow = (css.getPropertyValue('--carve') || '#3BE07A').trim();
+    var hi = parseHex((css.getPropertyValue('--wave-hi') || '#B06BE0').trim());
+    var lo = parseHex((css.getPropertyValue('--wave-lo') || '#1A0329').trim());
 
     var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var LIFE = 1400;                    // ms a trail point stays visible
-    var IDLE = 1800;                    // ms of stillness before autopilot
-    var trail = [], sparks = [];
-    var px = -1, py = -1, lastMove = -1e9;
-    var t0 = (window.performance || Date).now(), prev = t0;
-    // the autopilot: a position and a heading, moving at a constant speed
-    var rider = { x: 0, y: 0, ang: Math.random() * 6.2832 };
-    var SPEED = 300;                    // px/s — a board, not a balloon
+    var t0 = (window.performance || Date).now();
+    var tilt = 0, tiltTo = 0;              // eased cursor parallax
 
-    function seedSparks() {
-      var n = Math.round(Math.min(30, Math.max(10, (W * H) / 62000)));
-      sparks = [];
-      for (var i = 0; i < n; i++) sparks.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: 0.9 + Math.random() * 1.7,
-        vx: (Math.random() - 0.5) * 0.06,
-        vy: -0.05 - Math.random() * 0.11,
-        a: 0.10 + Math.random() * 0.22,
-        tw: Math.random() * 6.283      // twinkle phase
-      });
+    // Few, large, slow. More layers than this stops reading as waves and
+    // starts reading as noise.
+    var LAYERS = [
+      { base: 0.30, a1: 0.085, a2: 0.030, f1: 1.05, f2: 2.30, s1: 0.055, s2: -0.080, p1: 0.0, p2: 1.9, mix: 0.00, par: 0.30 },
+      { base: 0.46, a1: 0.070, a2: 0.034, f1: 0.85, f2: 1.95, s1: -0.048, s2: 0.071, p1: 2.1, p2: 0.4, mix: 0.26, par: 0.50 },
+      { base: 0.62, a1: 0.075, a2: 0.028, f1: 1.20, f2: 2.60, s1: 0.062, s2: -0.055, p1: 4.0, p2: 3.1, mix: 0.52, par: 0.72 },
+      { base: 0.79, a1: 0.065, a2: 0.032, f1: 0.95, f2: 2.15, s1: -0.058, s2: 0.066, p1: 1.2, p2: 5.0, mix: 0.78, par: 1.00 }
+    ];
+
+    function parseHex(h) {
+      h = String(h).replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      var n = parseInt(h, 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
     }
+    function mix(a, b, k) {
+      return [Math.round(a[0] + (b[0] - a[0]) * k),
+              Math.round(a[1] + (b[1] - a[1]) * k),
+              Math.round(a[2] + (b[2] - a[2]) * k)];
+    }
+    function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
     function size() {
       W = field.clientWidth;
@@ -241,130 +93,74 @@
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      seedSparks();
-      trail.length = 0;
-      rider.x = W * 0.5; rider.y = H * 0.55;
       if (reduced) draw((window.performance || Date).now());
     }
 
-    // Advance the autopilot. Steering a constant-speed heading, rather than
-    // driving x and y off sines directly, keeps the board moving at the same
-    // pace all the way round — a sine path crawls through its turns, and the
-    // trail collapses to a dot exactly where the carve should look best.
-    function steer(dt, now) {
-      var t = (now - t0) / 1000;
-      // two out-of-phase sines, so the curve never settles into a plain circle
-      rider.ang += (0.9 * Math.sin(t * 0.70) + 0.5 * Math.sin(t * 0.23 + 2.1)) * dt;
-
-      // turn back before running off the edge
-      var m = 90;
-      if (rider.x < m || rider.x > W - m || rider.y < m || rider.y > H - m) {
-        var toMid = Math.atan2(H / 2 - rider.y, W / 2 - rider.x);
-        var d = Math.atan2(Math.sin(toMid - rider.ang), Math.cos(toMid - rider.ang));
-        rider.ang += d * Math.min(1, dt * 2.2);
-      }
-      rider.x += Math.cos(rider.ang) * SPEED * dt;
-      rider.y += Math.sin(rider.ang) * SPEED * dt;
-    }
-
-    // where the board is right now: the pointer, or the autopilot
-    function head(now, dt) {
-      if (now - lastMove < IDLE && px >= 0) return { x: px, y: py };
-      steer(dt, now);
-      return { x: rider.x, y: rider.y };
+    // height of a layer's crest at x, as a fraction of H
+    function crest(L, x, t) {
+      var u = x / W;
+      return L.base
+           + Math.sin(u * 6.2832 * L.f1 + t * L.s1 + L.p1) * L.a1
+           + Math.sin(u * 6.2832 * L.f2 + t * L.s2 + L.p2) * L.a2;
     }
 
     function draw(now) {
+      var t = (now - t0) / 1000;
       ctx.clearRect(0, 0, W, H);
+      tilt += (tiltTo - tilt) * 0.05;
 
-      for (var i = 0; i < sparks.length; i++) {
-        var sp = sparks[i];
-        if (!reduced) {
-          sp.x += sp.vx; sp.y += sp.vy; sp.tw += 0.02;
-          if (sp.y < -4) { sp.y = H + 4; sp.x = Math.random() * W; }
-          if (sp.x < -4) sp.x = W + 4;
-          if (sp.x > W + 4) sp.x = -4;
+      for (var i = 0; i < LAYERS.length; i++) {
+        var L = LAYERS[i];
+        var shift = tilt * 26 * L.par;               // nearer layers move more
+        var top = 1e9;
+
+        ctx.beginPath();
+        ctx.moveTo(-2, H + 2);
+        for (var x = -2; x <= W + 2; x += 6) {
+          var y = crest(L, x, t) * H + shift;
+          if (y < top) top = y;
+          ctx.lineTo(x, y);
         }
-        ctx.globalAlpha = sp.a * (0.65 + 0.35 * Math.sin(sp.tw));
-        ctx.fillStyle = glow;
-        ctx.beginPath();
-        ctx.arc(sp.x, sp.y, sp.r, 0, 6.2832);
+        ctx.lineTo(W + 2, H + 2);
+        ctx.closePath();
+
+        // light where the crest is, falling away to dark below it
+        var band = mix(hi, lo, L.mix);
+        var deep = mix(hi, lo, Math.min(1, L.mix + 0.42));
+        var g = ctx.createLinearGradient(0, top - H * 0.06, 0, top + H * 0.55);
+        g.addColorStop(0, rgba(band, 0.95));
+        g.addColorStop(1, rgba(deep, 0.95));
+        ctx.fillStyle = g;
         ctx.fill();
-      }
 
-      // The trail, drawn as a handful of bands rather than one stroke per
-      // point: stroking every short segment separately makes the round caps
-      // overlap and composite alpha over themselves, which beads the ribbon.
-      // Each band is a single path — one width, one alpha, no double cover.
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.strokeStyle = glow;
-      var BANDS = 7;
-      for (var band = 0; band < BANDS; band++) {
-        var lo = Math.floor(trail.length * band / BANDS);
-        var hi = Math.floor(trail.length * (band + 1) / BANDS);
-        if (hi - lo < 1) continue;
-        var k = 1 - (now - trail[(lo + hi) >> 1].t) / LIFE;
-        if (k <= 0) continue;
+        // the sheen: a soft bright line riding the crest
         ctx.beginPath();
-        ctx.moveTo(trail[lo].x, trail[lo].y);
-        // run one point into the next band so the seams do not gap
-        for (var q = lo + 1; q <= hi && q < trail.length; q++) ctx.lineTo(trail[q].x, trail[q].y);
-        ctx.globalAlpha = 0.07 * k * k;
-        ctx.lineWidth = 18 * k;
-        ctx.stroke();
-        ctx.globalAlpha = 0.34 * k * k;
-        ctx.lineWidth = 3.4 * k;
+        for (var x2 = -2; x2 <= W + 2; x2 += 6) {
+          var y2 = crest(L, x2, t) * H + shift;
+          if (x2 < 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+        }
+        ctx.strokeStyle = rgba(mix(band, [255, 255, 255], 0.55), 0.16);
+        ctx.lineWidth = 1.6;
         ctx.stroke();
       }
-
-      // the board itself: a bright point at the tip, so the ribbon reads as
-      // something being left behind rather than a line drawing itself
-      var tip = trail[trail.length - 1];
-      if (tip) {
-        ctx.fillStyle = glow;
-        ctx.globalAlpha = 0.10;
-        ctx.beginPath(); ctx.arc(tip.x, tip.y, 9, 0, 6.2832); ctx.fill();
-        ctx.globalAlpha = 0.55;
-        ctx.beginPath(); ctx.arc(tip.x, tip.y, 2.6, 0, 6.2832); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
     }
 
     function loop() {
-      var now = (window.performance || Date).now();
-      // clamp dt so a backgrounded tab does not fling the rider across the page
-      var dt = Math.min(0.05, Math.max(0.001, (now - prev) / 1000));
-      prev = now;
-      var h = head(now, dt);
-      var last = trail[trail.length - 1];
-      // Only record real movement, so standing still does not pile up points.
-      // The gate must stay below one frame of travel or nothing is ever added.
-      if (!last || (h.x - last.x) * (h.x - last.x) + (h.y - last.y) * (h.y - last.y) > 0.25) {
-        trail.push({ x: h.x, y: h.y, t: now });
-      }
-      while (trail.length && now - trail[0].t > LIFE) trail.shift();
-      draw(now);
+      draw((window.performance || Date).now());
       requestAnimationFrame(loop);
     }
 
     size();
     window.addEventListener('resize', size);
-    if (reduced) return;               // sparks stay, nothing animates
+    if (reduced) return;
 
     window.addEventListener('mousemove', function (e) {
-      px = e.clientX; py = e.clientY;
-      lastMove = (window.performance || Date).now();
-    }, { passive: true });
-    window.addEventListener('touchmove', function (e) {
-      var t = e.touches && e.touches[0];
-      if (!t) return;
-      px = t.clientX; py = t.clientY;
-      lastMove = (window.performance || Date).now();
+      tiltTo = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
     }, { passive: true });
 
     loop();
   }
+
 
   /* ═══ NAV: mark the current page ═══════════════════════════ */
   function markNav() {

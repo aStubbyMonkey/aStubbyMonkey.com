@@ -100,10 +100,11 @@ a { color: inherit; }
   background-color: var(--grape);
   overflow: hidden;
 
-  /* site.js reads these to tint the drifting sprites. Override them on a
-     field variant to re-theme the background without touching the JS. */
-  --face-body: #000000;
-  --face-eye:  #FFFFFF;
+  /* site.js reads these to paint the wave bands: --wave-hi lights the
+     crests at the top, --wave-lo is what everything sinks into. Override
+     them on a variant to re-theme the background without touching the JS. */
+  --wave-hi: #C07AEE;
+  --wave-lo: #1A0330;
 }
 
 .field__fx {
@@ -120,9 +121,10 @@ a { color: inherit; }
   background-image:
     radial-gradient(ellipse at 50% -5%, rgba(59,224,122,.20), transparent 58%),
     linear-gradient(168deg, #333A41 0%, #262B31 46%, #15181B 100%);
-  --face-body: #3BE07A;
-  --face-eye:  #0C2E1A;
-  --carve:     #3BE07A;      /* the board trail, see wireCarve() */
+  /* deliberately dark: GTCH's green accent text sits on these crests, and a
+     lighter green ground drops it to 2.5:1. Measured 5.2:1 at this value. */
+  --wave-hi: #4A745D;
+  --wave-lo: #0C0F11;
 }
 /* doubled class so this outranks .field::before, which is declared later */
 .field.field--gtch::before {
@@ -151,7 +153,11 @@ a { color: inherit; }
 }
 
 /* darker ground for reading-heavy pages */
-.field--night { background-color: var(--night); }
+.field--night {
+  background-color: var(--night);
+  --wave-hi: #7E4FB0;
+  --wave-lo: #0A0111;
+}
 .field--night::after {
   content: '';
   position: absolute; inset: 0;
