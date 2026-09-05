@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Videos — aStubbyMonkey</title>
-<meta name="description" content="Every short and every upload from the aStubbyMonkey channel, pulled live, plus subscriber and view counts." />
+<title>Content — aStubbyMonkey</title>
+<meta name="description" content="The aStubbyMonkey channel: subscriber and view counts, every short and upload, and past livestreams — all pulled live from YouTube." />
 <link rel="canonical" href="https://astubbymonkey.com/v2/content.html" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Videos — aStubbyMonkey" />
-<meta property="og:description" content="Every short and every upload from the aStubbyMonkey channel, pulled live." />
+<meta property="og:title" content="Content — aStubbyMonkey" />
+<meta property="og:description" content="Channel stats, every short and upload, and past livestreams — pulled live." />
 <meta property="og:image" content="https://astubbymonkey.com/aStubbyMonkey.YT.Offical.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -90,7 +90,6 @@
   <!-- ══ 01 · STATISTICS ══ -->
   <section class="panel" id="statistics" aria-labelledby="stats-h">
     <div class="wrap">
-      <p class="panel__no">01</p>
       <h2 class="panel__h" id="stats-h">Statistics</h2>
       <p class="vid-note">Straight off the channel, counted up fresh on every visit.</p>
 
@@ -114,7 +113,6 @@
   <!-- ══ 02 · VIDEOS ══ -->
   <section class="panel" id="videos" aria-labelledby="videos-h">
     <div class="wrap">
-      <p class="panel__no">02</p>
       <h2 class="panel__h" id="videos-h">Videos</h2>
       <p class="vid-note">The edited stuff. No streams in here.</p>
 
@@ -139,7 +137,6 @@
   <!-- ══ 03 · LIVESTREAMS ══ -->
   <section class="panel" id="livestreams" aria-labelledby="streams-h">
     <div class="wrap">
-      <p class="panel__no">03</p>
       <h2 class="panel__h" id="streams-h">Livestreams</h2>
       <p class="vid-note">Streams that have already aired, newest first. If one is running right now it shows at the very top of this page instead.</p>
 
@@ -347,7 +344,7 @@
 
     var streams = data.streams || [];
     if (streams.length) {
-      document.getElementById('streams').innerHTML = streams.slice(0, 6).map(function (v) { return tile(v, false); }).join('');
+      document.getElementById('streams').innerHTML = streams.slice(0, 3).map(function (v) { return tile(v, false); }).join('');
     } else {
       var se = document.getElementById('streams');
       if (se) {
