@@ -49,12 +49,25 @@
     var night = field.classList.contains('field--night');
 
     // Dark body, light eyes and mouth. Composited at low alpha the body
-    // darkens the purple and the features lighten it, so the face still
-    // reads as a face instead of collapsing into a blob.
+    // darkens the ground and the features lighten it, so the face still
+    // reads as a face instead of collapsing into a blob. Colors come from
+    // CSS custom properties, so a field variant can re-theme them.
+    var css = getComputedStyle(field);
+    var bodyColor = (css.getPropertyValue('--face-body') || '#000000').trim();
+    var eyeColor  = (css.getPropertyValue('--face-eye')  || '#FFFFFF').trim();
+
+    // To swap in custom art (pixel art, a hoverboard, anything), put
+    // data-sprite="/your-image.png" on the .field element. No JS change needed.
+    var customSprite = field.getAttribute('data-sprite');
+
     var sprite = new Image();
     var ready = false;
     sprite.onload = function () { ready = true; };
-    sprite.src = monkeyUri('#000000', '#FFFFFF');
+    sprite.onerror = function () { ready = false; };   // a bad path just means no texture
+    sprite.src = customSprite || monkeyUri(bodyColor, eyeColor);
+
+    // custom art is usually square-ish; the drawn glyph is 100x80
+    var ratio = customSprite ? 1 : 0.8;
 
     var faces = [];
     var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -122,7 +135,7 @@
           if (f.x > W + m) f.x = -m;
         }
 
-        var w = f.s, h = f.s * 0.8;
+        var w = f.s, h = f.s * ratio;
         ctx.save();
         ctx.globalAlpha = f.a;
         ctx.translate(f.x + f.ox, f.y + f.oy);
@@ -171,20 +184,22 @@
     'CAN’T CATCH ME!', 'RUN!', 'NICE TRY!', 'BEHIND YOU!', 'SPEED!'
   ];
 
-  function taunt() {
-    var word = TAUNTS[(Math.random() * TAUNTS.length) | 0];
+  function tauntMarkup(word) {
     var cls = word.length > 11 ? ' tag-wipe__word--long'
             : word.length > 7  ? ' tag-wipe__word--mid'
             : '';
     return '<div class="tag-wipe__word' + cls + '">' + word + '</div>';
   }
 
-  function buildWipe() {
+  // The slab covers the screen on the way out of one page and uncovers on
+  // the way into the next — two separate documents. Carry the chosen word
+  // across in sessionStorage so it doesn't change halfway through.
+  function buildWipe(word) {
     if (wipe || reduced) return null;
     wipe = document.createElement('div');
     wipe.className = 'tag-wipe';
     wipe.setAttribute('aria-hidden', 'true');
-    wipe.innerHTML = taunt();
+    wipe.innerHTML = tauntMarkup(word || TAUNTS[(Math.random() * TAUNTS.length) | 0]);
     document.body.appendChild(wipe);
     return wipe;
   }
@@ -212,12 +227,15 @@
       if (a.pathname === location.pathname) return; // same page
 
       e.preventDefault();
-      var el = buildWipe();
+
+      var word = TAUNTS[(Math.random() * TAUNTS.length) | 0];
+      var el = buildWipe(word);
       if (!el) { location.href = a.href; return; }
 
       el.classList.remove('is-out');
       el.classList.add('is-in');
       sessionStorage.setItem('sm-wiped', '1');
+      try { sessionStorage.setItem('sm-taunt', word); } catch (e2) {}
 
       var go = function () { location.href = a.href; };
       el.addEventListener('animationend', go, { once: true });
@@ -227,7 +245,9 @@
     // Arriving: if we came through a wipe, reveal from under it.
     if (sessionStorage.getItem('sm-wiped') === '1') {
       sessionStorage.removeItem('sm-wiped');
-      var el = buildWipe();
+      var carried = sessionStorage.getItem('sm-taunt');
+      sessionStorage.removeItem('sm-taunt');
+      var el = buildWipe(carried);
       if (el) {
         el.style.transform = 'translate3d(0,0,0)';
         requestAnimationFrame(function () {

@@ -558,14 +558,30 @@ onAuthStateChanged(auth, (user) => {
   if (user) loadInputs();
 });
 
+// Firebase deliberately returns one generic code for both a wrong password
+// and an unknown email, so spell out what that actually means.
+const AUTH_MESSAGES = {
+  'auth/invalid-login-credentials': 'Email or password is wrong. Note the sign-in email is not always the one in the footer.',
+  'auth/invalid-credential':        'Email or password is wrong. Note the sign-in email is not always the one in the footer.',
+  'auth/wrong-password':            'Wrong password for that email.',
+  'auth/user-not-found':            'No account with that email.',
+  'auth/invalid-email':             "That doesn't look like an email address.",
+  'auth/too-many-requests':         'Too many tries. Firebase has paused sign-in for a bit — wait a few minutes.',
+  'auth/network-request-failed':    'Could not reach Firebase. Check your connection.',
+  'auth/unauthorized-domain':       'This domain is not in the Firebase authorized-domains list.',
+  'auth/user-disabled':             'That account is disabled.'
+};
+
 $('ad-login').addEventListener('click', () => {
-  const email = $('ad-email').value.trim();
-  const pass = $('ad-pass').value;
-  signInWithEmailAndPassword(auth, email, pass).catch(() => {
-    $('ad-error').hidden = false;
-    $('ad-email').classList.add('in--bad');
-    $('ad-pass').classList.add('in--bad');
-  });
+  const box = $('ad-error');
+  box.hidden = true;
+  signInWithEmailAndPassword(auth, $('ad-email').value.trim(), $('ad-pass').value)
+    .catch((err) => {
+      box.textContent = (AUTH_MESSAGES[err.code] || 'Sign-in failed.') + '  [' + err.code + ']';
+      box.hidden = false;
+      $('ad-email').classList.add('in--bad');
+      $('ad-pass').classList.add('in--bad');
+    });
 });
 
 $('ad-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('ad-login').click(); });

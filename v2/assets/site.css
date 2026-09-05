@@ -99,6 +99,11 @@ a { color: inherit; }
   pointer-events: none;
   background-color: var(--grape);
   overflow: hidden;
+
+  /* site.js reads these to tint the drifting sprites. Override them on a
+     field variant to re-theme the background without touching the JS. */
+  --face-body: #000000;
+  --face-eye:  #FFFFFF;
 }
 
 .field__fx {
@@ -107,6 +112,32 @@ a { color: inherit; }
   width: 100%;
   height: 100%;
   display: block;
+}
+
+/* GTCH runs its own paint: dark grey, grey, and the Hoverpark green */
+.field--gtch {
+  background-color: #23272C;
+  background-image:
+    radial-gradient(ellipse at 50% -5%, rgba(59,224,122,.20), transparent 58%),
+    linear-gradient(168deg, #333A41 0%, #262B31 46%, #15181B 100%);
+  --face-body: #3BE07A;
+  --face-eye:  #0C2E1A;
+}
+/* doubled class so this outranks .field::before, which is declared later */
+.field.field--gtch::before {
+  background: radial-gradient(ellipse at 50% 40%, transparent 26%, rgba(9,11,13,.82) 100%);
+}
+
+/* checkered racing bands — start line, finish line */
+.race-strip {
+  position: relative;
+  z-index: 1;
+  height: 24px;
+  background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 24px 24px;
+  border-block: 3px solid var(--ink);
+}
+@media (max-width: 620px) {
+  .race-strip { height: 18px; background-size: 18px 18px; }
 }
 
 /* darker ground for reading-heavy pages */
