@@ -122,6 +122,7 @@ a { color: inherit; }
     linear-gradient(168deg, #333A41 0%, #262B31 46%, #15181B 100%);
   --face-body: #3BE07A;
   --face-eye:  #0C2E1A;
+  --carve:     #3BE07A;      /* the board trail, see wireCarve() */
 }
 /* doubled class so this outranks .field::before, which is declared later */
 .field.field--gtch::before {

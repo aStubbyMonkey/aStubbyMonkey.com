@@ -40,6 +40,9 @@
     var field = document.querySelector('.field');
     if (!field) return;
 
+    // data-field="carve" swaps the drifting sprites for a board trail
+    if (field.getAttribute('data-field') === 'carve') { wireCarve(field); return; }
+
     var canvas = document.createElement('canvas');
     canvas.className = 'field__fx';
     canvas.setAttribute('aria-hidden', 'true');
@@ -185,6 +188,181 @@
 
     window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
     window.addEventListener('mouseout', function () { mx = my = -9999; });
+    loop();
+  }
+
+
+  /* ═══ CARVE FIELD ══════════════════════════════════════════
+     A hoverboard trail for the GTCH page. The pointer carves a
+     glowing line that thins and fades behind it.
+
+     Nothing here needs art. It also has to work with no pointer
+     at all — an idle desktop, or any touch screen — so after a
+     moment of stillness an autopilot rider takes the board and
+     carves its own path until a real pointer interrupts.
+     ═════════════════════════════════════════════════════════ */
+  function wireCarve(field) {
+    var canvas = document.createElement('canvas');
+    canvas.className = 'field__fx';
+    canvas.setAttribute('aria-hidden', 'true');
+    field.appendChild(canvas);
+
+    var ctx = canvas.getContext('2d');
+    var css = getComputedStyle(field);
+    var glow = (css.getPropertyValue('--carve') || '#3BE07A').trim();
+
+    var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var LIFE = 1400;                    // ms a trail point stays visible
+    var IDLE = 1800;                    // ms of stillness before autopilot
+    var trail = [], sparks = [];
+    var px = -1, py = -1, lastMove = -1e9;
+    var t0 = (window.performance || Date).now(), prev = t0;
+    // the autopilot: a position and a heading, moving at a constant speed
+    var rider = { x: 0, y: 0, ang: Math.random() * 6.2832 };
+    var SPEED = 300;                    // px/s — a board, not a balloon
+
+    function seedSparks() {
+      var n = Math.round(Math.min(30, Math.max(10, (W * H) / 62000)));
+      sparks = [];
+      for (var i = 0; i < n; i++) sparks.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.9 + Math.random() * 1.7,
+        vx: (Math.random() - 0.5) * 0.06,
+        vy: -0.05 - Math.random() * 0.11,
+        a: 0.10 + Math.random() * 0.22,
+        tw: Math.random() * 6.283      // twinkle phase
+      });
+    }
+
+    function size() {
+      W = field.clientWidth;
+      H = field.clientHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seedSparks();
+      trail.length = 0;
+      rider.x = W * 0.5; rider.y = H * 0.55;
+      if (reduced) draw((window.performance || Date).now());
+    }
+
+    // Advance the autopilot. Steering a constant-speed heading, rather than
+    // driving x and y off sines directly, keeps the board moving at the same
+    // pace all the way round — a sine path crawls through its turns, and the
+    // trail collapses to a dot exactly where the carve should look best.
+    function steer(dt, now) {
+      var t = (now - t0) / 1000;
+      // two out-of-phase sines, so the curve never settles into a plain circle
+      rider.ang += (0.9 * Math.sin(t * 0.70) + 0.5 * Math.sin(t * 0.23 + 2.1)) * dt;
+
+      // turn back before running off the edge
+      var m = 90;
+      if (rider.x < m || rider.x > W - m || rider.y < m || rider.y > H - m) {
+        var toMid = Math.atan2(H / 2 - rider.y, W / 2 - rider.x);
+        var d = Math.atan2(Math.sin(toMid - rider.ang), Math.cos(toMid - rider.ang));
+        rider.ang += d * Math.min(1, dt * 2.2);
+      }
+      rider.x += Math.cos(rider.ang) * SPEED * dt;
+      rider.y += Math.sin(rider.ang) * SPEED * dt;
+    }
+
+    // where the board is right now: the pointer, or the autopilot
+    function head(now, dt) {
+      if (now - lastMove < IDLE && px >= 0) return { x: px, y: py };
+      steer(dt, now);
+      return { x: rider.x, y: rider.y };
+    }
+
+    function draw(now) {
+      ctx.clearRect(0, 0, W, H);
+
+      for (var i = 0; i < sparks.length; i++) {
+        var sp = sparks[i];
+        if (!reduced) {
+          sp.x += sp.vx; sp.y += sp.vy; sp.tw += 0.02;
+          if (sp.y < -4) { sp.y = H + 4; sp.x = Math.random() * W; }
+          if (sp.x < -4) sp.x = W + 4;
+          if (sp.x > W + 4) sp.x = -4;
+        }
+        ctx.globalAlpha = sp.a * (0.65 + 0.35 * Math.sin(sp.tw));
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sp.r, 0, 6.2832);
+        ctx.fill();
+      }
+
+      // The trail, drawn as a handful of bands rather than one stroke per
+      // point: stroking every short segment separately makes the round caps
+      // overlap and composite alpha over themselves, which beads the ribbon.
+      // Each band is a single path — one width, one alpha, no double cover.
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = glow;
+      var BANDS = 7;
+      for (var band = 0; band < BANDS; band++) {
+        var lo = Math.floor(trail.length * band / BANDS);
+        var hi = Math.floor(trail.length * (band + 1) / BANDS);
+        if (hi - lo < 1) continue;
+        var k = 1 - (now - trail[(lo + hi) >> 1].t) / LIFE;
+        if (k <= 0) continue;
+        ctx.beginPath();
+        ctx.moveTo(trail[lo].x, trail[lo].y);
+        // run one point into the next band so the seams do not gap
+        for (var q = lo + 1; q <= hi && q < trail.length; q++) ctx.lineTo(trail[q].x, trail[q].y);
+        ctx.globalAlpha = 0.07 * k * k;
+        ctx.lineWidth = 18 * k;
+        ctx.stroke();
+        ctx.globalAlpha = 0.34 * k * k;
+        ctx.lineWidth = 3.4 * k;
+        ctx.stroke();
+      }
+
+      // the board itself: a bright point at the tip, so the ribbon reads as
+      // something being left behind rather than a line drawing itself
+      var tip = trail[trail.length - 1];
+      if (tip) {
+        ctx.fillStyle = glow;
+        ctx.globalAlpha = 0.10;
+        ctx.beginPath(); ctx.arc(tip.x, tip.y, 9, 0, 6.2832); ctx.fill();
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath(); ctx.arc(tip.x, tip.y, 2.6, 0, 6.2832); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function loop() {
+      var now = (window.performance || Date).now();
+      // clamp dt so a backgrounded tab does not fling the rider across the page
+      var dt = Math.min(0.05, Math.max(0.001, (now - prev) / 1000));
+      prev = now;
+      var h = head(now, dt);
+      var last = trail[trail.length - 1];
+      // Only record real movement, so standing still does not pile up points.
+      // The gate must stay below one frame of travel or nothing is ever added.
+      if (!last || (h.x - last.x) * (h.x - last.x) + (h.y - last.y) * (h.y - last.y) > 0.25) {
+        trail.push({ x: h.x, y: h.y, t: now });
+      }
+      while (trail.length && now - trail[0].t > LIFE) trail.shift();
+      draw(now);
+      requestAnimationFrame(loop);
+    }
+
+    size();
+    window.addEventListener('resize', size);
+    if (reduced) return;               // sparks stay, nothing animates
+
+    window.addEventListener('mousemove', function (e) {
+      px = e.clientX; py = e.clientY;
+      lastMove = (window.performance || Date).now();
+    }, { passive: true });
+    window.addEventListener('touchmove', function (e) {
+      var t = e.touches && e.touches[0];
+      if (!t) return;
+      px = t.clientX; py = t.clientY;
+      lastMove = (window.performance || Date).now();
+    }, { passive: true });
+
     loop();
   }
 
