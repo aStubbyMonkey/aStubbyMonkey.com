@@ -200,11 +200,12 @@
     });
   }
 
-  function compact(n) {
-    n = Number(n) || 0;
-    if (n >= 1e6) return (n / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
-    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-    return String(n);
+  // The exact figure, grouped. Rounding to "1.2K" hid 40 subscribers and
+  // 676 views, and on a page headed Statistics the real number is the point.
+  function full(n) {
+    n = Number(n);
+    if (!isFinite(n)) return '—';
+    return Math.round(n).toLocaleString('en-US');
   }
 
   function isoSeconds(iso) {
@@ -304,18 +305,18 @@
   function countUp(el, target, delay) {
     target = Number(target);
     if (!isFinite(target)) { el.textContent = '—'; return; }
-    if (reducedMotion) { el.textContent = compact(target); return; }
+    if (reducedMotion) { el.textContent = full(target); return; }
     var from = Math.min(9, target), DUR = 1100, t0 = null, settled = false;
     function land() {
       settled = true;
-      el.textContent = compact(target);
+      el.textContent = full(target);
     }
     function step(now) {
       if (settled) return;
       if (t0 === null) t0 = now;
       var t = Math.min(1, (now - t0) / DUR);
       var k = 1 - Math.pow(1 - t, 3);
-      el.textContent = compact(Math.round(from + (target - from) * k));
+      el.textContent = full(Math.round(from + (target - from) * k));
       if (t < 1) requestAnimationFrame(step);
       else land();
     }
