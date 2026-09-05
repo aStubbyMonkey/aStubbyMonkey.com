@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>About — aStubbyMonkey</title>
+<meta name="description" content="Who I am, what I make, my top five games of all time, and what's coming up next." />
+<link rel="canonical" href="https://astubbymonkey.com/v2/about.html" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+
+<meta property="og:type" content="profile" />
+<meta property="og:title" content="About — aStubbyMonkey" />
+<meta property="og:description" content="Who I am, what I make, my top five games of all time, and what's coming up next." />
+<meta property="og:image" content="https://astubbymonkey.com/avatar.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/v2/assets/site.css" />
+
+<style>
+  .about-lead { display: grid; grid-template-columns: minmax(0,190px) minmax(0,1fr); gap: 36px; align-items: start; }
+  @media (max-width: 780px) { .about-lead { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+
+  .about-face { position: relative; width: 100%; max-width: 190px; }
+  .about-av {
+    width: 100%; height: auto; aspect-ratio: 1;
+    border-radius: 50%; object-fit: cover;
+    border: 5px solid var(--paper);
+    box-shadow: 0 8px 0 var(--ink), 0 24px 46px rgba(0,0,0,.5);
+    background: var(--grape);
+  }
+  .about-hat {
+    position: absolute; width: 96%; top: -54%; left: 50%;
+    transform: translateX(-52%) rotate(-8deg);
+    pointer-events: none;
+    filter: drop-shadow(0 6px 8px rgba(0,0,0,.5));
+  }
+
+  .about-p { font-size: var(--t-lg); line-height: 1.7; color: var(--text); max-width: 60ch; }
+  .about-p + .about-p { margin-top: 1em; }
+  .about-p em { font-style: normal; font-weight: 900; color: var(--banana); }
+
+  .sec-h {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(32px, 5vw, 54px);
+    color: var(--paper);
+    text-shadow: 0 5px 0 var(--grape-deep);
+    margin-bottom: 6px;
+  }
+  .sec-note { font-size: var(--t-sm); font-weight: 700; color: var(--text-mid); margin-bottom: 26px; }
+
+  /* ── Top 5 — a genuine ranking, so it gets real numbers ──── */
+  .ranks { display: flex; flex-direction: column; gap: 14px; }
+
+  .rank {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr);
+    gap: 22px;
+    align-items: center;
+    background: var(--paper);
+    color: var(--ink);
+    border: 4px solid var(--ink);
+    border-radius: var(--r);
+    padding: 18px 24px;
+    box-shadow: var(--shadow-hard);
+    transition: transform .18s cubic-bezier(.34,1.6,.64,1), box-shadow .18s;
+  }
+  .rank:hover { transform: translateX(7px); box-shadow: 0 6px 0 var(--ink), 0 16px 30px rgba(0,0,0,.4); }
+
+  .rank__n {
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(44px, 6vw, 62px);
+    line-height: .8;
+    color: var(--grape);
+    min-width: 58px;
+  }
+  .rank--1 .rank__n { color: #E0A800; }
+  .rank--2 .rank__n { color: #8E9099; }
+  .rank--3 .rank__n { color: #B0672F; }
+
+  .rank__name { font-size: var(--t-xl); font-weight: 900; line-height: 1.1; margin-bottom: 4px; }
+  .rank__why  { font-size: var(--t-sm); color: #574566; font-weight: 600; line-height: 1.55; }
+
+  /* ── Calendar ─────────────────────────────────────────────── */
+  .ev-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .ev {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto;
+    gap: 18px;
+    align-items: center;
+    background: rgba(14,0,22,.55);
+    border: 3px solid rgba(255,255,255,.18);
+    border-radius: var(--r);
+    padding: 14px 18px;
+  }
+  .ev--soon { border-color: var(--banana); background: rgba(255,201,60,.09); }
+
+  .ev__date {
+    display: grid; place-items: center;
+    background: var(--banana); color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    width: 62px; padding: 6px 0;
+    box-shadow: 0 4px 0 var(--ink);
+  }
+  .ev__mon { font-size: 11px; font-weight: 900; line-height: 1; }
+  .ev__day { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 30px; line-height: .9; }
+
+  .ev__title { font-size: var(--t-b); font-weight: 900; color: var(--text); line-height: 1.3; }
+  .ev__note  { font-size: var(--t-sm); color: var(--text-dim); font-weight: 600; margin-top: 2px; }
+  .ev__when  { font-size: var(--t-xs); font-weight: 900; color: var(--banana); margin-top: 3px; }
+
+  .ev__x { display: none; background: none; border: none; color: var(--text-dim); font-size: 17px; cursor: pointer; padding: 0 4px; }
+  .ev__x:hover { color: #f23f43; }
+  .ev-list.admin-on .ev__x { display: block; }
+
+  .ev-empty {
+    border: 3px dashed rgba(255,255,255,.24);
+    border-radius: var(--r);
+    padding: 32px 24px;
+    text-align: center;
+    color: var(--text-dim);
+    font-weight: 700;
+  }
+
+  /* ── Admin ────────────────────────────────────────────────── */
+  .admin {
+    background: rgba(14,0,22,.72);
+    border: 3px dashed rgba(255,201,60,.4);
+    border-radius: var(--r);
+    opacity: 0; max-height: 0; overflow: hidden; pointer-events: none;
+    padding: 0 22px; margin-top: 18px;
+    transition: opacity .28s ease, max-height .4s ease, padding .3s ease;
+  }
+  .admin.is-open { opacity: 1; max-height: 900px; pointer-events: auto; padding: 22px; }
+  .admin h3 { font-family: 'Bebas Neue', Impact, sans-serif; font-size: 25px; color: var(--banana); font-weight: 400; margin-bottom: 14px; }
+  .admin__row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .in {
+    background: rgba(0,0,0,.45);
+    border: 2px solid rgba(255,255,255,.18);
+    border-radius: 8px; padding: 9px 12px;
+    font-size: var(--t-sm); color: var(--text);
+    font-family: 'Nunito', sans-serif; font-weight: 600;
+  }
+  .in:focus { outline: none; border-color: var(--banana); }
+  .in--bad { border-color: #f23f43; }
+  .abtn {
+    background: var(--banana); color: var(--ink);
+    border: 2px solid var(--ink); border-radius: 9px;
+    padding: 9px 16px; font-size: var(--t-sm); font-weight: 900;
+    cursor: pointer; font-family: 'Nunito', sans-serif;
+  }
+  .abtn--ghost { background: transparent; color: var(--text-mid); border-color: rgba(255,255,255,.25); }
+  .hint { font-size: var(--t-xs); color: var(--text-dim); font-weight: 700; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<div class="field" aria-hidden="true"></div>
+
+<nav class="nav">
+  <a class="nav__home" href="/v2/index.html">
+    <img class="nav__mark" src="/avatar.png" alt="" width="38" height="38" />
+    <span class="nav__name">aStubbyMonkey</span>
+  </a>
+  <div class="nav__links">
+    <a class="nav__link" href="/v2/index.html">Home</a>
+    <a class="nav__link" href="/v2/about.html">About</a>
+    <a class="nav__link" href="/v2/videos.html">Videos</a>
+    <a class="nav__link" href="/v2/status.html">Status</a>
+    <a class="nav__link" href="/v2/gtch.html">GTCH</a>
+    <a class="nav__link" href="/v2/gospel.html">The Gospel</a>
+  </div>
+  <div class="nav__social">
+    <a class="nav__icon" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener" aria-label="YouTube">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+    </a>
+    <button class="nav__icon" type="button" onclick="showDiscordPopup()" aria-label="My Discord">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.3.5a18.3 18.3 0 0 1 4.3 1.3 15.6 15.6 0 0 0-15 0A18.3 18.3 0 0 1 8.9 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9 .1 13.5.4 17.9A19.9 19.9 0 0 0 6.4 21l.6-.8a13 13 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 13 0l.5.4a13 13 0 0 1-2 1l.6.8a19.9 19.9 0 0 0 6-3.1c.4-5.1-.6-9.5-3.3-13.5ZM8.1 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="above">
+
+  <!-- ══ WHO ══ -->
+  <header class="wrap phead">
+    <div class="about-lead">
+      <div class="about-face">
+        <img class="about-av" data-egg="avatar" src="/avatar.png" alt="aStubbyMonkey" />
+        <img class="about-hat" src="/Chromecowboyhat.png" alt="" />
+      </div>
+      <div>
+        <h1 class="title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);margin-bottom:16px;">About me</h1>
+        <p class="about-p">
+          I'm aStubbyMonkey — a <em>content creator</em> and <em>filmmaker</em>. I love making things,
+          and I'm not picky about what. Games, videos, drawings, mods, whatever's in front of me.
+        </p>
+        <p class="about-p">
+          I like anything fast-paced, and I'm especially bad at putting down a good <em>rhythm game</em>.
+        </p>
+        <p class="about-p">
+          Most importantly: I don't just believe in God, I <em>follow Him with a passion</em>. My life
+          ends at some point, and the only thing I get to bring to heaven is the people who came to
+          Jesus because of me. My life is devoted to the <em>Father, Son, and Holy Spirit</em>.
+        </p>
+        <div style="margin-top:24px;">
+          <a class="btn" href="/v2/gospel.html">Read what I mean by that</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ TOP 5 ══ -->
+  <section class="wrap section" aria-labelledby="games-h">
+    <h2 class="sec-h" id="games-h">Top 5 games of all time</h2>
+    <p class="sec-note">This list is correct and I will not be taking questions.</p>
+
+    <div class="ranks">
+      <article class="rank rank--1">
+        <div class="rank__n">1</div>
+        <div>
+          <h3 class="rank__name">Jurassic World: Aftermath</h3>
+          <p class="rank__why">The best VR game of all time. It does NOT compare with Gorilla Tag. Trust.</p>
+        </div>
+      </article>
+
+      <article class="rank rank--2">
+        <div class="rank__n">2</div>
+        <div>
+          <h3 class="rank__name">A Dance of Fire and Ice</h3>
+          <p class="rank__why">The best 2D rhythm game there is. FNF, osu!, GD — they have nothing on this.</p>
+        </div>
+      </article>
+
+      <article class="rank rank--3">
+        <div class="rank__n">3</div>
+        <div>
+          <h3 class="rank__name">PARKOUR Reborn</h3>
+          <p class="rank__why">The smoothest, highest quality, most fun and challenging Roblox game out right now.</p>
+        </div>
+      </article>
+
+      <article class="rank">
+        <div class="rank__n">4</div>
+        <div>
+          <h3 class="rank__name">Gorilla Tag</h3>
+          <p class="rank__why">I played VR a full year before Gorilla Tag released. I was on my Beat Saber arc and didn't care to play until after Christmas, when a friend finally talked me into it. If only I'd found it three months earlier…</p>
+        </div>
+      </article>
+
+      <article class="rank">
+        <div class="rank__n">5</div>
+        <div>
+          <h3 class="rank__name">Trombone Champ: Unflattened</h3>
+          <p class="rank__why">Toot… hehe… toot… I love trombone… hehe… Beat Saber good too I guess.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══ CALENDAR ══ -->
+  <section class="wrap section" style="padding-top:0;" aria-labelledby="cal-h">
+    <h2 class="sec-h" id="cal-h">What's coming up</h2>
+    <p class="sec-note">Uploads, GTCH events, and when I'm going to be away.</p>
+
+    <div class="ev-list" id="ev-list">
+      <div class="ev-empty">Loading the calendar…</div>
+    </div>
+
+    <!-- hidden until unlocked -->
+    <div class="admin" id="admin">
+      <div id="admin-login">
+        <h3>Sign in</h3>
+        <div class="admin__row">
+          <input class="in" style="flex:1;min-width:180px;" type="email" id="ad-email" placeholder="Email" autocomplete="username" />
+          <input class="in" style="flex:1;min-width:150px;" type="password" id="ad-pass" placeholder="Password" autocomplete="current-password" />
+          <button class="abtn" id="ad-login">Sign in</button>
+        </div>
+        <p class="hint" id="ad-error" hidden>That didn't work. Check the email and password.</p>
+      </div>
+
+      <div id="admin-panel" hidden>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+          <h3 style="margin:0;">Add something to the calendar</h3>
+          <button class="abtn abtn--ghost" id="ad-logout">Sign out</button>
+        </div>
+        <div class="admin__row" style="margin-top:14px;">
+          <input class="in" type="date" id="ev-date" />
+          <input class="in" style="flex:1;min-width:200px;" id="ev-title" placeholder="What's happening" />
+          <input class="in" style="flex:1;min-width:170px;" id="ev-note" placeholder="Detail (optional)" />
+          <button class="abtn" id="ev-add">Add</button>
+        </div>
+        <p class="hint">Anything dated before today drops off the list on its own. Click the ✕ on an entry to remove it early.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot__in">
+    <div class="foot__name">aStubbyMonkey</div>
+    <div class="foot__meta">
+      Built with 💜 —
+      <a href="mailto:contactastubbymonkey@gmail.com">contactastubbymonkey@gmail.com</a>
+    </div>
+    <div class="foot__v">v0.3.0</div>
+  </div>
+</footer>
+
+<script src="/v2/assets/site.js"></script>
+
+<script>
+/* ═══ ADMIN UNLOCK — type "admin" ═══════════════════════════════ */
+(function () {
+  var buf = '';
+  document.addEventListener('keydown', function (e) {
+    var tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (!/^[a-z]$/i.test(e.key)) return;
+    buf = (buf + e.key.toLowerCase()).slice(-5);
+    if (buf === 'admin') {
+      buf = '';
+      var panel = document.getElementById('admin');
+      var open = panel.classList.toggle('is-open');
+      document.getElementById('ev-list').classList.toggle('admin-on', open);
+      if (open) panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+})();
+</script>
+
+<script type="module">
+/* ═══ CALENDAR — Firebase, same project as the status board ═════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyBe1Ex5z_tDW4JuLZaHs-65_kMM0jfFjX8",
+  authDomain: "astubbymonkey-status.firebaseapp.com",
+  projectId: "astubbymonkey-status",
+  storageBucket: "astubbymonkey-status.firebasestorage.app",
+  messagingSenderId: "410093699659",
+  appId: "1:410093699659:web:bc3a00c3f70b3f8b0c43ce",
+  databaseURL: "https://astubbymonkey-status-default-rtdb.firebaseio.com"
+});
+
+const db = getDatabase(app);
+const auth = getAuth(app);
+const $ = (id) => document.getElementById(id);
+
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Local "today" as YYYY-MM-DD. ISO date strings sort and compare as plain
+// text, so this avoids Date parsing and its timezone surprises entirely.
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' +
+         String(d.getMonth() + 1).padStart(2, '0') + '-' +
+         String(d.getDate()).padStart(2, '0');
+}
+
+function daysUntil(iso) {
+  const [y, m, d] = iso.split('-').map(Number);
+  const then = new Date(y, m - 1, d);
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return Math.round((then - now) / 86400000);
+}
+
+function whenLabel(iso) {
+  const n = daysUntil(iso);
+  if (n <= 0) return 'Today';
+  if (n === 1) return 'Tomorrow';
+  if (n < 7) return 'In ' + n + ' days';
+  if (n < 14) return 'Next week';
+  return '';
+}
+
+function row(key, ev) {
+  const [y, m, d] = ev.date.split('-').map(Number);
+  const when = whenLabel(ev.date);
+  const soon = daysUntil(ev.date) <= 7;
+  return '<article class="ev' + (soon ? ' ev--soon' : '') + '" data-key="' + key + '">' +
+           '<div class="ev__date"><span class="ev__mon">' + MONTHS[m - 1] + '</span>' +
+           '<span class="ev__day">' + d + '</span></div>' +
+           '<div>' +
+             '<h3 class="ev__title">' + esc(ev.title) + '</h3>' +
+             (ev.note ? '<p class="ev__note">' + esc(ev.note) + '</p>' : '') +
+             (when ? '<p class="ev__when">' + when + '</p>' : '') +
+           '</div>' +
+           '<button class="ev__x" data-key="' + key + '" aria-label="Remove">✕</button>' +
+         '</article>';
+}
+
+// If the database never answers, say so rather than spinning forever.
+let answered = false;
+setTimeout(() => {
+  if (!answered) {
+    $('ev-list').innerHTML =
+      '<div class="ev-empty">Can\'t reach the calendar right now. Try a refresh.</div>';
+  }
+}, 9000);
+
+onValue(ref(db, 'about/events'), (snap) => {
+  answered = true;
+  const data = snap.val() || {};
+  const list = $('ev-list');
+  const today = todayISO();
+
+  const rows = Object.entries(data)
+    .filter(([, ev]) => ev && ev.date && ev.date >= today)   // past events fall off
+    .sort((a, b) => a[1].date.localeCompare(b[1].date))
+    .slice(0, 12);
+
+  list.innerHTML = rows.length
+    ? rows.map(([k, ev]) => row(k, ev)).join('')
+    : '<div class="ev-empty">Nothing on the calendar right now. Check back.</div>';
+});
+
+$('ev-list').addEventListener('click', (e) => {
+  const btn = e.target.closest('.ev__x');
+  if (btn) set(ref(db, 'about/events/' + btn.dataset.key), null);
+});
+
+/* ── auth ──────────────────────────────────────────────────── */
+onAuthStateChanged(auth, (user) => {
+  $('admin-login').hidden = !!user;
+  $('admin-panel').hidden = !user;
+});
+
+$('ad-login').addEventListener('click', () => {
+  signInWithEmailAndPassword(auth, $('ad-email').value.trim(), $('ad-pass').value)
+    .catch(() => {
+      $('ad-error').hidden = false;
+      $('ad-email').classList.add('in--bad');
+      $('ad-pass').classList.add('in--bad');
+    });
+});
+$('ad-pass').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('ad-login').click(); });
+$('ad-logout').addEventListener('click', () => signOut(auth));
+
+function addEvent() {
+  const date = $('ev-date').value;
+  const title = $('ev-title').value.trim();
+  if (!date || !title) {
+    $('ev-date').classList.toggle('in--bad', !date);
+    $('ev-title').classList.toggle('in--bad', !title);
+    return;
+  }
+  $('ev-date').classList.remove('in--bad');
+  $('ev-title').classList.remove('in--bad');
+  push(ref(db, 'about/events'), { date, title, note: $('ev-note').value.trim() });
+  $('ev-title').value = '';
+  $('ev-note').value = '';
+}
+
+$('ev-add').addEventListener('click', addEvent);
+$('ev-title').addEventListener('keydown', (e) => { if (e.key === 'Enter') addEvent(); });
+$('ev-note').addEventListener('keydown', (e) => { if (e.key === 'Enter') addEvent(); });
+</script>
+
+</body>
+</html>

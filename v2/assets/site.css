@@ -89,9 +89,8 @@ a { color: inherit; }
 }
 
 /* ── THE FIELD ──────────────────────────────────────────────
-   Purple ground + tiled gorilla-face silhouettes. The tile is an
-   inline SVG data URI (~700B) rather than the 4096px PNG, which
-   would decode to ~67MB for a background texture.
+   Purple ground. site.js injects a canvas that drifts small
+   gorilla faces across it and nudges them away from the cursor.
    ──────────────────────────────────────────────────────────── */
 .field {
   position: fixed;
@@ -99,8 +98,15 @@ a { color: inherit; }
   z-index: 0;
   pointer-events: none;
   background-color: var(--grape);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='210' viewBox='0 0 180 210'%3E%3Cg fill='%23000' fill-opacity='0.07'%3E%3Cg transform='translate(45 30) rotate(-12 45 60)'%3E%3Cellipse cx='25' cy='29' rx='24' ry='22'/%3E%3Cellipse cx='65' cy='29' rx='24' ry='22'/%3E%3Crect x='27' y='27' width='36' height='64' rx='18'/%3E%3Cellipse cx='33' cy='93' rx='13' ry='11'/%3E%3Cellipse cx='57' cy='93' rx='13' ry='11'/%3E%3C/g%3E%3Cg transform='translate(-45 135) rotate(9 45 60) scale(0.62)'%3E%3Cellipse cx='25' cy='29' rx='24' ry='22'/%3E%3Cellipse cx='65' cy='29' rx='24' ry='22'/%3E%3Crect x='27' y='27' width='36' height='64' rx='18'/%3E%3C/g%3E%3Cg transform='translate(120 140) rotate(24 45 60) scale(0.5)'%3E%3Cellipse cx='25' cy='29' rx='24' ry='22'/%3E%3Cellipse cx='65' cy='29' rx='24' ry='22'/%3E%3Crect x='27' y='27' width='36' height='64' rx='18'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 180px 210px;
+  overflow: hidden;
+}
+
+.field__fx {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* darker ground for reading-heavy pages */
@@ -108,6 +114,7 @@ a { color: inherit; }
 .field--night::after {
   content: '';
   position: absolute; inset: 0;
+  z-index: 1;
   background: radial-gradient(ellipse at 50% -10%, rgba(119,0,177,.42), transparent 62%);
 }
 
@@ -115,6 +122,7 @@ a { color: inherit; }
 .field::before {
   content: '';
   position: absolute; inset: 0;
+  z-index: 1;
   background: radial-gradient(ellipse at 50% 40%, transparent 20%, rgba(24,3,37,.72) 100%);
 }
 
@@ -254,6 +262,8 @@ h1, h2, h3 { font-weight: 800; line-height: 1.15; }
   transform: translateY(-2px);
 }
 .nav__icon svg { width: 21px; height: 21px; display: block; }
+/* the Discord control is a button (the server isn't open yet), not a link */
+button.nav__icon { font: inherit; cursor: pointer; padding: 0; }
 
 /* ── BUTTONS ────────────────────────────────────────────────── */
 .btn {
@@ -368,6 +378,7 @@ a.sticker:active, button.sticker:active {
 }
 
 /* per-card accent on the art panel */
+.hub__card--about  .hub__art { background: linear-gradient(150deg, #7A8A9B, #35414F); }
 .hub__card--videos .hub__art { background: linear-gradient(150deg, #B01243, #6A0A28); }
 .hub__card--status .hub__art { background: linear-gradient(150deg, #2F7DF6, #123A7A); }
 .hub__card--gtch   .hub__art { background: linear-gradient(150deg, #1E7F45, #0A3A1F); }
@@ -530,6 +541,22 @@ a.sticker:active, button.sticker:active {
 }
 .pop-box__x:hover { transform: translateY(-2px); }
 
+.pop-box__actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pop-box__alt {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 24px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  background: #5865F2;
+  color: #fff;
+  font-weight: 900;
+  font-size: var(--t-b);
+  text-decoration: none;
+  box-shadow: 0 5px 0 var(--ink);
+}
+.pop-box__alt:hover { transform: translateY(-3px); box-shadow: 0 8px 0 var(--ink); }
+.pop-box__alt svg { width: 20px; height: 20px; }
+
 /* ── TAG WIPE (page transition) ─────────────────────────────
    You get tagged. Purple slab of monkey faces slams across.
    ──────────────────────────────────────────────────────────── */
@@ -540,8 +567,8 @@ a.sticker:active, button.sticker:active {
   pointer-events: none;
   transform: translate3d(0, 100%, 0);
   background-color: var(--grape);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='210' viewBox='0 0 180 210'%3E%3Cg fill='%23000' fill-opacity='0.13'%3E%3Cg transform='translate(45 30) rotate(-12 45 60)'%3E%3Cellipse cx='25' cy='29' rx='24' ry='22'/%3E%3Cellipse cx='65' cy='29' rx='24' ry='22'/%3E%3Crect x='27' y='27' width='36' height='64' rx='18'/%3E%3Cellipse cx='33' cy='93' rx='13' ry='11'/%3E%3Cellipse cx='57' cy='93' rx='13' ry='11'/%3E%3C/g%3E%3Cg transform='translate(-45 135) rotate(9 45 60) scale(0.62)'%3E%3Cellipse cx='25' cy='29' rx='24' ry='22'/%3E%3Cellipse cx='65' cy='29' rx='24' ry='22'/%3E%3Crect x='27' y='27' width='36' height='64' rx='18'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 180px 210px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' viewBox='0 0 170 150'%3E%3Cg transform='translate(35 25) rotate(-10 50 40)'%3E%3Cg fill='%23000' fill-opacity='0.12'%3E%3Cellipse cx='27' cy='29' rx='26' ry='25'/%3E%3Cellipse cx='73' cy='29' rx='26' ry='25'/%3E%3Crect x='32' y='33' width='36' height='30' rx='16'/%3E%3Cellipse cx='36' cy='64' rx='13' ry='11'/%3E%3Cellipse cx='64' cy='64' rx='13' ry='11'/%3E%3C/g%3E%3Cg fill='%23000' fill-opacity='0.20'%3E%3Cellipse cx='27' cy='27' rx='13' ry='10'/%3E%3Cellipse cx='73' cy='27' rx='13' ry='10'/%3E%3Cellipse cx='50' cy='56' rx='11' ry='4.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: 170px 150px;
   display: grid;
   place-items: center;
 }
@@ -556,10 +583,16 @@ a.sticker:active, button.sticker:active {
   font-family: 'Bebas Neue', Impact, sans-serif;
   font-size: clamp(70px, 18vw, 200px);
   color: var(--paper);
-  line-height: .8;
+  line-height: .82;
   text-shadow: 0 8px 0 var(--grape-deep);
   transform: rotate(-5deg);
+  text-align: center;
+  padding-inline: 5vw;
+  max-width: 100%;
 }
+/* longer taunts need to come down a size or two to fit */
+.tag-wipe__word--mid  { font-size: clamp(52px, 12vw, 132px); }
+.tag-wipe__word--long { font-size: clamp(38px, 8.5vw, 96px); }
 
 /* ── CURSOR (fine pointers only) ────────────────────────────── */
 .cur-dot, .cur-ring { display: none; }

@@ -143,6 +143,7 @@
   </a>
   <div class="nav__links">
     <a class="nav__link" href="/v2/index.html">Home</a>
+    <a class="nav__link" href="/v2/about.html">About</a>
     <a class="nav__link" href="/v2/videos.html">Videos</a>
     <a class="nav__link" href="/v2/status.html">Status</a>
     <a class="nav__link" href="/v2/gtch.html">GTCH</a>
@@ -152,9 +153,9 @@
     <a class="nav__icon" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener" aria-label="YouTube">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.5 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
     </a>
-    <a class="nav__icon" href="https://discord.gg/StQGJEyHEC" target="_blank" rel="noopener" aria-label="GTCH Discord">
+    <button class="nav__icon" type="button" onclick="showDiscordPopup()" aria-label="My Discord">
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.3.5a18.3 18.3 0 0 1 4.3 1.3 15.6 15.6 0 0 0-15 0A18.3 18.3 0 0 1 8.9 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.6 9 .1 13.5.4 17.9A19.9 19.9 0 0 0 6.4 21l.6-.8a13 13 0 0 1-2-1l.5-.4a14.2 14.2 0 0 0 13 0l.5.4a13 13 0 0 1-2 1l.6.8a19.9 19.9 0 0 0 6-3.1c.4-5.1-.6-9.5-3.3-13.5ZM8.1 15.3c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Zm7.8 0c-1.2 0-2.2-1.1-2.2-2.4s1-2.4 2.2-2.4 2.2 1.1 2.2 2.4-1 2.4-2.2 2.4Z"/></svg>
-    </a>
+    </button>
   </div>
 </nav>
 
@@ -184,10 +185,19 @@
   <section class="wrap section" aria-labelledby="hub-h">
     <div class="hub-head">
       <h2 class="title-lg" id="hub-h">Pick somewhere</h2>
-      <p>Five doors. The last one is locked.</p>
+      <p>Six doors. The last one is locked.</p>
     </div>
 
     <div class="hub">
+
+      <a class="sticker sticker--tilt-r hub__card hub__card--about" href="/v2/about.html">
+        <div class="hub__art"><div class="hub__glyph">🤠</div></div>
+        <div class="hub__body">
+          <h3 class="hub__name">About me</h3>
+          <p class="hub__desc">Who I am, what I make, my top five games of all time, and what's coming up next.</p>
+          <span class="hub__go">Get to know me</span>
+        </div>
+      </a>
 
       <a class="sticker sticker--tilt-l hub__card hub__card--videos" href="/v2/videos.html">
         <div class="hub__art" id="hub-art-videos">
@@ -233,7 +243,7 @@
         <div class="hub__art hub__art--soon"><span>SOON</span></div>
         <div class="hub__body">
           <h3 class="hub__name">Locked</h3>
-          <p class="hub__desc">I'm building a VR game. It has a name. You don't get it yet.</p>
+          <p class="hub__desc">Something's being built behind this door. That's genuinely all you're getting for now.</p>
           <span class="hub__go">Try the handle</span>
         </div>
       </button>
@@ -266,18 +276,18 @@
   var tries = 0;
   var lines = [
     "It's locked. It stays locked.",
-    "Still locked. You're not the first to try.",
-    "Third time. Genuinely, it's a VR game and it isn't ready.",
-    "Okay, you're committed. Here's one thing: it isn't a Gorilla Tag fangame."
+    "Still locked. You're not the first to try the handle.",
+    "Third time. I admire the persistence. The answer is still no.",
+    "Okay — you've earned exactly one word, and the word is <em>soon</em>. That's it. That's the word."
   ];
   document.getElementById('soon-card').addEventListener('click', function () {
     var msg = lines[Math.min(tries, lines.length - 1)];
     tries++;
     window.smPopup({
-      glyph: tries > 3 ? '🔓' : '🔒',
-      title: tries > 3 ? 'Fine, a crumb' : 'Locked',
+      glyph: tries > 3 ? '🔑' : '🔒',
+      title: tries > 3 ? 'One word' : 'Locked',
       text: msg,
-      ok: tries > 3 ? 'Worth it' : 'Alright'
+      ok: tries > 3 ? "I'll wait" : 'Alright'
     });
   });
 })();
