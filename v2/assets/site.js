@@ -57,21 +57,30 @@
     var eyeColor  = (css.getPropertyValue('--face-eye')  || '#FFFFFF').trim();
 
     // To swap in custom art, put data-sprite="/your-image.png" on the .field
-    // element. No JS change needed — the aspect ratio is read off the file.
-    // Art is treated as pixel art (see pixel below); drop data-sprite-smooth
-    // on the element if you ever point this at a smooth, non-pixel image.
+    // element. Pass a comma-separated list to mix several — each drifting
+    // piece picks one at random, so a set of differently coloured boards
+    // scatters instead of repeating. Aspect ratio is read per file, so they
+    // need not be the same shape. Art is treated as pixel art (see pixel
+    // below); add data-sprite-smooth for smooth, non-pixel images.
     var customSprite = field.getAttribute('data-sprite');
     var pixel = !!customSprite && !field.hasAttribute('data-sprite-smooth');
 
-    var sprite = new Image();
-    var ready = false;
-    var ratio = 0.8;                                   // the drawn glyph is 100x80
-    sprite.onload = function () {
-      ready = true;
-      if (sprite.naturalWidth) ratio = sprite.naturalHeight / sprite.naturalWidth;
-    };
-    sprite.onerror = function () { ready = false; };   // a bad path just means no texture
-    sprite.src = customSprite || monkeyUri(bodyColor, eyeColor);
+    var sources = customSprite
+      ? customSprite.split(',').map(function (t) { return t.trim(); }).filter(Boolean)
+      : [monkeyUri(bodyColor, eyeColor)];
+
+    // one entry per source; a file that fails to load simply never draws
+    var sprites = sources.map(function (src) {
+      var rec = { img: new Image(), ready: false, ratio: 0.8 };   // glyph is 100x80
+      rec.img.onload = function () {
+        rec.ready = true;
+        if (rec.img.naturalWidth) rec.ratio = rec.img.naturalHeight / rec.img.naturalWidth;
+        if (reduced) draw();
+      };
+      rec.img.onerror = function () { rec.ready = false; };
+      rec.img.src = src;
+      return rec;
+    });
 
     var faces = [];
     var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -88,6 +97,7 @@
           x: Math.random() * W,
           y: Math.random() * H,
           s: s,
+          si: (Math.random() * sprites.length) | 0,
           rot: pixel ? 0 : (Math.random() - 0.5) * 0.9,
           spin: pixel ? 0 : (Math.random() - 0.5) * 0.0022,
           vx: (Math.random() - 0.5) * 0.16,
@@ -114,10 +124,11 @@
 
     function draw() {
       ctx.clearRect(0, 0, W, H);
-      if (!ready) return;
 
       for (var i = 0; i < faces.length; i++) {
         var f = faces[i];
+        var rec = sprites[f.si];
+        if (!rec || !rec.ready) continue;          // still loading, or a bad path
 
         if (!reduced) {
           f.x += f.vx;
@@ -144,19 +155,19 @@
           if (f.x > W + m) f.x = -m;
         }
 
-        var w = f.s, h = f.s * ratio;
+        var w = f.s, h = f.s * rec.ratio;
         ctx.save();
         ctx.globalAlpha = f.a;
         if (pixel) {
           // whole-pixel size and position, so the art stays crisp instead of
           // shimmering as it drifts across sub-pixel offsets
           w = Math.round(w); h = Math.round(h);
-          ctx.drawImage(sprite,
+          ctx.drawImage(rec.img,
             Math.round(f.x + f.ox - w / 2), Math.round(f.y + f.oy - h / 2), w, h);
         } else {
           ctx.translate(f.x + f.ox, f.y + f.oy);
           ctx.rotate(f.rot);
-          ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+          ctx.drawImage(rec.img, -w / 2, -h / 2, w, h);
         }
         ctx.restore();
       }
@@ -168,12 +179,7 @@
     window.addEventListener('resize', size);
 
     if (reduced) {
-      sprite.onload = function () {
-        ready = true;
-        if (sprite.naturalWidth) ratio = sprite.naturalHeight / sprite.naturalWidth;
-        draw();
-      };
-      if (ready) draw();
+      draw();                     // each sprite also repaints as it finishes loading
       return;
     }
 
