@@ -68,6 +68,13 @@
 
 <main class="above">
 
+  <a class="live-bar" id="live-bar" href="#" target="_blank" rel="noopener" hidden>
+    <span class="live-bar__pip" aria-hidden="true"></span>
+    <span class="live-bar__now">Live right now!</span>
+    <span class="live-bar__title" id="live-bar-title"></span>
+    <span class="live-bar__go">Watch</span>
+  </a>
+
   <header class="wrap phead">
     <span class="phead__kicker">Updates itself</span>
     <h1 class="phead__title title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);">Videos</h1>
@@ -93,7 +100,7 @@
 
   <section class="wrap section" aria-labelledby="shorts-h">
     <h2 class="vid-h" id="shorts-h">Shorts</h2>
-    <p class="vid-note">Three minutes or less.</p>
+    <p class="vid-note">The vertical ones.</p>
     <div class="grid-shorts" id="shorts">
       <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
       <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
@@ -146,8 +153,15 @@
   var KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
   var CHANNEL = 'UCDlHHAvfs7GXP_l5IDYpgqw';
   var UPLOADS = 'UU' + CHANNEL.slice(2);
-  var CACHE = 'sm-videos-v1';
+  var CACHE = 'sm-videos-v2';
   var TTL = 30 * 60 * 1000;
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Live is checked on its own short clock. The video list can happily be
+  // half an hour stale; a "live right now" banner cannot — showing one
+  // twenty minutes after the stream ended is worse than showing none.
+  var LIVE_CACHE = 'sm-live-v1';
+  var LIVE_TTL = 3 * 60 * 1000;
 
   var PLAY = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
 
@@ -182,6 +196,51 @@
            '</a>';
   }
 
+  function showLive(live) {
+    var bar = document.getElementById('live-bar');
+    if (!bar) return;
+    if (!live || !live.id) { bar.hidden = true; return; }
+    bar.href = 'https://www.youtube.com/watch?v=' + live.id;
+    document.getElementById('live-bar-title').textContent = live.title || '';
+    bar.hidden = false;
+  }
+
+  function cacheLive(live) {
+    try { localStorage.setItem(LIVE_CACHE, JSON.stringify({ d: live || null, t: Date.now() })); } catch (e) {}
+  }
+
+  // Only ever a stream that is on air right now: liveBroadcastContent must
+  // read 'live'. A finished stream keeps its liveStreamingDetails but drops
+  // back to 'none', which is how VODs stay out of here.
+  function findLive(items) {
+    var hit = (items || []).filter(function (v) {
+      return v.snippet && v.snippet.liveBroadcastContent === 'live';
+    })[0];
+    return hit ? { id: hit.id, title: hit.snippet.title } : null;
+  }
+
+  function checkLive() {
+    try {
+      var c = JSON.parse(localStorage.getItem(LIVE_CACHE) || 'null');
+      if (c && Date.now() - c.t < LIVE_TTL) { showLive(c.d); return; }
+    } catch (e) {}
+    // a stream sits at the very top of the uploads playlist, so three is plenty
+    fetch(api + 'playlistItems?part=contentDetails&maxResults=3&playlistId=' + UPLOADS + '&key=' + KEY)
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        var ids = (d.items || []).map(function (i) { return i.contentDetails.videoId; }).filter(Boolean);
+        if (!ids.length) return null;
+        return fetch(api + 'videos?part=snippet&id=' + ids.join(',') + '&key=' + KEY)
+          .then(function (r) { return r.json(); })
+          .then(function (v) {
+            var live = findLive(v.items);
+            cacheLive(live);
+            showLive(live);
+          });
+      })
+      .catch(function () { /* no banner is the correct failure here */ });
+  }
+
   function fail(id, msg) {
     var el = document.getElementById(id);
     if (!el) return;
@@ -191,11 +250,59 @@
       '</p><a class="btn" href="https://www.youtube.com/@aStubbyMonkey" target="_blank" rel="noopener">Open the channel instead</a></div>';
   }
 
+  // How many shorts fit on one row. Read straight off the resolved grid
+  // rather than recomputing minmax() here — duplicating the CSS maths in JS
+  // means the two can disagree the moment either changes, and the mismatch
+  // shows up as a thumbnail loaded only to be clipped away.
+  function shortsFit() {
+    var el = document.getElementById('shorts');
+    if (!el) return 5;
+    var cols = getComputedStyle(el).gridTemplateColumns;
+    if (!cols || cols === 'none') return 5;
+    return Math.max(1, cols.trim().split(/\s+/).length);
+  }
+
+  var current = null, shownFit = -1;
+
+  function paintShorts(shorts) {
+    var n = shortsFit();
+    shownFit = n;
+    document.getElementById('shorts').innerHTML =
+      shorts.slice(0, n).map(function (v) { return tile(v, true); }).join('');
+  }
+
+  // a fast run-up that eases onto the real number
+  function countUp(el, target, delay) {
+    target = Number(target);
+    if (!isFinite(target)) { el.textContent = '—'; return; }
+    if (reducedMotion) { el.textContent = compact(target); return; }
+    var from = Math.min(9, target), DUR = 1100, t0 = null, settled = false;
+    function land() {
+      settled = true;
+      el.textContent = compact(target);
+    }
+    function step(now) {
+      if (settled) return;
+      if (t0 === null) t0 = now;
+      var t = Math.min(1, (now - t0) / DUR);
+      var k = 1 - Math.pow(1 - t, 3);
+      el.textContent = compact(Math.round(from + (target - from) * k));
+      if (t < 1) requestAnimationFrame(step);
+      else land();
+    }
+    setTimeout(function () { requestAnimationFrame(step); }, delay || 0);
+    // Animation frames stop in a background tab, which would strand the
+    // counter on a half-way number and quietly report the wrong figure.
+    // This guarantees the real one regardless of how the frames behave.
+    setTimeout(land, (delay || 0) + DUR + 150);
+  }
+
   function render(data) {
+    current = data;
     var shorts = data.shorts, longs = data.longs;
 
     if (shorts.length) {
-      document.getElementById('shorts').innerHTML = shorts.slice(0, 8).map(function (v) { return tile(v, true); }).join('');
+      paintShorts(shorts);
     } else {
       fail('shorts', 'No shorts came back from YouTube this time.');
     }
@@ -207,19 +314,32 @@
     }
 
     if (data.stats) {
-      document.getElementById('stat-subs').textContent = compact(data.stats.subscriberCount);
-      document.getElementById('stat-views').textContent = compact(data.stats.viewCount);
-      document.getElementById('stat-count').textContent = compact(data.stats.videoCount);
+      countUp(document.getElementById('stat-subs'),  data.stats.subscriberCount, 0);
+      countUp(document.getElementById('stat-views'), data.stats.viewCount, 90);
+      countUp(document.getElementById('stat-count'), data.stats.videoCount, 180);
     }
+
+    showLive(data.live);
   }
 
-  // serve from cache when it's fresh
-  try {
-    var hit = JSON.parse(localStorage.getItem(CACHE) || 'null');
-    if (hit && Date.now() - hit.t < TTL) { render(hit.d); return; }
-  } catch (e) { /* fall through and fetch */ }
+  // re-lay the shorts row when the width changes the column count
+  var rt = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(function () {
+      if (current && current.shorts && current.shorts.length && shortsFit() !== shownFit) {
+        paintShorts(current.shorts);
+      }
+    }, 180);
+  }, { passive: true });
 
   var api = 'https://www.googleapis.com/youtube/v3/';
+
+  // serve the lists from cache when fresh, but always settle live separately
+  try {
+    var hit = JSON.parse(localStorage.getItem(CACHE) || 'null');
+    if (hit && Date.now() - hit.t < TTL) { render(hit.d); checkLive(); return; }
+  } catch (e) { /* fall through and fetch */ }
 
   Promise.all([
     fetch(api + 'playlistItems?part=contentDetails&maxResults=50&playlistId=' + UPLOADS + '&key=' + KEY).then(function (r) { return r.json(); }),
@@ -234,23 +354,30 @@
 
     var stats = chan && chan.items && chan.items[0] ? chan.items[0].statistics : null;
 
-    return fetch(api + 'videos?part=contentDetails,snippet,liveStreamingDetails&id=' + ids.join(',') + '&key=' + KEY)
+    return fetch(api + 'videos?part=contentDetails,snippet,player,liveStreamingDetails&maxWidth=800&id=' + ids.join(',') + '&key=' + KEY)
       .then(function (r) { return r.json(); })
       .then(function (detail) {
         if (detail.error) throw new Error(detail.error.message || 'video detail error');
 
+        var live = findLive(detail.items);
+        cacheLive(live);
+
         var shorts = [], longs = [];
         (detail.items || []).forEach(function (v) {
           if (v.liveStreamingDetails) return;                       // no VODs
-          if (v.snippet.liveBroadcastContent === 'live') return;     // no live now
+          if (v.snippet.liveBroadcastContent === 'live') return;     // that's the banner's job
           var t = v.snippet.thumbnails || {};
           var pick = t.maxres || t.standard || t.high || t.medium || t.default;
           if (!pick) return;
           var item = { id: v.id, title: v.snippet.title, thumb: pick.url };
-          (isoSeconds(v.contentDetails.duration) <= 180 ? shorts : longs).push(item);
+          // Shape, not length: Shorts run to three minutes now, so duration no
+          // longer separates them. A portrait player means a Short.
+          var pl = v.player || {};
+          var portrait = pl.embedWidth && pl.embedHeight && pl.embedWidth / pl.embedHeight <= 1;
+          (portrait ? shorts : longs).push(item);
         });
 
-        var data = { shorts: shorts, longs: longs, stats: stats };
+        var data = { shorts: shorts, longs: longs, stats: stats, live: live };
         try { localStorage.setItem(CACHE, JSON.stringify({ d: data, t: Date.now() })); } catch (e) {}
         render(data);
       });

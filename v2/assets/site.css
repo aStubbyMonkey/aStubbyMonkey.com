@@ -508,7 +508,17 @@ a.sticker:active, button.sticker:active {
   overflow: hidden;
 }
 
-.grid-shorts { display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 20px; }
+/* One row of shorts, however many that is at this width. site.js renders
+   only what fits; the explicit first row plus zero-height implicit rows is
+   the belt-and-braces, so nothing can ever spill onto a second line. */
+.grid-shorts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  grid-template-rows: auto;
+  grid-auto-rows: 0;
+  gap: 20px;
+  overflow: hidden;
+}
 .grid-videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
 
 /* loading shimmer */
@@ -618,11 +628,36 @@ a.sticker:active, button.sticker:active {
   z-index: 900;
   pointer-events: none;
   transform: translate3d(0, 100%, 0);
-  background-color: var(--grape);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='170' height='150' viewBox='0 0 170 150'%3E%3Cg transform='translate(35 25) rotate(-10 50 40)'%3E%3Cg fill='%23000' fill-opacity='0.12'%3E%3Cellipse cx='27' cy='29' rx='26' ry='25'/%3E%3Cellipse cx='73' cy='29' rx='26' ry='25'/%3E%3Crect x='32' y='33' width='36' height='30' rx='16'/%3E%3Cellipse cx='36' cy='64' rx='13' ry='11'/%3E%3Cellipse cx='64' cy='64' rx='13' ry='11'/%3E%3C/g%3E%3Cg fill='%23000' fill-opacity='0.20'%3E%3Cellipse cx='27' cy='27' rx='13' ry='10'/%3E%3Cellipse cx='73' cy='27' rx='13' ry='10'/%3E%3Cellipse cx='50' cy='56' rx='11' ry='4.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  background-size: 170px 150px;
+  background: linear-gradient(180deg,
+    #C42BFF 0%, var(--grape) 32%, var(--grape-deep) 70%, var(--night) 100%);
   display: grid;
   place-items: center;
+
+  /* the crest shape, as a mask so the colour stays themable in CSS */
+  --wipe-wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,84 C200,-8 400,124 600,56 C800,-10 1010,116 1200,40 L1200,120 L0,120 Z' fill='%23000'/%3E%3C/svg%3E");
+}
+
+/* Two crests ride ahead of the slab so the page washes over instead of a
+   flat block slamming up. Absolute, so they stay out of the grid that
+   centres the word, and they sit above the slab rather than over it. */
+.tag-wipe::before,
+.tag-wipe::after {
+  content: '';
+  position: absolute;
+  /* wide enough that the offset copy below still cannot pull an edge
+     into frame on any screen */
+  left: -14%;
+  right: -14%;
+  bottom: calc(100% - 1px);        /* overlap, so no hairline shows at the join */
+  background: #C42BFF;
+  -webkit-mask: var(--wipe-wave) center bottom / 100% 100% no-repeat;
+  mask: var(--wipe-wave) center bottom / 100% 100% no-repeat;
+}
+.tag-wipe::before { height: clamp(58px, 11vw, 148px); }
+.tag-wipe::after {
+  height: clamp(92px, 16vw, 212px);
+  opacity: .34;
+  transform: translateX(-7%);
 }
 
 .tag-wipe.is-in  { animation: wipeIn .42s cubic-bezier(.5,0,.3,1) forwards; }
@@ -721,3 +756,77 @@ a.sticker:active, button.sticker:active {
   .foot__in { flex-direction: column; text-align: center; }
 }
 
+
+
+/* ── LIVE BAR (videos page) ──────────────────────────────────
+   Only ever shown for a stream that is on air this second.
+   ──────────────────────────────────────────────────────────── */
+.live-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: var(--wrap);
+  margin: 22px auto 0;
+  padding: 13px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: linear-gradient(100deg, #E02B3C, #B0122B);
+  box-shadow: 0 6px 0 var(--ink), 0 18px 32px rgba(0, 0, 0, .40);
+  color: var(--paper);
+  text-decoration: none;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.live-bar[hidden] { display: none; }
+.live-bar:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--ink), 0 22px 38px rgba(0, 0, 0, .46); }
+
+.live-bar__pip {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, .75);
+  animation: livePulse 1.6s ease-out infinite;
+}
+@keyframes livePulse {
+  70%  { box-shadow: 0 0 0 11px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0  rgba(255, 255, 255, 0); }
+}
+
+.live-bar__now {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 26px;
+  letter-spacing: .03em;
+  flex: none;
+}
+
+.live-bar__title {
+  font-size: var(--t-sm);
+  font-weight: 700;
+  opacity: .94;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.live-bar__go {
+  flex: none;
+  font-weight: 900;
+  font-size: var(--t-sm);
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, .28);
+}
+
+@media (max-width: 620px) {
+  /* smaller tiles on a phone, so the single row still holds a pair */
+  .grid-shorts { grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 14px; }
+  .live-bar { margin-inline: 18px; gap: 9px; padding: 11px 14px; }
+  .live-bar__title { display: none; }   /* the headline matters more than the title */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-bar__pip { animation: none; }
+}
