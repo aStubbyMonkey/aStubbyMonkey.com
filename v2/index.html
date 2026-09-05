@@ -134,7 +134,7 @@
 </head>
 <body>
 
-<div class="field" data-sprite="/v2/assets/art/monkey-pixel.png" aria-hidden="true"></div>
+<div class="field" data-sprite="/v2/assets/art/monkey-face.png" aria-hidden="true"></div>
 
 <nav class="nav">
   <a class="nav__home" href="/v2/index.html">
@@ -191,7 +191,9 @@
     <div class="hub">
 
       <a class="sticker sticker--tilt-r hub__card hub__card--about" href="/v2/about.html">
-        <div class="hub__art"><div class="hub__glyph">🤠</div></div>
+        <div class="hub__art">
+          <img src="/aStubbyMonkey_AboutMeCard.png" alt="" width="480" height="300" decoding="async" />
+        </div>
         <div class="hub__body">
           <h3 class="hub__name">About me</h3>
           <p class="hub__desc">Who I am, what I make, my top five games of all time, and what's coming up next.</p>
@@ -292,46 +294,78 @@
   });
 })();
 
-/* ── Latest thumbnail on the Videos door ─────────────────────────
-   Uses the uploads playlist (1 quota unit), NOT search (100 units).
-   A channel's uploads playlist id is its id with UC swapped for UU,
-   so this needs no lookup call. Result is cached for 30 minutes.
+/* ── A random real video on the Videos door ──────────────────────
+   Shorts and livestreams are excluded. Duration no longer identifies
+   a Short (they run to three minutes now), so this asks for the
+   player part with maxWidth — that reports the true frame size, and
+   anything portrait is a Short. Streams carry liveStreamingDetails.
+
+   Costs 1 unit per playlist page plus 1 per 50-video lookup, NOT the
+   100 units a search call would. The eligible LIST is cached, not the
+   pick, so the door shows a different video on every visit for free.
    ──────────────────────────────────────────────────────────────── */
 (function () {
   var KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
   var UPLOADS = 'UUDlHHAvfs7GXP_l5IDYpgqw';
-  var CACHE = 'sm-latest-thumb';
+  var API = 'https://www.googleapis.com/youtube/v3/';
+  var CACHE = 'sm-real-videos-v1';
   var TTL = 30 * 60 * 1000;
+  var MAX_PAGES = 3;                       // 150 most recent uploads is plenty
 
-  function paint(src) {
-    if (!src) return;
+  function paint(list) {
+    if (!list || !list.length) return;
     var art = document.getElementById('hub-art-videos');
     if (!art) return;
+    var pick = list[(Math.random() * list.length) | 0];
     var img = new Image();
     img.alt = '';
     img.decoding = 'async';
     img.onload = function () { art.replaceChildren(img); };
-    img.src = src;
+    img.src = pick.src;
   }
 
   try {
     var hit = JSON.parse(localStorage.getItem(CACHE) || 'null');
-    if (hit && Date.now() - hit.t < TTL) { paint(hit.src); return; }
+    if (hit && Date.now() - hit.t < TTL) { paint(hit.list); return; }
   } catch (e) { /* private mode, or junk in storage — just refetch */ }
 
-  fetch('https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=1&playlistId=' +
-        UPLOADS + '&key=' + KEY)
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      var item = d.items && d.items[0];
-      if (!item) return;
-      var t = item.snippet.thumbnails || {};
-      var pick = t.maxres || t.standard || t.high || t.medium || t.default;
-      if (!pick) return;
-      paint(pick.url);
-      try { localStorage.setItem(CACHE, JSON.stringify({ src: pick.url, t: Date.now() })); } catch (e) {}
-    })
-    .catch(function () { /* the emoji stays — nothing to undo */ });
+  function get(q) {
+    return fetch(API + q + '&key=' + KEY).then(function (r) { return r.json(); });
+  }
+
+  var ids = [];
+  function page(token, n) {
+    return get('playlistItems?part=contentDetails&maxResults=50&playlistId=' + UPLOADS +
+               (token ? '&pageToken=' + token : ''))
+      .then(function (d) {
+        (d.items || []).forEach(function (i) { ids.push(i.contentDetails.videoId); });
+        if (d.nextPageToken && n + 1 < MAX_PAGES) return page(d.nextPageToken, n + 1);
+      });
+  }
+
+  page('', 0).then(function () {
+    var batches = [];
+    for (var i = 0; i < ids.length; i += 50) batches.push(ids.slice(i, i + 50));
+    return Promise.all(batches.map(function (b) {
+      return get('videos?part=snippet,player,liveStreamingDetails&maxWidth=800&id=' + b.join(','));
+    }));
+  }).then(function (pages) {
+    var list = [];
+    pages.forEach(function (d) {
+      (d.items || []).forEach(function (v) {
+        if (v.liveStreamingDetails) return;                 // stream or premiere
+        var pl = v.player || {};
+        if (!pl.embedWidth || !pl.embedHeight) return;
+        if (pl.embedWidth / pl.embedHeight <= 1) return;     // portrait means Short
+        var t = v.snippet.thumbnails || {};
+        var thumb = t.maxres || t.standard || t.high || t.medium || t.default;
+        if (thumb) list.push({ src: thumb.url });
+      });
+    });
+    if (!list.length) return;
+    paint(list);
+    try { localStorage.setItem(CACHE, JSON.stringify({ list: list, t: Date.now() })); } catch (e) {}
+  }).catch(function () { /* the emoji stays — nothing to undo */ });
 })();
 
 /* ── Intro: the avatar drops into its slot. Once per session. ── */
