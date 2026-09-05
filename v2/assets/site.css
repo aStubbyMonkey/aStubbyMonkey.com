@@ -128,16 +128,25 @@ a { color: inherit; }
   background: radial-gradient(ellipse at 50% 40%, transparent 26%, rgba(9,11,13,.82) 100%);
 }
 
-/* checkered racing bands — start line, finish line */
-.race-strip {
-  position: relative;
-  z-index: 1;
-  height: 24px;
-  background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 24px 24px;
-  border-block: 3px solid var(--ink);
+/* checkered racing lines running the full height of both edges */
+.race-line {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: 26px;
+  z-index: 70;
+  pointer-events: none;
+  background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 23px 23px;
 }
+.race-line--l { left: 0;  border-right: 3px solid var(--ink); }
+.race-line--r { right: 0; border-left:  3px solid var(--ink); }
+
+/* the page insets itself so nothing runs underneath the lines */
+.raceway { padding-inline: 30px; }
+
 @media (max-width: 620px) {
-  .race-strip { height: 18px; background-size: 18px 18px; }
+  .race-line { width: 17px; background-size: 15px 15px; }
+  .raceway { padding-inline: 19px; }
 }
 
 /* darker ground for reading-heavy pages */
