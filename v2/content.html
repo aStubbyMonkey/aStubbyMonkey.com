@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Videos — aStubbyMonkey</title>
 <meta name="description" content="Every short and every upload from the aStubbyMonkey channel, pulled live, plus subscriber and view counts." />
-<link rel="canonical" href="https://astubbymonkey.com/v2/videos.html" />
+<link rel="canonical" href="https://astubbymonkey.com/v2/content.html" />
 <link rel="icon" type="image/png" href="/favicon.png" />
 
 <meta property="og:type" content="website" />
@@ -51,7 +51,7 @@
   <div class="nav__links">
     <a class="nav__link" href="/v2/index.html">Home</a>
     <a class="nav__link" href="/v2/about.html">About</a>
-    <a class="nav__link" href="/v2/videos.html">Videos</a>
+    <a class="nav__link" href="/v2/content.html">Content</a>
     <a class="nav__link" href="/v2/status.html">Status</a>
     <a class="nav__link" href="/v2/gtch.html">GTCH</a>
     <a class="nav__link" href="/v2/gospel.html">The Gospel</a>
@@ -77,44 +77,76 @@
 
   <header class="wrap phead">
     <span class="phead__kicker">Updates itself</span>
-    <h1 class="phead__title title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);">Videos</h1>
-    <p class="lede">Pulled straight from the channel every time this page loads. Livestreams and VODs are filtered out, so this is just the edited stuff.</p>
+    <h1 class="phead__title title-lg" style="color:var(--paper);text-shadow:0 6px 0 var(--grape-deep);">Content</h1>
+    <p class="lede">Everything the channel has — the numbers, the videos, and the streams. Pulled straight from YouTube every time this page loads.</p>
+
+    <nav class="jump" aria-label="Jump to a section">
+      <a class="jump__link" href="#statistics">Statistics</a>
+      <a class="jump__link" href="#videos">Videos</a>
+      <a class="jump__link" href="#livestreams">Livestreams</a>
+    </nav>
   </header>
 
-  <section class="wrap" aria-label="Channel numbers">
-    <div class="slabs">
-      <div class="slab">
-        <div class="slab__num" id="stat-subs">—</div>
-        <div class="slab__label">Subscribers</div>
-      </div>
-      <div class="slab">
-        <div class="slab__num" id="stat-views">—</div>
-        <div class="slab__label">Total views</div>
-      </div>
-      <div class="slab">
-        <div class="slab__num" id="stat-count">—</div>
-        <div class="slab__label">Videos posted</div>
+  <!-- ══ 01 · STATISTICS ══ -->
+  <section class="panel" id="statistics" aria-labelledby="stats-h">
+    <div class="wrap">
+      <p class="panel__no">01</p>
+      <h2 class="panel__h" id="stats-h">Statistics</h2>
+      <p class="vid-note">Straight off the channel, counted up fresh on every visit.</p>
+
+      <div class="slabs">
+        <div class="slab">
+          <div class="slab__num" id="stat-subs">—</div>
+          <div class="slab__label">Subscribers</div>
+        </div>
+        <div class="slab">
+          <div class="slab__num" id="stat-views">—</div>
+          <div class="slab__label">Total views</div>
+        </div>
+        <div class="slab">
+          <div class="slab__num" id="stat-count">—</div>
+          <div class="slab__label">Videos posted</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="wrap section" aria-labelledby="shorts-h">
-    <h2 class="vid-h" id="shorts-h">Shorts</h2>
-    <p class="vid-note">The vertical ones.</p>
-    <div class="grid-shorts" id="shorts">
-      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
-      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
-      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
-      <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+  <!-- ══ 02 · VIDEOS ══ -->
+  <section class="panel" id="videos" aria-labelledby="videos-h">
+    <div class="wrap">
+      <p class="panel__no">02</p>
+      <h2 class="panel__h" id="videos-h">Videos</h2>
+      <p class="vid-note">The edited stuff. No streams in here.</p>
+
+      <h3 class="vid-h" id="shorts-h">Shorts</h3>
+      <p class="vid-note">The vertical ones.</p>
+      <div class="grid-shorts" id="shorts" aria-labelledby="shorts-h">
+        <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+        <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+        <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+        <div class="tile tile--short tile--load"><div class="tile__img"></div></div>
+      </div>
+
+      <h3 class="vid-h vid-h--gap" id="longs-h">Full videos</h3>
+      <p class="vid-note">The ones that took a while.</p>
+      <div class="grid-videos" id="longs" aria-labelledby="longs-h">
+        <div class="tile tile--load"><div class="tile__img"></div></div>
+        <div class="tile tile--load"><div class="tile__img"></div></div>
+      </div>
     </div>
   </section>
 
-  <section class="wrap section" style="padding-top:0;" aria-labelledby="longs-h">
-    <h2 class="vid-h" id="longs-h">Full videos</h2>
-    <p class="vid-note">The ones that took a while.</p>
-    <div class="grid-videos" id="longs">
-      <div class="tile tile--load"><div class="tile__img"></div></div>
-      <div class="tile tile--load"><div class="tile__img"></div></div>
+  <!-- ══ 03 · LIVESTREAMS ══ -->
+  <section class="panel" id="livestreams" aria-labelledby="streams-h">
+    <div class="wrap">
+      <p class="panel__no">03</p>
+      <h2 class="panel__h" id="streams-h">Livestreams</h2>
+      <p class="vid-note">Streams that have already aired, newest first. If one is running right now it shows at the very top of this page instead.</p>
+
+      <div class="grid-videos" id="streams">
+        <div class="tile tile--load"><div class="tile__img"></div></div>
+        <div class="tile tile--load"><div class="tile__img"></div></div>
+      </div>
     </div>
   </section>
 
@@ -153,7 +185,7 @@
   var KEY = 'AIzaSyDWTT7w4_FxzVgE6P75v2VKYps_ZYRsc-c';
   var CHANNEL = 'UCDlHHAvfs7GXP_l5IDYpgqw';
   var UPLOADS = 'UU' + CHANNEL.slice(2);
-  var CACHE = 'sm-videos-v2';
+  var CACHE = 'sm-content-v3';
   var TTL = 30 * 60 * 1000;
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -313,6 +345,17 @@
       fail('longs', 'No full videos came back from YouTube this time.');
     }
 
+    var streams = data.streams || [];
+    if (streams.length) {
+      document.getElementById('streams').innerHTML = streams.slice(0, 6).map(function (v) { return tile(v, false); }).join('');
+    } else {
+      var se = document.getElementById('streams');
+      if (se) {
+        se.className = '';
+        se.innerHTML = '<div class="empty"><h3>No streams yet</h3><p>Nothing has aired that YouTube still has a recording of. When a stream is running it appears at the top of this page.</p></div>';
+      }
+    }
+
     if (data.stats) {
       countUp(document.getElementById('stat-subs'),  data.stats.subscriberCount, 0);
       countUp(document.getElementById('stat-views'), data.stats.viewCount, 90);
@@ -371,14 +414,21 @@
         var live = findLive(detail.items);
         cacheLive(live);
 
-        var shorts = [], longs = [];
+        var shorts = [], longs = [], streams = [];
         (detail.items || []).forEach(function (v) {
-          if (v.liveStreamingDetails) return;                       // no VODs
           if (v.snippet.liveBroadcastContent === 'live') return;     // that's the banner's job
           var t = v.snippet.thumbnails || {};
           var pick = t.maxres || t.standard || t.high || t.medium || t.default;
           if (!pick) return;
           var item = { id: v.id, title: v.snippet.title, thumb: pick.url };
+
+          // A stream that has finished keeps its liveStreamingDetails and gains
+          // an actualEndTime. That is what separates an aired stream from a
+          // scheduled one, and from an ordinary upload.
+          if (v.liveStreamingDetails) {
+            if (v.liveStreamingDetails.actualEndTime) streams.push(item);
+            return;                                                  // never in the video grids
+          }
           // Shape, not length: Shorts run to three minutes now, so duration no
           // longer separates them. A portrait player means a Short.
           var pl = v.player || {};
@@ -386,7 +436,7 @@
           (portrait ? shorts : longs).push(item);
         });
 
-        var data = { shorts: shorts, longs: longs, stats: stats, live: live };
+        var data = { shorts: shorts, longs: longs, streams: streams, stats: stats, live: live };
         try { localStorage.setItem(CACHE, JSON.stringify({ d: data, t: Date.now() })); } catch (e) {}
         render(data);
       });
