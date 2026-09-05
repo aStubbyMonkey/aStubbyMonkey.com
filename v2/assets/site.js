@@ -56,18 +56,22 @@
     var bodyColor = (css.getPropertyValue('--face-body') || '#000000').trim();
     var eyeColor  = (css.getPropertyValue('--face-eye')  || '#FFFFFF').trim();
 
-    // To swap in custom art (pixel art, a hoverboard, anything), put
-    // data-sprite="/your-image.png" on the .field element. No JS change needed.
+    // To swap in custom art, put data-sprite="/your-image.png" on the .field
+    // element. No JS change needed — the aspect ratio is read off the file.
+    // Art is treated as pixel art (see pixel below); drop data-sprite-smooth
+    // on the element if you ever point this at a smooth, non-pixel image.
     var customSprite = field.getAttribute('data-sprite');
+    var pixel = !!customSprite && !field.hasAttribute('data-sprite-smooth');
 
     var sprite = new Image();
     var ready = false;
-    sprite.onload = function () { ready = true; };
+    var ratio = 0.8;                                   // the drawn glyph is 100x80
+    sprite.onload = function () {
+      ready = true;
+      if (sprite.naturalWidth) ratio = sprite.naturalHeight / sprite.naturalWidth;
+    };
     sprite.onerror = function () { ready = false; };   // a bad path just means no texture
     sprite.src = customSprite || monkeyUri(bodyColor, eyeColor);
-
-    // custom art is usually square-ish; the drawn glyph is 100x80
-    var ratio = customSprite ? 1 : 0.8;
 
     var faces = [];
     var W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -84,8 +88,8 @@
           x: Math.random() * W,
           y: Math.random() * H,
           s: s,
-          rot: (Math.random() - 0.5) * 0.9,
-          spin: (Math.random() - 0.5) * 0.0022,
+          rot: pixel ? 0 : (Math.random() - 0.5) * 0.9,
+          spin: pixel ? 0 : (Math.random() - 0.5) * 0.0022,
           vx: (Math.random() - 0.5) * 0.16,
           vy: -0.05 - Math.random() * 0.14,        // a slow, general drift upward
           a: (night ? 0.07 : 0.13) + Math.random() * 0.06,
@@ -100,7 +104,12 @@
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.imageSmoothingEnabled = !pixel;
       seed();
+      // Resizing the canvas wipes it. The animation loop repaints anyway, but
+      // the reduced-motion path paints only once, so it has to repaint here or
+      // the field goes permanently blank after the first resize.
+      if (reduced) draw();
     }
 
     function draw() {
@@ -138,9 +147,17 @@
         var w = f.s, h = f.s * ratio;
         ctx.save();
         ctx.globalAlpha = f.a;
-        ctx.translate(f.x + f.ox, f.y + f.oy);
-        ctx.rotate(f.rot);
-        ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+        if (pixel) {
+          // whole-pixel size and position, so the art stays crisp instead of
+          // shimmering as it drifts across sub-pixel offsets
+          w = Math.round(w); h = Math.round(h);
+          ctx.drawImage(sprite,
+            Math.round(f.x + f.ox - w / 2), Math.round(f.y + f.oy - h / 2), w, h);
+        } else {
+          ctx.translate(f.x + f.ox, f.y + f.oy);
+          ctx.rotate(f.rot);
+          ctx.drawImage(sprite, -w / 2, -h / 2, w, h);
+        }
         ctx.restore();
       }
     }
@@ -151,7 +168,11 @@
     window.addEventListener('resize', size);
 
     if (reduced) {
-      sprite.onload = function () { ready = true; draw(); };
+      sprite.onload = function () {
+        ready = true;
+        if (sprite.naturalWidth) ratio = sprite.naturalHeight / sprite.naturalWidth;
+        draw();
+      };
       if (ready) draw();
       return;
     }
