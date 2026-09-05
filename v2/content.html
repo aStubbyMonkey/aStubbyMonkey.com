@@ -91,7 +91,7 @@
   <section class="panel" id="statistics" aria-labelledby="stats-h">
     <div class="wrap">
       <h2 class="panel__h" id="stats-h">Statistics</h2>
-      <p class="vid-note">Straight off the channel, counted up fresh on every visit.</p>
+      <p class="vid-note">Straight off the channel. YouTube only publishes subscriber counts to three digits, so that one is rounded — views and uploads are exact.</p>
 
       <div class="slabs">
         <div class="slab">
@@ -208,6 +208,25 @@
     return Math.round(n).toLocaleString('en-US');
   }
 
+  // YouTube publishes subscriber counts to three significant figures only,
+  // so the API's 1240 could be anything up to 1249. Printing it in full
+  // would claim a precision that does not exist. Views and video count are
+  // exact, and stay exact.
+  function abbrev(n) {
+    n = Number(n);
+    if (!isFinite(n)) return '—';
+    if (n >= 1e9) return trimZeros((n / 1e9).toFixed(2)) + 'B';
+    if (n >= 1e6) return trimZeros((n / 1e6).toFixed(2)) + 'M';
+    if (n >= 1e3) return trimZeros((n / 1e3).toFixed(2)) + 'K';
+    return String(Math.round(n));
+  }
+  function trimZeros(t) {
+    if (t.indexOf('.') < 0) return t;
+    while (t.charAt(t.length - 1) === '0') t = t.slice(0, -1);
+    if (t.charAt(t.length - 1) === '.') t = t.slice(0, -1);
+    return t;
+  }
+
   function isoSeconds(iso) {
     var m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(iso || '');
     if (!m) return 0;
@@ -302,21 +321,22 @@
   }
 
   // a fast run-up that eases onto the real number
-  function countUp(el, target, delay) {
+  function countUp(el, target, delay, fmt) {
+    fmt = fmt || full;
     target = Number(target);
     if (!isFinite(target)) { el.textContent = '—'; return; }
-    if (reducedMotion) { el.textContent = full(target); return; }
+    if (reducedMotion) { el.textContent = fmt(target); return; }
     var from = Math.min(9, target), DUR = 1100, t0 = null, settled = false;
     function land() {
       settled = true;
-      el.textContent = full(target);
+      el.textContent = fmt(target);
     }
     function step(now) {
       if (settled) return;
       if (t0 === null) t0 = now;
       var t = Math.min(1, (now - t0) / DUR);
       var k = 1 - Math.pow(1 - t, 3);
-      el.textContent = full(Math.round(from + (target - from) * k));
+      el.textContent = fmt(Math.round(from + (target - from) * k));
       if (t < 1) requestAnimationFrame(step);
       else land();
     }
@@ -355,7 +375,7 @@
     }
 
     if (data.stats) {
-      countUp(document.getElementById('stat-subs'),  data.stats.subscriberCount, 0);
+      countUp(document.getElementById('stat-subs'),  data.stats.subscriberCount, 0, abbrev);
       countUp(document.getElementById('stat-views'), data.stats.viewCount, 90);
       countUp(document.getElementById('stat-count'), data.stats.videoCount, 180);
     }
