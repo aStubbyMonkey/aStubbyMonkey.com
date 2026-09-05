@@ -333,6 +333,15 @@
     }, 180);
   }, { passive: true });
 
+  // the placeholders have to obey the one-row rule too, or the skeleton
+  // wraps to a second line and then collapses when the real tiles land
+  (function () {
+    var el = document.getElementById('shorts');
+    if (!el) return;
+    var n = shortsFit();
+    while (el.children.length > n) el.removeChild(el.lastElementChild);
+  })();
+
   var api = 'https://www.googleapis.com/youtube/v3/';
 
   // serve the lists from cache when fresh, but always settle live separately

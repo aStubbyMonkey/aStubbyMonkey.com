@@ -207,7 +207,12 @@
     wipe = document.createElement('div');
     wipe.className = 'tag-wipe';
     wipe.setAttribute('aria-hidden', 'true');
-    wipe.innerHTML = tauntMarkup(word || TAUNTS[(Math.random() * TAUNTS.length) | 0]);
+    wipe.innerHTML =
+      '<span class="tag-wipe__crest tag-wipe__crest--4"></span>' +
+      '<span class="tag-wipe__crest tag-wipe__crest--3"></span>' +
+      '<span class="tag-wipe__crest tag-wipe__crest--2"></span>' +
+      '<span class="tag-wipe__crest tag-wipe__crest--1"></span>' +
+      tauntMarkup(word || TAUNTS[(Math.random() * TAUNTS.length) | 0]);
     document.body.appendChild(wipe);
     return wipe;
   }
@@ -245,9 +250,13 @@
       sessionStorage.setItem('sm-wiped', '1');
       try { sessionStorage.setItem('sm-taunt', word); } catch (e2) {}
 
-      var go = function () { location.href = a.href; };
-      el.addEventListener('animationend', go, { once: true });
-      setTimeout(go, 620); // guarantee navigation even if the event misses
+      // Hold once the screen is covered, so the line is actually readable
+      // instead of flashing past on the way to the next page.
+      var HOLD = 520;
+      var went = false;
+      var go = function () { if (went) return; went = true; location.href = a.href; };
+      el.addEventListener('animationend', function () { setTimeout(go, HOLD); }, { once: true });
+      setTimeout(go, 780 + HOLD + 320);  // guarantee it even if the event misses
     });
 
     // Arriving: if we came through a wipe, reveal from under it.
