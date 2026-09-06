@@ -69,8 +69,17 @@ body {
   color: var(--text);
   background: var(--night);
   overflow-x: hidden;
+  /* min-height alone only sizes the body — the footer still ended wherever
+     the content did, so a short page (Status with 0-1 notes) left it
+     floating above the fold. A column flex box hands the slack to <main>
+     instead, which pins the footer to the bottom. */
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
+body > main { flex: 1 0 auto; }
+body > .nav,
+body > .foot { flex: 0 0 auto; }
 
 img { max-width: 100%; display: block; }
 a { color: inherit; }
@@ -132,21 +141,31 @@ a { color: inherit; }
   background: radial-gradient(ellipse at 50% 40%, transparent 26%, rgba(9,11,13,.82) 100%);
 }
 
-/* checkered racing lines running the full height of both edges */
+/* Checkered racing lines down both edges. Absolute, not fixed: a fixed rail
+   is welded to the viewport and reads as browser chrome, so the checks never
+   move no matter how far you scroll. Absolute makes them part of the page —
+   they run the height of the document and travel with it. */
 .race-line {
-  position: fixed;
+  position: absolute;
   top: 0;
   bottom: 0;
   width: 26px;
   z-index: 70;
   pointer-events: none;
-  background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 23px 23px;
+  background: repeating-conic-gradient(#EEF1F4 0% 25%, #141019 0% 50%) 0 0 / 23px 23px;
 }
+/* The containing block is the body's PADDING box, which starts at the window
+   edge regardless of padding-inline — so 0 is already flush and needs no
+   correction for the inset below. */
 .race-line--l { left: 0;  border-right: 3px solid var(--ink); }
 .race-line--r { right: 0; border-left:  3px solid var(--ink); }
 
-/* the page insets itself so nothing runs underneath the lines */
-.raceway { padding-inline: 30px; }
+/* the page insets itself so nothing runs underneath the lines, and turns
+   itself into the rails' containing block so they span the whole document */
+.raceway {
+  position: relative;
+  padding-inline: 30px;
+}
 
 @media (max-width: 620px) {
   .race-line { width: 17px; background-size: 15px 15px; }
@@ -391,6 +410,22 @@ a.sticker:active, button.sticker:active {
 }
 
 .hub__card { padding: 0; overflow: hidden; }
+
+/* The locked door is a <button>, and a button lays its children out inside a
+   centred anonymous box that shrink-wraps rather than stretching — which is
+   why its tape and white body stopped short of all four edges. Flex makes
+   them real children again. */
+button.hub__card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+}
+button.hub__card > .hub__art { flex: 0 0 auto; }
+button.hub__card > .hub__body { flex: 1 0 auto; }
 
 .hub__art {
   aspect-ratio: 16 / 10;
