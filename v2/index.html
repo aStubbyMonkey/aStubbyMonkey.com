@@ -114,21 +114,29 @@
   }
 
   /* ── INTRO ────────────────────────────────────────────────────
-     A scripted opening: Videos, GTCH, Status, The Gospel — each
-     whipping in stretched and snapping straight — then everything
-     collapses into the mark, which holds a beat before dissolving.
+     Four beats, each built out of what that page actually is, and
+     each exit causing the next entrance:
 
-     Fixed choreography. Beats are 0.92s long, staggered 0.74s, so
-     nudge the delays rather than the durations.
+       VIDEOS  real thumbnails tearing past — Content is a tile grid
+       GTCH    the red/white race lines that edge that page, sweeping
+               in from both sides and wiping the tiles away
+       GOSPEL  quiet. That page is calm, so the beat opens like a
+               light rather than whipping
+       STATUS  the presence card: avatar, the green dot switching on,
+               and the playing / listening / working cards
+
+     Status runs last on purpose. Its subject IS the avatar, so when
+     the cards scatter the mark is already centre frame — it grows,
+     the ring snaps on, and that is the logo. No cut, nothing new.
      ───────────────────────────────────────────────────────────── */
   .cine {
     position: fixed;
     inset: 0;
     z-index: 980;
     overflow: hidden;
-    background: #0B0014;
+    background: #07000E;
     cursor: pointer;
-    animation: cineOut .5s ease 4.62s forwards;
+    animation: cineOut .55s ease 5.30s forwards;
   }
   @keyframes cineOut { to { opacity: 0; visibility: hidden; } }
 
@@ -139,37 +147,23 @@
     place-items: center;
     opacity: 0;
     will-change: transform, opacity;
-    animation: cineWhip .92s cubic-bezier(.16,.9,.24,1) forwards;
   }
-  @keyframes cineWhip {
-    0%   { opacity: 0; transform: translateX(60%) scaleX(3.2) skewX(-22deg); filter: blur(16px); }
-    22%  { opacity: 1; transform: none; filter: blur(0); }
-    72%  { opacity: 1; transform: none; filter: blur(0); }
-    100% { opacity: 0; transform: translateX(-52%) scaleX(2.6) scaleY(.72) skewX(18deg); filter: blur(14px); }
-  }
-  .cine__panel--1 { animation-delay: .04s; background: linear-gradient(120deg, #7700B1, #17022A 70%); }
-  .cine__panel--2 { animation-delay: .78s; background: linear-gradient(120deg, #12734A, #04170F 72%); }
-  .cine__panel--3 { animation-delay: 1.52s; background: linear-gradient(120deg, #1052B8, #04122E 72%); }
-  .cine__panel--4 { animation-delay: 2.26s; background: linear-gradient(120deg, #C08A16, #2A1200 72%); }
-
-  /* darkens the middle so the type carries over whatever is flying past */
   .cine__panel::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: 3;
     pointer-events: none;
-    background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.58) 0%, transparent 64%);
+    background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.55) 0%, transparent 66%);
   }
 
   .cine__word {
     position: relative;
     z-index: 4;
     font-family: 'Bebas Neue', Impact, sans-serif;
-    font-size: clamp(58px, 15vw, 210px);
+    font-size: clamp(52px, 13.5vw, 190px);
     line-height: .84;
     color: var(--paper);
-    letter-spacing: .01em;
     text-shadow: 0 10px 0 rgba(0,0,0,.5);
     text-align: center;
     padding-inline: 5vw;
@@ -177,38 +171,31 @@
   .cine__tag {
     position: absolute;
     z-index: 4;
-    bottom: 17%;
-    font-size: clamp(12px, 1.9vw, 18px);
+    bottom: 16%;
+    font-size: clamp(11px, 1.8vw, 17px);
     font-weight: 900;
     letter-spacing: .3em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.72);
+    color: rgba(255,255,255,.70);
     text-align: center;
     padding-inline: 6vw;
   }
 
-  /* speed lines */
-  .cine__streaks { position: absolute; inset: -20%; z-index: 1; }
-  .cine__streaks i {
-    position: absolute;
-    left: -30%;
-    width: 160%;
-    height: 5%;
-    border-radius: 99px;
-    opacity: .28;
-    transform: skewY(-8deg);
-    animation: cineStreak .92s ease-out forwards;
+  /* ── 1 · VIDEOS — the tile grid, in motion ── */
+  .cine__panel--videos {
+    background: linear-gradient(120deg, #7700B1, #17022A 70%);
+    animation: vidPanel 1.00s cubic-bezier(.16,.9,.24,1) .04s forwards;
   }
-  @keyframes cineStreak {
-    0%   { transform: translateX(70%) skewY(-8deg) scaleX(1.6); opacity: 0; }
-    30%  { opacity: .34; }
-    100% { transform: translateX(-70%) skewY(-8deg) scaleX(1); opacity: 0; }
+  @keyframes vidPanel {
+    0%   { opacity: 0; transform: scaleX(2.6) skewX(-18deg); filter: blur(14px); }
+    20%  { opacity: 1; transform: none; filter: blur(0); }
+    78%  { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scale(1.14); filter: blur(10px); }
   }
-
-  /* real video stills tearing past on the first beat */
   .cine__reel { position: absolute; inset: 0; z-index: 2; }
   .cine__thumb {
     position: absolute;
+    right: -36%;
     width: clamp(124px, 19vw, 262px);
     aspect-ratio: 16 / 9;
     object-fit: cover;
@@ -216,133 +203,229 @@
     border: 3px solid rgba(255,255,255,.82);
     box-shadow: 0 14px 34px rgba(0,0,0,.55);
     opacity: 0;
-    animation: cineFly 1.02s cubic-bezier(.2,.72,.3,1) forwards;
+    animation: cineFly 1.05s cubic-bezier(.2,.72,.3,1) forwards;
   }
   @keyframes cineFly {
-    0%   { opacity: 0; transform: translateX(135%) scale(1.45) skewX(-16deg); filter: blur(12px); }
-    26%  { opacity: 1; filter: blur(0); }
-    74%  { opacity: 1; }
-    100% { opacity: 0; transform: translateX(-140%) scale(.66) skewX(15deg); filter: blur(7px); }
+    0%   { opacity: 0; transform: translateX(0) scale(1.4) skewX(-15deg); filter: blur(11px); }
+    24%  { opacity: 1; filter: blur(0); }
+    72%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-165vw) scale(.62) skewX(14deg); filter: blur(7px); }
   }
 
-  /* GTCH keeps its racing checker */
-  .cine__check {
+  /* ── 2 · GTCH — the race lines wipe the tiles away ── */
+  .cine__panel--gtch {
+    background: linear-gradient(120deg, #12734A, #04170F 72%);
+    animation: gtchPanel 1.00s cubic-bezier(.16,.9,.24,1) .82s forwards;
+  }
+  @keyframes gtchPanel {
+    0%   { opacity: 0; }
+    12%  { opacity: 1; }
+    72%  { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: scaleY(.06); filter: blur(6px); }
+  }
+  .cine__rail {
     position: absolute;
-    inset: 0;
+    top: -10%;
+    bottom: -10%;
     z-index: 2;
-    opacity: .17;
-    background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 30px 30px;
-    -webkit-mask: linear-gradient(90deg, #000 0 16%, transparent 22% 78%, #000 84% 100%);
-    mask: linear-gradient(90deg, #000 0 16%, transparent 22% 78%, #000 84% 100%);
+    width: clamp(26px, 4vw, 54px);
+    background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 26px 26px;
+    box-shadow: 0 0 0 3px rgba(0,0,0,.55);
+    animation: railIn 1.00s cubic-bezier(.16,.9,.24,1) .82s forwards;
+  }
+  .cine__rail--l { left: 0;  --from: -120%; }
+  .cine__rail--r { right: 0; --from: 120%; }
+  @keyframes railIn {
+    0%   { opacity: 0; transform: translateX(var(--from)); }
+    18%  { opacity: 1; transform: none; }
+    72%  { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translateX(calc(var(--from) * -.34)); }
   }
 
-  /* Status keeps its pulse */
-  .cine__pulse {
-    position: absolute;
-    z-index: 2;
-    width: 52vmin;
-    height: 52vmin;
-    border-radius: 50%;
-    border: 5px solid rgba(59,224,122,.55);
-    animation: cinePulse 1s ease-out infinite;
+  /* ── 3 · GOSPEL — opens like a light, not a whip ── */
+  .cine__panel--gospel {
+    background: linear-gradient(160deg, #2A1B02, #120018 74%);
+    animation: gosPanel 1.20s cubic-bezier(.3,.9,.3,1) 1.60s forwards;
   }
-  @keyframes cinePulse {
-    from { transform: scale(.55); opacity: .9; }
-    to   { transform: scale(1.5); opacity: 0; }
+  @keyframes gosPanel {
+    0%   { opacity: 0; transform: scaleY(.02); }
+    16%  { opacity: 1; transform: scaleY(1); }
+    76%  { opacity: 1; }
+    100% { opacity: 0; transform: scale(1.1); filter: blur(9px); }
   }
-
-  /* the Gospel beat gets light rather than motion */
   .cine__glow {
     position: absolute;
     z-index: 2;
-    width: 70vmin;
-    height: 70vmin;
+    width: 74vmin; height: 74vmin;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,231,166,.55) 0%, transparent 62%);
+    background: radial-gradient(circle, rgba(255,215,120,.46) 0%, transparent 62%);
+    animation: gosGlow 1.20s ease-out 1.60s forwards;
+  }
+  @keyframes gosGlow {
+    0%   { opacity: 0; transform: scale(.3); }
+    40%  { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(2.4); }
   }
   .cine__cross {
     position: absolute;
     z-index: 2;
-    font-size: 46vmin;
+    font-size: 44vmin;
     line-height: 1;
-    color: rgba(0,0,0,.16);   /* dark reads on the gold; white vanished into it */
+    color: rgba(0,0,0,.20);
     font-family: 'Bebas Neue', Impact, sans-serif;
   }
+  .cine__panel--gospel .cine__word { font-size: clamp(42px, 10vw, 138px); }
 
-  /* ── the finale ── */
-  .cine__end {
-    position: absolute;
-    inset: 0;
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(16px, 2.6vw, 30px);
-    opacity: 0;
-    animation: cineEndIn .1s linear 2.98s forwards;
+  /* ── 4 · STATUS — the presence card ── */
+  .cine__panel--status {
+    background: radial-gradient(circle at 50% 42%, #241243, #0B0117 70%);
+    animation: staPanel 1.90s ease 2.42s forwards;
   }
-  @keyframes cineEndIn { to { opacity: 1; } }
-
-  .cine__burst {
+  @keyframes staPanel {
+    0%   { opacity: 0; }
+    10%  { opacity: 1; }
+    78%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .cine__cards { position: absolute; inset: 0; z-index: 2; }
+  .cine__card {
     position: absolute;
-    width: 12vmin; height: 12vmin;
+    width: clamp(150px, 21vw, 254px);
+    padding: 12px 15px;
+    border-radius: 14px;
+    border: 3px solid rgba(0,0,0,.5);
+    background: rgba(255,247,238,.96);
+    box-shadow: 0 10px 0 rgba(0,0,0,.4);
+    text-align: left;
+    opacity: 0;
+    animation: cardIn 1.75s cubic-bezier(.2,1.2,.35,1) forwards;
+  }
+  @keyframes cardIn {
+    0%   { opacity: 0; transform: translateY(46px) scale(.86); }
+    14%  { opacity: 1; transform: none; }
+    62%  { opacity: 1; transform: none; }
+    100% { opacity: 0; transform: translate(var(--fx), var(--fy)) scale(.68) rotate(var(--fr)); }
+  }
+  .cine__card b {
+    display: block;
+    font-size: 11px;
+    letter-spacing: .19em;
+    text-transform: uppercase;
+    color: #6B4B90;
+    margin-bottom: 7px;
+  }
+  .cine__card i {
+    display: block;
+    height: 9px;
+    border-radius: 99px;
+    background: #D9CCE8;
+  }
+  .cine__card i + i { margin-top: 6px; width: 62%; }
+
+  /* ── the avatar: lives across Status and the finale ── */
+  .cine__hero {
+    position: absolute;
+    z-index: 6;
+    left: 50%;
+    top: 45%;
+    width: clamp(118px, 19vw, 208px);
+    aspect-ratio: 1;
+    opacity: 0;
+    animation: heroLife 3.00s cubic-bezier(.22,1.2,.34,1) 2.86s forwards;
+  }
+  @keyframes heroLife {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(.42); }
+    11%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    46%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    58%  { transform: translate(-50%, -50%) scale(1.44); }
+    66%  { transform: translate(-50%, -50%) scale(1.30); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1.32); }
+  }
+  .cine__hero img {
+    width: 100%; height: 100%;
+    object-fit: cover;
     border-radius: 50%;
-    background: radial-gradient(circle, #FFFFFF 0%, #C42BFF 45%, transparent 70%);
-    opacity: 0;
-    animation: cineBurst .7s cubic-bezier(.2,.9,.3,1) 2.98s forwards;
+    display: block;
+    border: 6px solid rgba(255,255,255,.26);
+    box-shadow: 0 12px 0 rgba(0,0,0,.45), 0 26px 60px rgba(0,0,0,.6);
+    animation: heroRing .5s ease 4.58s forwards;
   }
-  @keyframes cineBurst {
-    0%   { opacity: .95; transform: scale(.2); }
-    100% { opacity: 0;   transform: scale(9); }
+  @keyframes heroRing {
+    to {
+      border-color: var(--paper);
+      box-shadow: 0 12px 0 rgba(0,0,0,.5), 0 0 0 15px rgba(255,255,255,.09), 0 32px 74px rgba(0,0,0,.65);
+    }
   }
 
-  .cine__mark {
-    position: relative;
-    width: clamp(140px, 26vw, 280px);
+  /* the Discord presence dot, switching on */
+  .cine__dot {
+    position: absolute;
+    right: -1%;
+    bottom: -1%;
+    width: 19%;
     aspect-ratio: 1;
     border-radius: 50%;
-    border: 7px solid var(--paper);
-    background: #7700B1;
-    box-shadow: 0 12px 0 rgba(0,0,0,.5), 0 0 0 16px rgba(255,255,255,.09), 0 34px 80px rgba(0,0,0,.6);
-    overflow: hidden;
+    background: #4B4459;
+    border: 5px solid #14042A;
+    animation: dotOn .42s cubic-bezier(.2,1.6,.4,1) 3.44s forwards;
+  }
+  @keyframes dotOn {
+    0%   { background: #4B4459; transform: scale(1); }
+    45%  { background: #3BE07A; transform: scale(1.38); }
+    100% { background: #3BE07A; transform: scale(1); }
+  }
+  .cine__dot::after {
+    content: '';
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    border: 3px solid rgba(59,224,122,.85);
     opacity: 0;
-    animation: cineMark .78s cubic-bezier(.18,1.35,.35,1) 2.98s forwards;
+    animation: dotPing .85s ease-out 3.52s 2;
   }
-  @keyframes cineMark {
-    0%   { opacity: 0; transform: scaleX(3.4) scaleY(.28) skewX(-20deg); filter: blur(12px); }
-    46%  { opacity: 1; transform: scaleX(1.06) scaleY(1.06) skewX(0); filter: blur(0); }
-    100% { opacity: 1; transform: none; filter: blur(0); }
+  @keyframes dotPing {
+    0%   { opacity: .85; transform: scale(.7); }
+    100% { opacity: 0;   transform: scale(2.1); }
   }
-  .cine__mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
   .cine__sig {
-    position: relative;
+    position: absolute;
+    z-index: 6;
+    left: 0; right: 0;
+    top: 69%;
+    text-align: center;
     font-family: 'Bebas Neue', Impact, sans-serif;
-    font-size: clamp(36px, 7.5vw, 96px);
+    font-size: clamp(34px, 7vw, 92px);
     line-height: .9;
     letter-spacing: .02em;
     color: var(--paper);
     text-shadow: 0 8px 0 rgba(0,0,0,.45);
     opacity: 0;
-    animation: cineSig .5s cubic-bezier(.2,1.3,.4,1) 3.42s forwards;
+    animation: sigIn .55s cubic-bezier(.2,1.3,.4,1) 4.72s forwards;
   }
-  @keyframes cineSig {
-    from { opacity: 0; transform: translateY(26px) scaleY(.86); }
+  @keyframes sigIn {
+    from { opacity: 0; transform: translateY(28px) scaleY(.84); }
     to   { opacity: 1; transform: none; }
   }
 
   .cine__skip {
     position: absolute;
     z-index: 9;
-    bottom: 24px;
+    bottom: 22px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 12px;
     font-weight: 800;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.55);
+    color: rgba(255,255,255,.5);
+  }
+
+  @media (max-width: 700px) {
+    .cine__card { width: 46vw; padding: 10px 12px; }
+    .cine__card:nth-child(1) { left: 4% !important;  top: 15% !important; }
+    .cine__card:nth-child(2) { left: 48% !important; top: 27% !important; }
+    .cine__card:nth-child(3) { left: 8% !important;  top: 68% !important; }
   }
 
   @media (prefers-reduced-motion: reduce) { .cine { display: none; } }
@@ -583,8 +666,11 @@
 })();
 
 /* ── Intro: a scripted opening. Once per session. ──────────────
-   Videos, GTCH, Status, The Gospel, then the mark. Beats are
-   0.92s, staggered 0.74s; the timings live in the stylesheet.
+   Each beat is built from what that page actually is, and each
+   exit causes the next entrance. Status runs last because its
+   subject is the avatar — when its cards scatter the mark is
+   already centre frame, so it simply grows into the logo.
+   Timings live in the stylesheet.
    ────────────────────────────────────────────────────────────── */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -592,9 +678,9 @@
   sessionStorage.setItem('sm-intro', 'seen');
 
   /* Real stills for the first beat. Prefer whatever the Content page
-     already cached, so the reel follows the channel; fall back to a
-     fixed set otherwise. Either way a still that fails to load just
-     leaves the panel behind it — never a blank frame. */
+     already cached so the reel follows the channel; fall back to a
+     fixed set otherwise. A still that fails to load simply leaves the
+     panel behind it — never a blank frame. */
   var FALLBACK = ['xp03Tcx-6y8', '9i3GysLHjK8', 'dEXgDbcUgtw', 'SmDwCZbKO0k', 'VDGEMGAOC0w', '25jP6EemzmY'];
   function thumbs() {
     var out = [];
@@ -612,44 +698,27 @@
     return out.slice(0, 6);
   }
 
-  // where each still crosses the frame, and when
   var LANES = [
-    { top: '6%',  delay: .06 }, { top: '30%', delay: .17 }, { top: '54%', delay: .11 },
-    { top: '18%', delay: .28 }, { top: '66%', delay: .22 }, { top: '42%', delay: .33 }
+    { top: '7%',  d: .06 }, { top: '31%', d: .17 }, { top: '55%', d: .11 },
+    { top: '19%', d: .28 }, { top: '67%', d: .22 }, { top: '43%', d: .33 }
   ];
   var reel = thumbs().map(function (src, i) {
-    var L = LANES[i];
-    return '<img class="cine__thumb" src="' + src + '" alt="" loading="eager" decoding="async" ' +
-           'referrerpolicy="no-referrer" ' +
-           'style="top:' + L.top + ';right:-34%;animation-delay:' + L.delay + 's" />';
+    return '<img class="cine__thumb" src="' + src + '" alt="" decoding="async" ' +
+           'referrerpolicy="no-referrer" style="top:' + LANES[i].top +
+           ';animation-delay:' + LANES[i].d + 's" />';
   }).join('');
 
-  var BEATS = [
-    { word: 'VIDEOS', tag: 'Shorts, uploads, streams',
-      streaks: ['#C42BFF', '#FF4DD2', '#FFC93C', '#7700B1', '#FFFFFF'],
-      extra: '<div class="cine__reel">' + reel + '</div>' },
-    { word: 'GTCH', tag: 'Competitive Hoverpark',
-      streaks: ['#3BE07A', '#EAFFF3', '#12734A', '#9BFFC9', '#FFFFFF'],
-      extra: '<div class="cine__check"></div>' },
-    { word: 'STATUS', tag: 'What I am doing right now',
-      streaks: ['#35E8FF', '#8A5BFF', '#FFFFFF', '#1052B8', '#3BE07A'],
-      extra: '<div class="cine__pulse"></div>' },
-    { word: 'THE GOSPEL', tag: 'The most important page here',
-      streaks: ['#FFE7A6', '#FFC93C', '#FFFFFF', '#C08A16', '#FFD86B'],
-      extra: '<div class="cine__glow"></div><div class="cine__cross">&#10014;</div>' }
+  // the presence cards, mirroring the real Status page
+  var CARDS = [
+    { label: 'Playing',      l: '9%',  t: '20%', fx: '-62vw', fy: '-40vh', fr: '-16deg', delay: 2.62 },
+    { label: 'Listening to', l: '67%', t: '30%', fx: '62vw',  fy: '-32vh', fr: '14deg',  delay: 2.74 },
+    { label: 'Working on',   l: '15%', t: '62%', fx: '-50vw', fy: '48vh',  fr: '10deg',  delay: 2.86 }
   ];
-
-  var panels = BEATS.map(function (b, i) {
-    var streaks = b.streaks.map(function (col, k) {
-      var top = 8 + k * 19 + (k % 2 ? 4 : 0);
-      var delay = (0.04 + i * 0.74 + k * 0.045).toFixed(3);
-      return '<i style="top:' + top + '%;background:' + col + ';animation-delay:' + delay + 's"></i>';
-    }).join('');
-    return '<div class="cine__panel cine__panel--' + (i + 1) + '">' +
-             '<div class="cine__streaks">' + streaks + '</div>' +
-             b.extra +
-             '<div class="cine__word">' + b.word + '</div>' +
-             '<div class="cine__tag">' + b.tag + '</div>' +
+  var cards = CARDS.map(function (c) {
+    return '<div class="cine__card" style="left:' + c.l + ';top:' + c.t + ';' +
+             '--fx:' + c.fx + ';--fy:' + c.fy + ';--fr:' + c.fr + ';' +
+             'animation-delay:' + c.delay + 's">' +
+             '<b>' + c.label + '</b><i></i><i></i>' +
            '</div>';
   }).join('');
 
@@ -657,12 +726,37 @@
   el.className = 'cine';
   el.setAttribute('role', 'presentation');
   el.innerHTML =
-    panels +
-    '<div class="cine__end">' +
-      '<div class="cine__burst"></div>' +
-      '<div class="cine__mark"><img src="/aStubbyMonkey.YT.Offical.png" alt="" /></div>' +
-      '<p class="cine__sig">aStubbyMonkey</p>' +
+    // 1 · the tiles
+    '<div class="cine__panel cine__panel--videos">' +
+      '<div class="cine__reel">' + reel + '</div>' +
+      '<div class="cine__word">VIDEOS</div>' +
+      '<div class="cine__tag">Shorts, uploads, streams</div>' +
     '</div>' +
+    // 2 · the race lines wipe them away
+    '<div class="cine__panel cine__panel--gtch">' +
+      '<div class="cine__word">GTCH</div>' +
+      '<div class="cine__tag">Competitive Hoverpark</div>' +
+    '</div>' +
+    '<div class="cine__rail cine__rail--l"></div>' +
+    '<div class="cine__rail cine__rail--r"></div>' +
+    // 3 · quiet
+    '<div class="cine__panel cine__panel--gospel">' +
+      '<div class="cine__glow"></div>' +
+      '<div class="cine__cross">&#10014;</div>' +
+      '<div class="cine__word">THE GOSPEL</div>' +
+      '<div class="cine__tag">The most important page here</div>' +
+    '</div>' +
+    // 4 · the presence card
+    '<div class="cine__panel cine__panel--status">' +
+      '<div class="cine__cards">' + cards + '</div>' +
+      '<div class="cine__tag">Online right now</div>' +
+    '</div>' +
+    // the avatar outlives Status and becomes the mark
+    '<div class="cine__hero">' +
+      '<img src="/aStubbyMonkey.YT.Offical.png" alt="" />' +
+      '<span class="cine__dot"></span>' +
+    '</div>' +
+    '<p class="cine__sig">aStubbyWebsite</p>' +
     '<p class="cine__skip">click anywhere to skip</p>';
 
   document.body.appendChild(el);
@@ -680,8 +774,8 @@
     }, 320);
   }
 
-  // the sequence dissolves itself at 4.62s; this clears the node after
-  setTimeout(finish, 5200);
+  // the sequence dissolves itself at 5.30s; this clears the node after
+  setTimeout(finish, 5950);
   ['click', 'keydown', 'touchstart'].forEach(function (evt) {
     window.addEventListener(evt, finish, { once: true });
   });
