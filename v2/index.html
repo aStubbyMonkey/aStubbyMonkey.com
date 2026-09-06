@@ -114,12 +114,12 @@
   }
 
   /* ── INTRO ────────────────────────────────────────────────────
-     A scripted three-second sizzle: Videos, GTCH, Status, each
-     whipping in stretched and snapping straight, then collapsing
-     into the mark, which dissolves to reveal the page.
+     A scripted opening: Videos, GTCH, Status, The Gospel — each
+     whipping in stretched and snapping straight — then everything
+     collapses into the mark, which holds a beat before dissolving.
 
-     Fixed choreography, not random — the timings below are the
-     storyboard, so nudge the delays rather than the durations.
+     Fixed choreography. Beats are 0.92s long, staggered 0.74s, so
+     nudge the delays rather than the durations.
      ───────────────────────────────────────────────────────────── */
   .cine {
     position: fixed;
@@ -128,7 +128,7 @@
     overflow: hidden;
     background: #0B0014;
     cursor: pointer;
-    animation: cineOut .46s ease 2.98s forwards;
+    animation: cineOut .5s ease 4.62s forwards;
   }
   @keyframes cineOut { to { opacity: 0; visibility: hidden; } }
 
@@ -139,7 +139,6 @@
     place-items: center;
     opacity: 0;
     will-change: transform, opacity;
-    /* in stretched, hold, out squashed */
     animation: cineWhip .92s cubic-bezier(.16,.9,.24,1) forwards;
   }
   @keyframes cineWhip {
@@ -148,46 +147,47 @@
     72%  { opacity: 1; transform: none; filter: blur(0); }
     100% { opacity: 0; transform: translateX(-52%) scaleX(2.6) scaleY(.72) skewX(18deg); filter: blur(14px); }
   }
-  .cine__panel--1 { animation-delay: .04s; }
-  .cine__panel--2 { animation-delay: .78s; }
-  .cine__panel--3 { animation-delay: 1.52s; }
-
-  .cine__panel--1 { background: linear-gradient(120deg, #7700B1, #17022A 70%); }
-  .cine__panel--2 { background: linear-gradient(120deg, #12734A, #04170F 72%); }
-  .cine__panel--3 { background: linear-gradient(120deg, #1052B8, #04122E 72%); }
+  .cine__panel--1 { animation-delay: .04s; background: linear-gradient(120deg, #7700B1, #17022A 70%); }
+  .cine__panel--2 { animation-delay: .78s; background: linear-gradient(120deg, #12734A, #04170F 72%); }
+  .cine__panel--3 { animation-delay: 1.52s; background: linear-gradient(120deg, #1052B8, #04122E 72%); }
+  .cine__panel--4 { animation-delay: 2.26s; background: linear-gradient(120deg, #C08A16, #2A1200 72%); }
 
   /* darkens the middle so the type carries over whatever is flying past */
   .cine__panel::after {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 3;
     pointer-events: none;
     background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.58) 0%, transparent 64%);
   }
 
   .cine__word {
     position: relative;
-    z-index: 3;
+    z-index: 4;
     font-family: 'Bebas Neue', Impact, sans-serif;
     font-size: clamp(58px, 15vw, 210px);
     line-height: .84;
     color: var(--paper);
     letter-spacing: .01em;
     text-shadow: 0 10px 0 rgba(0,0,0,.5);
+    text-align: center;
+    padding-inline: 5vw;
   }
   .cine__tag {
     position: absolute;
-    z-index: 3;
+    z-index: 4;
     bottom: 17%;
     font-size: clamp(12px, 1.9vw, 18px);
     font-weight: 900;
     letter-spacing: .3em;
     text-transform: uppercase;
     color: rgba(255,255,255,.72);
+    text-align: center;
+    padding-inline: 6vw;
   }
 
-  /* streaks: the speed lines that sell the whip */
+  /* speed lines */
   .cine__streaks { position: absolute; inset: -20%; z-index: 1; }
   .cine__streaks i {
     position: absolute;
@@ -203,6 +203,26 @@
     0%   { transform: translateX(70%) skewY(-8deg) scaleX(1.6); opacity: 0; }
     30%  { opacity: .34; }
     100% { transform: translateX(-70%) skewY(-8deg) scaleX(1); opacity: 0; }
+  }
+
+  /* real video stills tearing past on the first beat */
+  .cine__reel { position: absolute; inset: 0; z-index: 2; }
+  .cine__thumb {
+    position: absolute;
+    width: clamp(124px, 19vw, 262px);
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid rgba(255,255,255,.82);
+    box-shadow: 0 14px 34px rgba(0,0,0,.55);
+    opacity: 0;
+    animation: cineFly 1.02s cubic-bezier(.2,.72,.3,1) forwards;
+  }
+  @keyframes cineFly {
+    0%   { opacity: 0; transform: translateX(135%) scale(1.45) skewX(-16deg); filter: blur(12px); }
+    26%  { opacity: 1; filter: blur(0); }
+    74%  { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-140%) scale(.66) skewX(15deg); filter: blur(7px); }
   }
 
   /* GTCH keeps its racing checker */
@@ -231,15 +251,36 @@
     to   { transform: scale(1.5); opacity: 0; }
   }
 
+  /* the Gospel beat gets light rather than motion */
+  .cine__glow {
+    position: absolute;
+    z-index: 2;
+    width: 70vmin;
+    height: 70vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,231,166,.55) 0%, transparent 62%);
+  }
+  .cine__cross {
+    position: absolute;
+    z-index: 2;
+    font-size: 46vmin;
+    line-height: 1;
+    color: rgba(0,0,0,.16);   /* dark reads on the gold; white vanished into it */
+    font-family: 'Bebas Neue', Impact, sans-serif;
+  }
+
   /* ── the finale ── */
   .cine__end {
     position: absolute;
     inset: 0;
     z-index: 5;
-    display: grid;
-    place-items: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(16px, 2.6vw, 30px);
     opacity: 0;
-    animation: cineEndIn .1s linear 2.24s forwards;
+    animation: cineEndIn .1s linear 2.98s forwards;
   }
   @keyframes cineEndIn { to { opacity: 1; } }
 
@@ -249,7 +290,7 @@
     border-radius: 50%;
     background: radial-gradient(circle, #FFFFFF 0%, #C42BFF 45%, transparent 70%);
     opacity: 0;
-    animation: cineBurst .7s cubic-bezier(.2,.9,.3,1) 2.24s forwards;
+    animation: cineBurst .7s cubic-bezier(.2,.9,.3,1) 2.98s forwards;
   }
   @keyframes cineBurst {
     0%   { opacity: .95; transform: scale(.2); }
@@ -266,8 +307,7 @@
     box-shadow: 0 12px 0 rgba(0,0,0,.5), 0 0 0 16px rgba(255,255,255,.09), 0 34px 80px rgba(0,0,0,.6);
     overflow: hidden;
     opacity: 0;
-    /* arrives stretched, as though the three panels collapsed into it */
-    animation: cineMark .78s cubic-bezier(.18,1.35,.35,1) 2.24s forwards;
+    animation: cineMark .78s cubic-bezier(.18,1.35,.35,1) 2.98s forwards;
   }
   @keyframes cineMark {
     0%   { opacity: 0; transform: scaleX(3.4) scaleY(.28) skewX(-20deg); filter: blur(12px); }
@@ -275,6 +315,22 @@
     100% { opacity: 1; transform: none; filter: blur(0); }
   }
   .cine__mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .cine__sig {
+    position: relative;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(36px, 7.5vw, 96px);
+    line-height: .9;
+    letter-spacing: .02em;
+    color: var(--paper);
+    text-shadow: 0 8px 0 rgba(0,0,0,.45);
+    opacity: 0;
+    animation: cineSig .5s cubic-bezier(.2,1.3,.4,1) 3.42s forwards;
+  }
+  @keyframes cineSig {
+    from { opacity: 0; transform: translateY(26px) scaleY(.86); }
+    to   { opacity: 1; transform: none; }
+  }
 
   .cine__skip {
     position: absolute;
@@ -368,7 +424,7 @@
         <div class="hub__body">
           <h3 class="hub__name">Content</h3>
           <p class="hub__desc">The numbers, every short and upload, and the streams — pulled live from the channel.</p>
-          <span class="hub__go">Go watch</span>
+          <span class="hub__go">See the channel</span>
         </div>
       </a>
 
@@ -526,35 +582,68 @@
   }).catch(function () { /* the emoji stays — nothing to undo */ });
 })();
 
-/* ── Intro: a scripted three-second sizzle. Once per session. ──
-   Videos, then GTCH, then Status, each whipping in stretched and
-   snapping straight, before all three collapse into the mark and
-   dissolve into the page. Built from CSS and local art only, so a
-   slow network can never leave it staring at nothing.
+/* ── Intro: a scripted opening. Once per session. ──────────────
+   Videos, GTCH, Status, The Gospel, then the mark. Beats are
+   0.92s, staggered 0.74s; the timings live in the stylesheet.
    ────────────────────────────────────────────────────────────── */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced || sessionStorage.getItem('sm-intro') === 'seen') return;
   sessionStorage.setItem('sm-intro', 'seen');
 
-  // the storyboard: one entry per beat, in order
+  /* Real stills for the first beat. Prefer whatever the Content page
+     already cached, so the reel follows the channel; fall back to a
+     fixed set otherwise. Either way a still that fails to load just
+     leaves the panel behind it — never a blank frame. */
+  var FALLBACK = ['xp03Tcx-6y8', '9i3GysLHjK8', 'dEXgDbcUgtw', 'SmDwCZbKO0k', 'VDGEMGAOC0w', '25jP6EemzmY'];
+  function thumbs() {
+    var out = [];
+    try {
+      var c = JSON.parse(localStorage.getItem('sm-content-v3') || 'null');
+      if (c && c.d) {
+        [].concat(c.d.longs || [], c.d.shorts || []).forEach(function (v) {
+          if (v && v.thumb && out.length < 6) out.push(v.thumb);
+        });
+      }
+    } catch (e) { /* fall through to the fixed set */ }
+    while (out.length < 6) {
+      out.push('https://i.ytimg.com/vi/' + FALLBACK[out.length % FALLBACK.length] + '/mqdefault.jpg');
+    }
+    return out.slice(0, 6);
+  }
+
+  // where each still crosses the frame, and when
+  var LANES = [
+    { top: '6%',  delay: .06 }, { top: '30%', delay: .17 }, { top: '54%', delay: .11 },
+    { top: '18%', delay: .28 }, { top: '66%', delay: .22 }, { top: '42%', delay: .33 }
+  ];
+  var reel = thumbs().map(function (src, i) {
+    var L = LANES[i];
+    return '<img class="cine__thumb" src="' + src + '" alt="" loading="eager" decoding="async" ' +
+           'referrerpolicy="no-referrer" ' +
+           'style="top:' + L.top + ';right:-34%;animation-delay:' + L.delay + 's" />';
+  }).join('');
+
   var BEATS = [
     { word: 'VIDEOS', tag: 'Shorts, uploads, streams',
-      streaks: ['#C42BFF', '#FF4DD2', '#FFC93C', '#7700B1', '#FFFFFF'], extra: '' },
+      streaks: ['#C42BFF', '#FF4DD2', '#FFC93C', '#7700B1', '#FFFFFF'],
+      extra: '<div class="cine__reel">' + reel + '</div>' },
     { word: 'GTCH', tag: 'Competitive Hoverpark',
       streaks: ['#3BE07A', '#EAFFF3', '#12734A', '#9BFFC9', '#FFFFFF'],
       extra: '<div class="cine__check"></div>' },
     { word: 'STATUS', tag: 'What I am doing right now',
       streaks: ['#35E8FF', '#8A5BFF', '#FFFFFF', '#1052B8', '#3BE07A'],
-      extra: '<div class="cine__pulse"></div>' }
+      extra: '<div class="cine__pulse"></div>' },
+    { word: 'THE GOSPEL', tag: 'The most important page here',
+      streaks: ['#FFE7A6', '#FFC93C', '#FFFFFF', '#C08A16', '#FFD86B'],
+      extra: '<div class="cine__glow"></div><div class="cine__cross">&#10014;</div>' }
   ];
 
   var panels = BEATS.map(function (b, i) {
     var streaks = b.streaks.map(function (col, k) {
       var top = 8 + k * 19 + (k % 2 ? 4 : 0);
       var delay = (0.04 + i * 0.74 + k * 0.045).toFixed(3);
-      return '<i style="top:' + top + '%;background:' + col +
-             ';animation-delay:' + delay + 's"></i>';
+      return '<i style="top:' + top + '%;background:' + col + ';animation-delay:' + delay + 's"></i>';
     }).join('');
     return '<div class="cine__panel cine__panel--' + (i + 1) + '">' +
              '<div class="cine__streaks">' + streaks + '</div>' +
@@ -572,6 +661,7 @@
     '<div class="cine__end">' +
       '<div class="cine__burst"></div>' +
       '<div class="cine__mark"><img src="/aStubbyMonkey.YT.Offical.png" alt="" /></div>' +
+      '<p class="cine__sig">aStubbyMonkey</p>' +
     '</div>' +
     '<p class="cine__skip">click anywhere to skip</p>';
 
@@ -590,8 +680,8 @@
     }, 320);
   }
 
-  // the sequence fades itself out at 2.98s; this clears the node after
-  setTimeout(finish, 3460);
+  // the sequence dissolves itself at 4.62s; this clears the node after
+  setTimeout(finish, 5200);
   ['click', 'keydown', 'touchstart'].forEach(function (evt) {
     window.addEventListener(evt, finish, { once: true });
   });
