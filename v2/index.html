@@ -114,152 +114,182 @@
   }
 
   /* ── INTRO ────────────────────────────────────────────────────
-     A title card that plays once per session. Everything visual is
-     driven by custom properties set in JS, so the palette, the
-     wording and the entrance are all rolled fresh on each visit.
+     A scripted three-second sizzle: Videos, GTCH, Status, each
+     whipping in stretched and snapping straight, then collapsing
+     into the mark, which dissolves to reveal the page.
+
+     Fixed choreography, not random — the timings below are the
+     storyboard, so nudge the delays rather than the durations.
      ───────────────────────────────────────────────────────────── */
-  .intro {
+  .cine {
     position: fixed;
     inset: 0;
     z-index: 980;
+    overflow: hidden;
+    background: #0B0014;
+    cursor: pointer;
+    animation: cineOut .46s ease 2.98s forwards;
+  }
+  @keyframes cineOut { to { opacity: 0; visibility: hidden; } }
+
+  .cine__panel {
+    position: absolute;
+    inset: 0;
     display: grid;
     place-items: center;
-    overflow: hidden;
-    background: var(--i-deep);
-    cursor: pointer;
+    opacity: 0;
+    will-change: transform, opacity;
+    /* in stretched, hold, out squashed */
+    animation: cineWhip .92s cubic-bezier(.16,.9,.24,1) forwards;
   }
-  .intro.is-gone { animation: introLift .68s cubic-bezier(.7,0,.25,1) forwards; }
-  @keyframes introLift { to { transform: translate3d(0, -102%, 0); } }
-
-  /* ground: a wash of the rolled palette */
-  .intro__bg {
-    position: absolute;
-    inset: -10%;
-    background:
-      radial-gradient(circle at 50% 42%, var(--i-a) 0%, transparent 58%),
-      radial-gradient(circle at 18% 84%, var(--i-b) 0%, transparent 52%),
-      radial-gradient(circle at 84% 18%, var(--i-c) 0%, transparent 50%),
-      var(--i-deep);
-    animation: introBg 7s ease-in-out infinite alternate;
+  @keyframes cineWhip {
+    0%   { opacity: 0; transform: translateX(60%) scaleX(3.2) skewX(-22deg); filter: blur(16px); }
+    22%  { opacity: 1; transform: none; filter: blur(0); }
+    72%  { opacity: 1; transform: none; filter: blur(0); }
+    100% { opacity: 0; transform: translateX(-52%) scaleX(2.6) scaleY(.72) skewX(18deg); filter: blur(14px); }
   }
-  @keyframes introBg { to { transform: scale(1.12) rotate(3deg); } }
+  .cine__panel--1 { animation-delay: .04s; }
+  .cine__panel--2 { animation-delay: .78s; }
+  .cine__panel--3 { animation-delay: 1.52s; }
 
-  /* a slow ray burst behind the mark */
-  .intro__rays {
+  .cine__panel--1 { background: linear-gradient(120deg, #7700B1, #17022A 70%); }
+  .cine__panel--2 { background: linear-gradient(120deg, #12734A, #04170F 72%); }
+  .cine__panel--3 { background: linear-gradient(120deg, #1052B8, #04122E 72%); }
+
+  /* darkens the middle so the type carries over whatever is flying past */
+  .cine__panel::after {
+    content: '';
     position: absolute;
-    width: 190vmax;
-    height: 190vmax;
-    border-radius: 50%;
-    background: repeating-conic-gradient(
-      from 0deg,
-      rgba(255,255,255,.075) 0deg 7deg,
-      transparent 7deg 17deg);
-    animation: introSpin 26s linear infinite;
+    inset: 0;
+    z-index: 2;
     pointer-events: none;
+    background: radial-gradient(ellipse at 50% 48%, rgba(0,0,0,.58) 0%, transparent 64%);
   }
-  @keyframes introSpin { to { transform: rotate(360deg); } }
 
-  .intro__fx { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-  .intro__stack {
+  .cine__word {
     position: relative;
     z-index: 3;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding-inline: 6vw;
+    font-family: 'Bebas Neue', Impact, sans-serif;
+    font-size: clamp(58px, 15vw, 210px);
+    line-height: .84;
+    color: var(--paper);
+    letter-spacing: .01em;
+    text-shadow: 0 10px 0 rgba(0,0,0,.5);
+  }
+  .cine__tag {
+    position: absolute;
+    z-index: 3;
+    bottom: 17%;
+    font-size: clamp(12px, 1.9vw, 18px);
+    font-weight: 900;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.72);
   }
 
-  .intro__mark {
-    width: clamp(120px, 21vw, 224px);
+  /* streaks: the speed lines that sell the whip */
+  .cine__streaks { position: absolute; inset: -20%; z-index: 1; }
+  .cine__streaks i {
+    position: absolute;
+    left: -30%;
+    width: 160%;
+    height: 5%;
+    border-radius: 99px;
+    opacity: .28;
+    transform: skewY(-8deg);
+    animation: cineStreak .92s ease-out forwards;
+  }
+  @keyframes cineStreak {
+    0%   { transform: translateX(70%) skewY(-8deg) scaleX(1.6); opacity: 0; }
+    30%  { opacity: .34; }
+    100% { transform: translateX(-70%) skewY(-8deg) scaleX(1); opacity: 0; }
+  }
+
+  /* GTCH keeps its racing checker */
+  .cine__check {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    opacity: .17;
+    background: repeating-conic-gradient(#EEF1F4 0% 25%, #C62828 0% 50%) 0 0 / 30px 30px;
+    -webkit-mask: linear-gradient(90deg, #000 0 16%, transparent 22% 78%, #000 84% 100%);
+    mask: linear-gradient(90deg, #000 0 16%, transparent 22% 78%, #000 84% 100%);
+  }
+
+  /* Status keeps its pulse */
+  .cine__pulse {
+    position: absolute;
+    z-index: 2;
+    width: 52vmin;
+    height: 52vmin;
+    border-radius: 50%;
+    border: 5px solid rgba(59,224,122,.55);
+    animation: cinePulse 1s ease-out infinite;
+  }
+  @keyframes cinePulse {
+    from { transform: scale(.55); opacity: .9; }
+    to   { transform: scale(1.5); opacity: 0; }
+  }
+
+  /* ── the finale ── */
+  .cine__end {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    animation: cineEndIn .1s linear 2.24s forwards;
+  }
+  @keyframes cineEndIn { to { opacity: 1; } }
+
+  .cine__burst {
+    position: absolute;
+    width: 12vmin; height: 12vmin;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFFFFF 0%, #C42BFF 45%, transparent 70%);
+    opacity: 0;
+    animation: cineBurst .7s cubic-bezier(.2,.9,.3,1) 2.24s forwards;
+  }
+  @keyframes cineBurst {
+    0%   { opacity: .95; transform: scale(.2); }
+    100% { opacity: 0;   transform: scale(9); }
+  }
+
+  .cine__mark {
+    position: relative;
+    width: clamp(140px, 26vw, 280px);
     aspect-ratio: 1;
     border-radius: 50%;
-    border: 6px solid var(--paper);
-    background: var(--i-b);
-    box-shadow: 0 10px 0 rgba(0,0,0,.55), 0 0 0 14px rgba(255,255,255,.10), 0 30px 70px rgba(0,0,0,.55);
+    border: 7px solid var(--paper);
+    background: #7700B1;
+    box-shadow: 0 12px 0 rgba(0,0,0,.5), 0 0 0 16px rgba(255,255,255,.09), 0 34px 80px rgba(0,0,0,.6);
     overflow: hidden;
     opacity: 0;
+    /* arrives stretched, as though the three panels collapsed into it */
+    animation: cineMark .78s cubic-bezier(.18,1.35,.35,1) 2.24s forwards;
   }
-  .intro__mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  @keyframes cineMark {
+    0%   { opacity: 0; transform: scaleX(3.4) scaleY(.28) skewX(-20deg); filter: blur(12px); }
+    46%  { opacity: 1; transform: scaleX(1.06) scaleY(1.06) skewX(0); filter: blur(0); }
+    100% { opacity: 1; transform: none; filter: blur(0); }
+  }
+  .cine__mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* three entrances, rolled per visit */
-  .intro--drop  .intro__mark { animation: inDrop  .92s cubic-bezier(.3,1.5,.5,1) .08s forwards; }
-  .intro--punch .intro__mark { animation: inPunch .78s cubic-bezier(.2,1.5,.4,1) .08s forwards; }
-  .intro--spin  .intro__mark { animation: inSpin  .96s cubic-bezier(.24,1.3,.4,1) .08s forwards; }
-  @keyframes inDrop {
-    0%   { opacity: 0; transform: translateY(-88vh) rotate(-24deg) scale(.7); }
-    72%  { opacity: 1; transform: translateY(14px)  rotate(6deg)   scale(1.05); }
-    100% { opacity: 1; transform: none; }
-  }
-  @keyframes inPunch {
-    0%   { opacity: 0; transform: scale(4.2) rotate(12deg); filter: blur(9px); }
-    100% { opacity: 1; transform: none; filter: none; }
-  }
-  @keyframes inSpin {
-    0%   { opacity: 0; transform: translateX(-72vw) rotate(-540deg) scale(.5); }
-    100% { opacity: 1; transform: none; }
-  }
-
-  .intro__word {
-    font-family: 'Bebas Neue', Impact, sans-serif;
-    font-size: clamp(46px, 11vw, 148px);
-    line-height: .86;
-    letter-spacing: .01em;
-    color: var(--paper);
-    margin-top: clamp(18px, 3vw, 34px);
-    text-shadow: 0 7px 0 rgba(0,0,0,.45);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0;                      /* per-letter spans: any gap here spaces out the word */
-  }
-  /* longer headlines step down so they still land on one line */
-  .intro__word--mid  { font-size: clamp(36px, 8vw, 106px); }
-  .intro__word--long { font-size: clamp(28px, 6.2vw, 80px); }
-  /* each letter arrives on its own beat */
-  .intro__word span {
-    display: inline-block;
-    opacity: 0;
-    animation: inLetter .5s cubic-bezier(.2,1.4,.4,1) forwards;
-  }
-  @keyframes inLetter {
-    from { opacity: 0; transform: translateY(38px) rotate(8deg) scale(.8); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  .intro__sub {
-    margin-top: 14px;
-    font-size: clamp(13px, 2vw, 20px);
-    font-weight: 900;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--i-ink);
-    background: var(--i-chip);
-    border: 3px solid rgba(0,0,0,.42);
-    border-radius: 999px;
-    padding: 8px 20px;
-    opacity: 0;
-    animation: inSub .5s ease .92s forwards;
-  }
-  @keyframes inSub { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-
-  .intro__skip {
+  .cine__skip {
     position: absolute;
-    z-index: 4;
-    bottom: 26px;
+    z-index: 9;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 12px;
     font-weight: 800;
     letter-spacing: .16em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.62);
-    opacity: 0;
-    animation: inSub .5s ease 1.5s forwards;
+    color: rgba(255,255,255,.55);
   }
 
-  @media (prefers-reduced-motion: reduce) { .intro { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .cine { display: none; } }
 </style>
 </head>
 <body>
@@ -496,152 +526,72 @@
   }).catch(function () { /* the emoji stays — nothing to undo */ });
 })();
 
-/* ── Intro: a title card, rolled fresh. Once per session. ──────
-   Palette, wording and entrance are all picked at random, so the
-   site greets you a bit differently every time you arrive.
+/* ── Intro: a scripted three-second sizzle. Once per session. ──
+   Videos, then GTCH, then Status, each whipping in stretched and
+   snapping straight, before all three collapse into the mark and
+   dissolve into the page. Built from CSS and local art only, so a
+   slow network can never leave it staring at nothing.
    ────────────────────────────────────────────────────────────── */
 (function () {
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced || sessionStorage.getItem('sm-intro') === 'seen') return;
   sessionStorage.setItem('sm-intro', 'seen');
 
-  var PALETTES = [
-    { a: '#C42BFF', b: '#7700B1', c: '#FF4DD2', deep: '#1A0330', chip: '#FFC93C', ink: '#20003A' },
-    { a: '#3BE07A', b: '#12734A', c: '#9BFFC9', deep: '#04170F', chip: '#EAFFF3', ink: '#06341F' },
-    { a: '#FFC93C', b: '#C2600A', c: '#FF8A3D', deep: '#2A1200', chip: '#2B0140', ink: '#FFE7A6' },
-    { a: '#35E8FF', b: '#1052B8', c: '#8A5BFF', deep: '#04122E', chip: '#FF4DD2', ink: '#0B0030' },
-    { a: '#FF5E7A', b: '#A3125A', c: '#FFB36B', deep: '#2B0326', chip: '#FFD86B', ink: '#3A0018' },
-    { a: '#8AFF4D', b: '#2F8F12', c: '#DFFF7A', deep: '#0F1B02', chip: '#20003A', ink: '#E9FFCB' }
+  // the storyboard: one entry per beat, in order
+  var BEATS = [
+    { word: 'VIDEOS', tag: 'Shorts, uploads, streams',
+      streaks: ['#C42BFF', '#FF4DD2', '#FFC93C', '#7700B1', '#FFFFFF'], extra: '' },
+    { word: 'GTCH', tag: 'Competitive Hoverpark',
+      streaks: ['#3BE07A', '#EAFFF3', '#12734A', '#9BFFC9', '#FFFFFF'],
+      extra: '<div class="cine__check"></div>' },
+    { word: 'STATUS', tag: 'What I am doing right now',
+      streaks: ['#35E8FF', '#8A5BFF', '#FFFFFF', '#1052B8', '#3BE07A'],
+      extra: '<div class="cine__pulse"></div>' }
   ];
 
-  var WORDS = [
-    'WELCOME', 'MONKE', 'OOO OOO AAA AAA', 'YOU FOUND IT', "TAG! YOU'RE IN",
-    'HELLO THERE', 'GORILLA MODE', 'HOLD ON TIGHT', 'BOOTING UP', 'LET US COOK',
-    'WELCOME BACK', 'GAME ON'
-  ];
-
-  var SUBS = [
-    'aStubbyMonkey', 'VR videos · Gorilla Tag · Jesus', 'Founder of GTCH',
-    'Competitive Hoverpark', 'Roll the tape', 'Made in a bedroom',
-    'Now with 100% more monkey', 'Est. on a hoverboard'
-  ];
-
-  var ENTRANCES = ['drop', 'punch', 'spin'];
-  var pick = function (a) { return a[(Math.random() * a.length) | 0]; };
-
-  var pal = pick(PALETTES);
-  var word = pick(WORDS);
-  var sub = pick(SUBS);
-  var entrance = pick(ENTRANCES);
-
-  var el = document.createElement('div');
-  el.className = 'intro intro--' + entrance;
-  el.setAttribute('role', 'presentation');
-  el.style.setProperty('--i-a', pal.a);
-  el.style.setProperty('--i-b', pal.b);
-  el.style.setProperty('--i-c', pal.c);
-  el.style.setProperty('--i-deep', pal.deep);
-  el.style.setProperty('--i-chip', pal.chip);
-  el.style.setProperty('--i-ink', pal.ink);
-
-  var letters = word.split('').map(function (ch, i) {
-    if (ch === ' ') return '<span style="width:.36em"> </span>';
-    return '<span style="animation-delay:' + (0.42 + i * 0.035).toFixed(3) + 's">' + ch + '</span>';
+  var panels = BEATS.map(function (b, i) {
+    var streaks = b.streaks.map(function (col, k) {
+      var top = 8 + k * 19 + (k % 2 ? 4 : 0);
+      var delay = (0.04 + i * 0.74 + k * 0.045).toFixed(3);
+      return '<i style="top:' + top + '%;background:' + col +
+             ';animation-delay:' + delay + 's"></i>';
+    }).join('');
+    return '<div class="cine__panel cine__panel--' + (i + 1) + '">' +
+             '<div class="cine__streaks">' + streaks + '</div>' +
+             b.extra +
+             '<div class="cine__word">' + b.word + '</div>' +
+             '<div class="cine__tag">' + b.tag + '</div>' +
+           '</div>';
   }).join('');
 
-  var sizeClass = word.length > 13 ? ' intro__word--long'
-                : word.length > 8  ? ' intro__word--mid' : '';
-
+  var el = document.createElement('div');
+  el.className = 'cine';
+  el.setAttribute('role', 'presentation');
   el.innerHTML =
-    '<div class="intro__bg"></div>' +
-    '<div class="intro__rays"></div>' +
-    '<canvas class="intro__fx"></canvas>' +
-    '<div class="intro__stack">' +
-      '<div class="intro__mark"><img src="/aStubbyMonkey.YT.Offical.png" alt="" /></div>' +
-      '<h1 class="intro__word' + sizeClass + '">' + letters + '</h1>' +
-      '<p class="intro__sub">' + sub + '</p>' +
+    panels +
+    '<div class="cine__end">' +
+      '<div class="cine__burst"></div>' +
+      '<div class="cine__mark"><img src="/aStubbyMonkey.YT.Offical.png" alt="" /></div>' +
     '</div>' +
-    '<p class="intro__skip">click anywhere to skip</p>';
+    '<p class="cine__skip">click anywhere to skip</p>';
 
   document.body.appendChild(el);
   document.documentElement.style.overflow = 'hidden';
 
-  /* ── a burst of confetti when the mark lands ── */
-  var canvas = el.querySelector('.intro__fx');
-  var ctx = canvas.getContext('2d');
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  var W = 0, H = 0, bits = [], raf = 0, running = true;
-
-  function size() {
-    W = el.clientWidth; H = el.clientHeight;
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  size();
-  window.addEventListener('resize', size);
-
-  function burst() {
-    var cx = W / 2, cy = H * 0.40;
-    var tints = [pal.a, pal.c, pal.chip, '#FFFFFF'];
-    for (var i = 0; i < 90; i++) {
-      var ang = Math.random() * 6.2832;
-      var spd = 3.4 + Math.random() * 8.4;
-      bits.push({
-        x: cx, y: cy,
-        vx: Math.cos(ang) * spd,
-        vy: Math.sin(ang) * spd - 2.2,
-        r: 3 + Math.random() * 6,
-        rot: Math.random() * 6.2832,
-        spin: (Math.random() - 0.5) * 0.34,
-        col: tints[(Math.random() * tints.length) | 0],
-        life: 1
-      });
-    }
-  }
-
-  function tick() {
-    if (!running) return;
-    ctx.clearRect(0, 0, W, H);
-    for (var i = bits.length - 1; i >= 0; i--) {
-      var b = bits[i];
-      b.vy += 0.26;                 // gravity
-      b.vx *= 0.992;
-      b.x += b.vx; b.y += b.vy;
-      b.rot += b.spin;
-      b.life -= 0.0085;
-      if (b.life <= 0 || b.y > H + 40) { bits.splice(i, 1); continue; }
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, b.life);
-      ctx.translate(b.x, b.y);
-      ctx.rotate(b.rot);
-      ctx.fillStyle = b.col;
-      ctx.fillRect(-b.r / 2, -b.r / 2, b.r, b.r * 0.62);
-      ctx.restore();
-    }
-    raf = requestAnimationFrame(tick);
-  }
-  tick();
-  setTimeout(burst, entrance === 'punch' ? 620 : 780);
-
-  /* ── leaving ── */
   var done = false;
   function finish() {
     if (done) return;
     done = true;
-    el.classList.add('is-gone');
+    el.style.transition = 'opacity .3s ease';
+    el.style.opacity = '0';
     setTimeout(function () {
-      running = false;
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', size);
       el.remove();
       document.documentElement.style.overflow = '';
-    }, 700);
+    }, 320);
   }
 
-  // it leaves on its own, and any input sends it early — nobody is ever
-  // stuck behind it
-  setTimeout(finish, 3200);
+  // the sequence fades itself out at 2.98s; this clears the node after
+  setTimeout(finish, 3460);
   ['click', 'keydown', 'touchstart'].forEach(function (evt) {
     window.addEventListener(evt, finish, { once: true });
   });
