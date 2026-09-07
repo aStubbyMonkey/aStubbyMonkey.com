@@ -72,10 +72,19 @@
        and the nearest band — the one lowest in the frame — is the quickest,
        so the water settles bottom-to-top and the far crest lands last. The
        page's own layers follow the same rule; the timings are twinned with
-       the .rise block in index.html. */
+       the .rise block in index.html.
+
+       The bands sit held below the frame until index.html says go, which
+       it does once the images are in — otherwise the water would already
+       be climbing while the page was still waiting on its avatar, and the
+       two halves of the same move would come apart. */
     var rising = !reduced && document.documentElement.classList.contains('rise');
+    var riseGo = !rising || !!window.smRiseGo;
     var riseT0 = 0;
-    var RISE_MS = [1160, 1020, 880, 740];   // far/top band first
+    var RISE_MS = [1220, 1080, 940, 800];   // far/top band first
+    if (rising && !riseGo) {
+      document.addEventListener('sm:rise', function () { riseGo = true; }, { once: true });
+    }
 
     // Few, large, slow. More layers than this stops reading as waves and
     // starts reading as noise.
@@ -122,7 +131,7 @@
       tilt += (tiltTo - tilt) * 0.05;
 
       var rk = 0;
-      if (rising) {
+      if (rising && riseGo) {
         if (!riseT0) riseT0 = now;
         rk = now - riseT0;
         if (rk >= RISE_MS[0]) rising = false;   // [0] is the slowest band
@@ -133,10 +142,11 @@
         var shift = tilt * 26 * L.par;               // nearer layers move more
         var top = 1e9;
 
-        // out-cubic, from a full screen below the resting crest
+        // out-cubic, from a full screen below the resting crest. Before the
+        // go signal rp is 0, which parks the band off the bottom of the frame.
         var riseOff = 0;
         if (rising) {
-          var rp = Math.min(1, rk / RISE_MS[i]);
+          var rp = riseGo ? Math.min(1, rk / RISE_MS[i]) : 0;
           riseOff = Math.pow(1 - rp, 3) * H * 1.08;
         }
 

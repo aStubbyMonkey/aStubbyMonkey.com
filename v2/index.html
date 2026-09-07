@@ -22,13 +22,26 @@
 <link rel="stylesheet" href="/v2/assets/site.css" />
 
 <script>
-/* ── The rise, decided before the first paint ──────────────────
+/* ── The rise ─────────────────────────────────────────────────
    Home only (this is inline, so it exists nowhere else) and once
-   per session, so opening the site plays it and moving around it
-   afterwards does not. The class is what the stylesheet and
-   site.js both key off; if anything here throws — storage blocked,
-   a private window — the page just renders assembled, which is the
-   correct fallback rather than a blank screen.
+   per session. It runs in two steps on purpose:
+
+     .rise      goes on immediately, before anything paints, and
+                holds the page invisible on black
+     .rise--go  goes on once the page is genuinely ready, and is
+                what starts the motion
+
+   Splitting them is the whole point. A CSS animation begins at
+   first paint, and first paint lands at a different moment on
+   every connection — so images were still arriving while their
+   boxes had already travelled, which is why the avatar and the
+   card art looked like they were sitting still while everything
+   around them moved. Waiting for the images means every visitor
+   gets the same opening, and the black is held for a known
+   minimum instead of being either a flicker or a stare.
+
+   If anything here throws — storage blocked, a private window —
+   the page renders assembled, which is the right fallback.
    ────────────────────────────────────────────────────────────── */
 (function () {
   try {
@@ -40,21 +53,67 @@
   var html = document.documentElement;
   html.className += " rise";
 
-  /* Drop the class once the slowest layer has landed, so the black
-     ground and the animation rules stop applying to a page that is
-     finished with them. animationend rather than a bare timer: a
-     backgrounded tab pauses the animation but not setTimeout, and
-     clearing early would snap everything into place. */
-  function clear() { html.classList.remove("rise"); }
-  document.addEventListener("DOMContentLoaded", function () {
-    var last = document.querySelector(".nav");   // the longest duration
-    if (last) last.addEventListener("animationend", function (e) {
-      // animationend bubbles, so check this is the nav's own rise and not
-      // some descendant finishing something else
-      if (e.target === last && e.animationName === "riseUp") clear();
+  var HOLD = 420;    // black is on screen at least this long,
+  var CAP  = 2400;   // and never longer than this, whatever the network does
+  var t0 = Date.now();
+  var started = false, finished = false;
+
+  function start() {
+    if (started) return;
+    started = true;
+
+    /* Every layer leaves from the bottom edge of the screen, so measure
+       where each one actually rests and hand that distance to the
+       keyframes. Measured here, before anything has been moved, which
+       is the only moment the numbers are the real ones. Whatever is
+       already below the fold still gets a short lift. */
+    var vh = window.innerHeight;
+    var els = document.querySelectorAll(".nav, .hero__face, .hero__name," +
+      " .hero__line, .hero__btns, .hub-head, .hub__card, .foot");
+    for (var i = 0; i < els.length; i++) {
+      var top = els[i].getBoundingClientRect().top;
+      els[i].style.setProperty("--rise-from", Math.max(90, Math.round(vh - top)) + "px");
+    }
+
+    html.classList.add("rise--go");
+    window.smRiseGo = true;
+    try { document.dispatchEvent(new CustomEvent("sm:rise")); } catch (e) {}
+
+    var nav = document.querySelector(".nav");   // the longest duration
+    if (nav) nav.addEventListener("animationend", function (e) {
+      // animationend bubbles, so check this is the nav's own rise
+      if (e.target === nav && e.animationName === "riseUp") done();
     });
-    setTimeout(clear, 4000);
-  });
+    setTimeout(done, 4000);
+  }
+
+  /* Drop both classes once the slowest layer has landed, so the black
+     ground stops applying to a page that is finished with it. */
+  function done() {
+    if (finished) return;
+    finished = true;
+    html.classList.remove("rise", "rise--go");
+  }
+
+  function ready() {
+    /* Gate on the images that shipped with the document. Anything the
+       page fetches afterwards — the YouTube still on the Content card —
+       is deliberately not waited on; it would hold the screen black
+       through a slow API call. */
+    var imgs = document.images, waiting = 0;
+    function go() { setTimeout(start, Math.max(0, HOLD - (Date.now() - t0))); }
+    function tick() { if (--waiting <= 0) go(); }
+    for (var i = 0; i < imgs.length; i++) {
+      if (imgs[i].complete) continue;
+      waiting++;
+      imgs[i].addEventListener("load", tick, { once: true });
+      imgs[i].addEventListener("error", tick, { once: true });
+    }
+    if (!waiting) go();
+  }
+
+  document.addEventListener("DOMContentLoaded", ready);
+  setTimeout(start, CAP);
 })();
 </script>
 
@@ -150,38 +209,27 @@
     letter-spacing: .04em;
   }
 
-  /* ── THE RISE ─────────────────────────────────────
-     The home page's opening, and only on the first launch of a
-     session. The screen starts black and every layer travels up
-     into place at its own speed: whatever sits lower in the frame
-     moves fastest and lands first, so the page settles bottom-to-
-     top and the name is the last thing to arrive. The water on the
-     canvas follows the same rule — see wireField() in site.js,
-     which reads this same .rise class off <html>.
+  /* ── THE RISE ─────────────────────────────────────────────────
+     The home page opens on black and every layer travels up from
+     the bottom edge of the screen into its place, each at its own
+     speed: whatever sits lower in the frame moves fastest and lands
+     first, so the page settles bottom-to-top and the name is the
+     last thing to arrive. The water on the canvas follows the same
+     rule — see wireField() in site.js.
+
+     Two states. .rise alone is the held frame: black, everything
+     invisible, nothing moving yet. .rise--go is what runs it, and
+     the script above only adds that once the images are in, so the
+     opening is the same on every connection. The distance each
+     layer travels is measured there too and arrives as --rise-from.
 
      Nothing here hides anything by default. With no .rise — second
      visit, no JS, no storage, reduced motion — the page is simply
      already assembled.
-     ───────────────────────────────────────────────────── */
+     ───────────────────────────────────────────────────────────── */
   html.rise, html.rise body { background: #000; }
-
-  /* the purple ground arrives under the farthest crest, not ahead of it */
-  html.rise .field { animation: riseGround 1.18s ease-out both; }
-  @keyframes riseGround {
-    0%, 32% { background-color: #000; }
-    100%    { background-color: var(--grape); }
-  }
-  html.rise .field::before { animation: riseVeil 1.18s ease-out both; }
-  @keyframes riseVeil { 0%, 38% { opacity: 0; } 100% { opacity: 1; } }
-
-  /* One travel, many speeds — everything leaves at once and the
-     durations do the staggering. `translate` rather than `transform`
-     on purpose: the cards already carry a rotate() for their tilt,
-     and animating `transform` would land them all dead straight. */
-  @keyframes riseUp {
-    from { opacity: 0; translate: 0 58px; }
-    to   { opacity: 1; translate: 0 0; }
-  }
+  html.rise .field          { background-color: #000; }
+  html.rise .field::before  { opacity: 0; }
   html.rise .nav,
   html.rise .hero__face,
   html.rise .hero__name,
@@ -189,27 +237,52 @@
   html.rise .hero__btns,
   html.rise .hub-head,
   html.rise .hub__card,
-  html.rise .foot {
+  html.rise .foot { opacity: 0; }
+
+  /* the purple ground arrives under the farthest crest, not ahead of it */
+  html.rise--go .field { animation: riseGround 1.30s ease-out both; }
+  @keyframes riseGround {
+    0%, 30% { background-color: #000; }
+    100%    { background-color: var(--grape); }
+  }
+  html.rise--go .field::before { animation: riseVeil 1.30s ease-out both; }
+  @keyframes riseVeil { 0%, 36% { opacity: 0; } 100% { opacity: 1; } }
+
+  /* `translate` rather than `transform` on purpose: the cards already
+     carry a rotate() for their tilt, and animating `transform` would
+     land all six of them dead straight. */
+  @keyframes riseUp {
+    from { opacity: 0; translate: 0 var(--rise-from, 100vh); }
+    to   { opacity: 1; translate: 0 0; }
+  }
+  html.rise--go .nav,
+  html.rise--go .hero__face,
+  html.rise--go .hero__name,
+  html.rise--go .hero__line,
+  html.rise--go .hero__btns,
+  html.rise--go .hub-head,
+  html.rise--go .hub__card,
+  html.rise--go .foot {
     animation-name: riseUp;
-    animation-timing-function: cubic-bezier(.16,.84,.3,1);
+    animation-timing-function: cubic-bezier(.16,.86,.28,1);
     animation-fill-mode: both;
   }
   /* longest at the top of the page, shortest at the bottom */
-  html.rise .nav        { animation-duration: 1.18s; }
-  html.rise .hero__face { animation-duration: 1.10s; }
-  html.rise .hero__name { animation-duration: 1.02s; }
-  html.rise .hero__line { animation-duration:  .94s; }
-  html.rise .hero__btns { animation-duration:  .86s; }
-  html.rise .hub-head   { animation-duration:  .78s; }
-  html.rise .foot       { animation-duration:  .62s; }
+  html.rise--go .nav        { animation-duration: 1.30s; }
+  html.rise--go .hero__face { animation-duration: 1.22s; }
+  html.rise--go .hero__name { animation-duration: 1.14s; }
+  html.rise--go .hero__line { animation-duration: 1.06s; }
+  html.rise--go .hero__btns { animation-duration:  .98s; }
+  html.rise--go .hub-head   { animation-duration:  .90s; }
+  html.rise--go .foot       { animation-duration:  .72s; }
   /* the grid rewraps at every width, so the cards stagger by DOM order,
      which is the one thing that still runs top-to-bottom either way */
-  html.rise .hub__card:nth-child(1) { animation-duration: .76s; }
-  html.rise .hub__card:nth-child(2) { animation-duration: .74s; }
-  html.rise .hub__card:nth-child(3) { animation-duration: .72s; }
-  html.rise .hub__card:nth-child(4) { animation-duration: .70s; }
-  html.rise .hub__card:nth-child(5) { animation-duration: .68s; }
-  html.rise .hub__card:nth-child(6) { animation-duration: .66s; }
+  html.rise--go .hub__card:nth-child(1) { animation-duration: .88s; }
+  html.rise--go .hub__card:nth-child(2) { animation-duration: .86s; }
+  html.rise--go .hub__card:nth-child(3) { animation-duration: .84s; }
+  html.rise--go .hub__card:nth-child(4) { animation-duration: .82s; }
+  html.rise--go .hub__card:nth-child(5) { animation-duration: .80s; }
+  html.rise--go .hub__card:nth-child(6) { animation-duration: .78s; }
 </style>
 </head>
 <body>
