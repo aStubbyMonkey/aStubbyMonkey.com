@@ -65,6 +65,18 @@
     var t0 = (window.performance || Date).now();
     var tilt = 0, tiltTo = 0;              // eased cursor parallax
 
+    /* The opening rise. index.html stamps .rise on <html> before the first
+       paint, on the home page and only on the first launch of a session;
+       every other page and every later visit never sees it. Each band
+       starts a screen below its resting line and travels up into place,
+       and the nearest band — the one lowest in the frame — is the quickest,
+       so the water settles bottom-to-top and the far crest lands last. The
+       page's own layers follow the same rule; the timings are twinned with
+       the .rise block in index.html. */
+    var rising = !reduced && document.documentElement.classList.contains('rise');
+    var riseT0 = 0;
+    var RISE_MS = [1160, 1020, 880, 740];   // far/top band first
+
     // Few, large, slow. More layers than this stops reading as waves and
     // starts reading as noise.
     var LAYERS = [
@@ -109,15 +121,29 @@
       ctx.clearRect(0, 0, W, H);
       tilt += (tiltTo - tilt) * 0.05;
 
+      var rk = 0;
+      if (rising) {
+        if (!riseT0) riseT0 = now;
+        rk = now - riseT0;
+        if (rk >= RISE_MS[0]) rising = false;   // [0] is the slowest band
+      }
+
       for (var i = 0; i < LAYERS.length; i++) {
         var L = LAYERS[i];
         var shift = tilt * 26 * L.par;               // nearer layers move more
         var top = 1e9;
 
+        // out-cubic, from a full screen below the resting crest
+        var riseOff = 0;
+        if (rising) {
+          var rp = Math.min(1, rk / RISE_MS[i]);
+          riseOff = Math.pow(1 - rp, 3) * H * 1.08;
+        }
+
         ctx.beginPath();
         ctx.moveTo(-2, H + 2);
         for (var x = -2; x <= W + 2; x += 6) {
-          var y = crest(L, x, t) * H + shift;
+          var y = crest(L, x, t) * H + shift + riseOff;
           if (y < top) top = y;
           ctx.lineTo(x, y);
         }
@@ -141,7 +167,7 @@
         // the sheen: a soft bright line riding the crest
         ctx.beginPath();
         for (var x2 = -2; x2 <= W + 2; x2 += 6) {
-          var y2 = crest(L, x2, t) * H + shift;
+          var y2 = crest(L, x2, t) * H + shift + riseOff;
           if (x2 < 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
         }
         // a light tint of the band's own colour, not a wash toward white —
