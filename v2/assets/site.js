@@ -571,6 +571,7 @@
   function boot() {
     markNav();
     wireField();
+    wirePresence();
     wireWipe();
     wireCursor();
     wireEggs();
@@ -581,4 +582,24 @@
   } else {
     boot();
   }
+  /* ═══ PRESENCE ═══════════════════════════════════════════════
+     How many people are on the site right now. Loaded on demand,
+     never eagerly: it pulls the Firebase SDK, which is far more
+     weight than a line in the footer is worth putting in front of
+     a paint. Waits for the page to finish, then for the browser to
+     go idle, then fetches. If any of that fails the footer simply
+     never shows the line.
+     ═════════════════════════════════════════════════════════════ */
+  function wirePresence() {
+    if (!document.querySelector('[data-here]')) return;
+
+    var go = function () {
+      import('/v2/assets/presence.js').catch(function () {});
+    };
+    var idle = window.requestIdleCallback || function (fn) { setTimeout(fn, 1200); };
+
+    if (document.readyState === 'complete') idle(go);
+    else window.addEventListener('load', function () { idle(go); }, { once: true });
+  }
+
 })();

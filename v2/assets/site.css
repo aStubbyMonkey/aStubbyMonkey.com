@@ -81,6 +81,11 @@ body > main { flex: 1 0 auto; }
 body > .nav,
 body > .foot { flex: 0 0 auto; }
 
+/* The UA rule for this is only `display: none`, which any display
+   declaration on the element beats — so hidden elements with a layout
+   mode of their own quietly stay visible. Settle it once, here. */
+[hidden] { display: none !important; }
+
 img { max-width: 100%; display: block; }
 a { color: inherit; }
 
@@ -760,6 +765,28 @@ button.hub__card > .hub__body { flex: 1 0 auto; }
 .foot__meta a { color: var(--text-mid); }
 .foot__v { font-size: var(--t-xs); color: var(--text-dim); opacity: .65; font-weight: 700; }
 
+/* how many people are in the room — filled in by presence.js, and
+   hidden until there is a real number to show */
+.foot__here {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: var(--t-sm);
+  font-weight: 800;
+  color: var(--text-mid);
+}
+.foot__here::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--vine);
+  box-shadow: 0 0 0 3px rgba(59,224,122,.16);
+  animation: herePulse 2.4s ease-in-out infinite;
+}
+@keyframes herePulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
 /* ── MOTION / ACCESSIBILITY ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -781,6 +808,8 @@ button.hub__card > .hub__body { flex: 1 0 auto; }
   .sticker { padding: 20px; }
   .sticker--tilt-l, .sticker--tilt-r { transform: none; }
   .foot__in { flex-direction: column; text-align: center; }
+  /* text-align does not reach a flex row, so centre it properly */
+  .foot__here { justify-content: center; }
 }
 
 
